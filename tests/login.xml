@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<suite version="0.1" name="Login &amp; registration">
+	<tests>
+		<test>
+			<cookies>
+				<delete name="ezUser1" />
+				<delete name="ezUser2" />
+				<delete name="ezUser3" />
+				<set name="ajaxUnit_test_cookie" value="Mancunian" days="1" />
+			</cookies>
+		</test>
+		<test>
+			<headers>
+				<location>http://192.168.1.64/ezuser</location>
+			</headers>
+			<results>
+				<result><![CDATA[
+		<form onsubmit="return false" class="ezUser-form">
+			<fieldset class="ezUser-fieldset">
+				<input type="text" size="40" onkeypress="ezUser_keyPress(event)" class="ezUser-text" value="" tabindex="1" id="ezUser-username"/>
+				<label for="ezUser-username" class="ezUser-label">Username:</label>
+				<input type="password" size="40" onkeypress="ezUser_keyPress(event)" class="ezUser-text" onfocus="ezUser_passwordFocus(this)" value="" tabindex="2" id="ezUser-password"/>
+				<label for="ezUser-password" class="ezUser-label">Password:</label>
+			</fieldset>
+			<fieldset class="ezUser-fieldset">
+				<div onclick="ezUser_click(this)" class="ezUser-message" id="ezUser-message"/>
+				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-action ezUser-buttonstate-0" tabindex="4" value="Sign in" id="ezUser-signIn"/>
+				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-action ezUser-buttonstate-0" tabindex="3" value="Register" id="ezUser-goaccount"/>
+			</fieldset>
+			<fieldset class="ezUser-fieldset">
+				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-preference ezUser-buttonstate-0" tabindex="7" value="Stay signed in" id="ezUser-staySignedIn"/>
+				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-preference ezUser-buttonstate-4" tabindex="6" value="Remember me" id="ezUser-rememberMe"/>
+				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-preference ezUser-buttonstate-0" tabindex="5" value="Reset password" id="ezUser-reminder"/>
+			</fieldset>
+		</form>
+]]>				</result>
+			</results>
+		</test>
+		<test>
+			<formfill>
+				<text id="ezUser-account-email">first.last@example.com</text>
+				<file id="ezUser-account-file">example.txt</file>
+				<checkbox id="ezUser-account-checkbox-1">checked</checkbox>
+				<radio id="ezUser-account-radio-1">checked</radio>
+			</formfill>
+		</test>
+	</tests>
+</suite>
