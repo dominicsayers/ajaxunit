@@ -1,48 +1,353 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 <suite version="0.1" name="Login &amp; registration">
 	<tests>
-		<test>
+		<test name="Setup">
 			<cookies>
-				<delete name="ezUser1" />
-				<delete name="ezUser2" />
-				<delete name="ezUser3" />
-				<set name="ajaxUnit_test_cookie" value="Mancunian" days="1" />
+				<delete name="ezUser1"/>
+				<delete name="ezUser2"/>
+				<delete name="ezUser3"/>
+				<set name="ajaxUnit_test_cookie" value="Mancunian" days="1"/>
 			</cookies>
 		</test>
-		<test>
+		<test name="Home page">
 			<headers>
-				<location>http://192.168.1.64/ezuser</location>
+				<location>/ezuser</location>
 			</headers>
 			<results>
-				<result><![CDATA[
-		<form onsubmit="return false" class="ezUser-form">
-			<fieldset class="ezUser-fieldset">
-				<input type="text" size="40" onkeypress="ezUser_keyPress(event)" class="ezUser-text" value="" tabindex="1" id="ezUser-username"/>
-				<label for="ezUser-username" class="ezUser-label">Username:</label>
-				<input type="password" size="40" onkeypress="ezUser_keyPress(event)" class="ezUser-text" onfocus="ezUser_passwordFocus(this)" value="" tabindex="2" id="ezUser-password"/>
-				<label for="ezUser-password" class="ezUser-label">Password:</label>
-			</fieldset>
-			<fieldset class="ezUser-fieldset">
-				<div onclick="ezUser_click(this)" class="ezUser-message" id="ezUser-message"/>
-				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-action ezUser-buttonstate-0" tabindex="4" value="Sign in" id="ezUser-signIn"/>
-				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-action ezUser-buttonstate-0" tabindex="3" value="Register" id="ezUser-goaccount"/>
-			</fieldset>
-			<fieldset class="ezUser-fieldset">
-				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-preference ezUser-buttonstate-0" tabindex="7" value="Stay signed in" id="ezUser-staySignedIn"/>
-				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-preference ezUser-buttonstate-4" tabindex="6" value="Remember me" id="ezUser-rememberMe"/>
-				<input type="button" onblur="ezUser_setButtonState(this, 2, false)" onfocus="ezUser_setButtonState(this, 2, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onmouseover="ezUser_setButtonState(this, 1, true)" onclick="ezUser_click(this)" class="ezUser-button ezUser-preference ezUser-buttonstate-0" tabindex="5" value="Reset password" id="ezUser-reminder"/>
-			</fieldset>
-		</form>
-]]>				</result>
-			</results>
+				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;input id= "ezUser-username"&#13;
+					tabindex	=	"1"&#13;
+					value		=	""&#13;
+					type		=	"text"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-password"&#13;
+					tabindex	=	"2"&#13;
+					value		=	""&#13;
+					type		=	"password"&#13;
+					onfocus		=	"ezUser_passwordFocus(this)"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;&#13;
+&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;div id="ezUser-message" class="ezUser-message" onclick="ezUser_click(this)"&gt;&lt;/div&gt;&#13;
+				&lt;input id="ezUser-signIn" value="Sign in"&#13;
+					tabindex	=	"4"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-goaccount" value="Register"&#13;
+					tabindex	=	"3"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;input id="ezUser-staySignedIn"	value="Stay signed in"&#13;
+					tabindex	=	"7"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-preference ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-rememberMe" value="Remember me"&#13;
+					tabindex	=	"6"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-preference ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-reminder" value="Reset password"&#13;
+					tabindex	=	"5"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-preference ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+		&lt;/form&gt;</result></results>
 		</test>
-		<test>
+		<test name="Go to registration page">
+			<click id="ezUser-goaccount"/>
+			<results><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;input id= "ezUser-account-email"&#13;
+					tabindex	=	"1"&#13;
+					value		=	""&#13;
+					type		=	"text"&#13;
+&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-firstName"&#13;
+					tabindex	=	"2"&#13;
+					value		=	""&#13;
+					type		=	"text"&#13;
+&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-firstName"&gt;First name:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-lastName"&#13;
+					tabindex	=	"3"&#13;
+					value		=	""&#13;
+					type		=	"text"&#13;
+&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-username"&#13;
+					tabindex	=	"4"&#13;
+					value		=	""&#13;
+					type		=	"text"&#13;
+&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-password"&#13;
+					tabindex	=	"5"&#13;
+					value		=	""&#13;
+					type		=	"password"&#13;
+&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-confirm"&#13;
+					tabindex	=	"6"&#13;
+					value		=	""&#13;
+					type		=	"password"&#13;
+&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+* = mandatory field&#13;
+				&lt;input id="ezUser-account-validate" value="Register"&#13;
+					tabindex	=	"7"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;div id="ezUser-account-message" class="ezUser-message" onclick="ezUser_click(this)"&gt;&lt;/div&gt;&#13;
+				&lt;input id="ezUser-account-new" type="hidden" value="true" /&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+		&lt;/form&gt;</result><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;input id= "ezUser-username"&#13;
+					tabindex	=	"1"&#13;
+					value		=	""&#13;
+					type		=	"text"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-password"&#13;
+					tabindex	=	"2"&#13;
+					value		=	""&#13;
+					type		=	"password"&#13;
+					onfocus		=	"ezUser_passwordFocus(this)"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;&#13;
+&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;div id="ezUser-message" class="ezUser-message" onclick="ezUser_click(this)"&gt;&lt;/div&gt;&#13;
+				&lt;input id="ezUser-signIn" value="Sign in"&#13;
+					tabindex	=	"4"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-goaccount" value="Register"&#13;
+					tabindex	=	"3"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;input id="ezUser-staySignedIn"	value="Stay signed in"&#13;
+					tabindex	=	"7"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-preference ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-rememberMe" value="Remember me"&#13;
+					tabindex	=	"6"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-preference ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-reminder" value="Reset password"&#13;
+					tabindex	=	"5"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-preference ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+		&lt;/form&gt;</result></results>
+		</test>
+		<test name="Register new account">
 			<formfill>
 				<text id="ezUser-account-email">first.last@example.com</text>
-				<file id="ezUser-account-file">example.txt</file>
+				<text id="ezUser-account-firstName">First</text>
+				<text id="ezUser-account-lastName">Last</text>
+				<text id="ezUser-account-username">FirstLast</text>
+				<text id="ezUser-account-password">password</text>
+				<text id="ezUser-account-confirm">password</text>
 				<checkbox id="ezUser-account-checkbox-1">checked</checkbox>
 				<radio id="ezUser-account-radio-1">checked</radio>
 			</formfill>
+			<click id="ezUser-account-validate"/>
+			<results><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;input id= "ezUser-username"&#13;
+					tabindex	=	"1"&#13;
+					value		=	""&#13;
+					type		=	"text"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-password"&#13;
+					tabindex	=	"2"&#13;
+					value		=	""&#13;
+					type		=	"password"&#13;
+					onfocus		=	"ezUser_passwordFocus(this)"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;&#13;
+&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;div id="ezUser-message" class="ezUser-message" onclick="ezUser_click(this)"&gt;&lt;/div&gt;&#13;
+				&lt;input id="ezUser-signIn" value="Sign in"&#13;
+					tabindex	=	"4"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-goaccount" value="Register"&#13;
+					tabindex	=	"3"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;input id="ezUser-staySignedIn"	value="Stay signed in"&#13;
+					tabindex	=	"7"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-preference ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-rememberMe" value="Remember me"&#13;
+					tabindex	=	"6"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-preference ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-reminder" value="Reset password"&#13;
+					tabindex	=	"5"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-preference ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+		&lt;/form&gt;</result></results>
 		</test>
 	</tests>
 </suite>

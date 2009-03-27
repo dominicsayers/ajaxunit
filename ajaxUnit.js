@@ -1,99 +1,21 @@
 /**
- * @package		ajaxUnit
- * @author		Dominic Sayers <dominic_sayers@hotmail.com>
+ * @package	ajaxUnit
+ * @author	Dominic Sayers <dominic_sayers@hotmail.com>
  * @copyright	2009 Dominic Sayers
- * @license		http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
- * @link		http://www.dominicsayers.com
- * @version		0.1 - First attempt
+ * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
+ * @link	http://www.dominicsayers.com
+ * @version	0.2 - Partially working :-)
  */
 /*global window, document, event, ActiveXObject */ // For JSLint
-var oAjaxUnit, oAjaxUnit_ajax;
+var oAjaxUnit;
 
-//	---------------------------------------------------------------------------
-//									C_ajaxUnit_cookies
-//	---------------------------------------------------------------------------
-//	General cookie management
-//	---------------------------------------------------------------------------
-function C_ajaxUnit_cookies() {
-	//	Public methods
-	this.persist = function (name, value, days) {
-		var date, expires;
-
-		if (typeof(days) !== 'undefined') {
-			date = new Date();
-			date.setTime(date.getTime() + (days * 1000 * 3600 * 24));
-			expires = '; expires=' + date.toGMTString();
-		} else {
-			expires = '';
-		}
-
-		document.cookie = name + '=' + value + expires + '; path=/';
-	};
-
-	this.acquire = function (name) {
-		name = name + '=';
-		var i, c, carray = document.cookie.split(';');
-
-		for (i = 0; i < carray.length; i += 1) {
-			c = carray[i];
-
-			while (c.charAt(0) === ' ') {
-				c = c.substring(1, c.length);
-			}
-
-			if (c.indexOf(name) === 0) {
-				return c.substring(name.length, c.length);
-			}
-		}
-
-		return null;
-	};
-
-	this.remove = function (name) {
-		this.persist(name, '', -1);
-	};
-}
-
-//	---------------------------------------------------------------------------
-//									C_ajaxUnit
-//	---------------------------------------------------------------------------
-//	The main ajaxUnit client-side class
-//	---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 		C_ajaxUnit
+// ---------------------------------------------------------------------------
+// The main ajaxUnit client-side class
+// ---------------------------------------------------------------------------
 function C_ajaxUnit() {
-	//	Private properties
-	var cookies = new C_ajaxUnit_cookies();
-
-	// Private methods
-//	---------------------------------------------------------------------------
-	function getCookies() {
-		var username		= cookies.acquire('$cookieUsername'),
-			passwordHash	= cookies.acquire('$cookiePassword'),
-			sessionID		= cookies.acquire('$sessionName');
-	}
-
-//	---------------------------------------------------------------------------
-
-	//	Public methods
-//	---------------------------------------------------------------------------
-	this.updateCookies = function () {
-		if (this.rememberMe) {
-			//	Remember username & password for 30 days
-			cookies.persist('$cookieUsername', this.username, 30);
-			cookies.persist('$cookiePassword', this.passwordHash, 30);
-		} else {
-			cookies.remove('$cookieUsername');
-			cookies.remove('$cookiePassword');
-		}
-
-		if (this.staySignedIn) {
-			//	Stay signed in for 2 weeks
-			cookies.persist('$cookieStaySignedIn', true, 24);
-		} else {
-			cookies.remove('$cookieStaySignedIn');
-		}
-	};
-
-//	---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 	this.setFocus = function () {
 		var textBox = document.getElementById('$package-suite');
 
@@ -105,7 +27,7 @@ function C_ajaxUnit() {
 		}
 	};
 
-//	---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 	this.replaceHTML = function (id, html) {
 		var newElement, originalElement;
 
@@ -124,21 +46,9 @@ function C_ajaxUnit() {
 		originalElement.parentNode.replaceChild(newElement, originalElement);
 	};
 
-//	---------------------------------------------------------------------------
-//	Constructor
-//	---------------------------------------------------------------------------
-	getCookies();
-}
-
-//	---------------------------------------------------------------------------
-//								C_ajaxUnit_AJAX
-//	---------------------------------------------------------------------------
-//	Talk to the man
-//	---------------------------------------------------------------------------
-function C_ajaxUnit_AJAX() {
-
-	// Private methods
-//	---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Private methods
+// ---------------------------------------------------------------------------
 	function getXMLHttpRequest() {
 		if (typeof(window.XMLHttpRequest) === 'undefined') {
 			try {
@@ -163,20 +73,18 @@ function C_ajaxUnit_AJAX() {
 		}
 	}
 
-	//	Private properties
-	var ajax = getXMLHttpRequest();
+	// Private properties
+	var ajax = getXMLHttpRequest(), that = this;
 
-//	---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 	function handleServerResponse() {
 		if ((ajax.readyState === 4) && (ajax.status === 200)) {
 			var id = ajax.getResponseHeader('$componentHeader');
 
-			if (id === null) {
-				id = '$package';
-			}
-
-			if (id === '$package') {
-				//	Put the CSS in the CSS place
+			switch (id) {
+			case '$package':
+				// Show the test console
+				// Put the CSS in the CSS place
 				var i, sheetsCount = document.styleSheets.length, found = false;
 				
 				for (i=0; i<sheetsCount; i++) {
@@ -193,15 +101,68 @@ function C_ajaxUnit_AJAX() {
 					ajaxUnit_node.title	= '$package';
 					document.getElementsByTagName('head')[0].appendChild(ajaxUnit_node);
 				}
-			}
 
-			oAjaxUnit.replaceHTML(id, ajax.responseText);
-			oAjaxUnit.setFocus(id);
+				that.replaceHTML(id, ajax.responseText);
+				that.setFocus(id);
+				break;
+			case '$package-$actionParse':
+				if (ajax.responseXML === null) {
+					break;
+				}
+
+				// Do whatever the test dictates
+				var controlId, step, stepList = ajax.responseXML.firstChild.childNodes;
+
+				for (i = 0; i < stepList.length; i++) {
+					step = stepList[i];
+
+					if (step.nodeType === window.Node.ELEMENT_NODE) {
+						switch (step.nodeName) {
+						case 'open':
+							window.open(step.getAttribute('url'));
+							break;
+						case 'click':
+							controlId = step.getAttribute('id');
+							document.getElementById(controlId).click();
+							break;
+						case 'formfill':
+							var j, controlNode, control, controlType, controlValue, controlList = step.childNodes;
+
+							for (j = 0; j < controlList.length; j++) {
+								controlNode	= controlList[j];
+
+								if (controlNode.nodeType === window.Node.ELEMENT_NODE) {
+									controlId	= controlNode.getAttribute('id');
+									control		= document.getElementById(controlId);
+									controlType	= controlNode.nodeName;
+									controlValue	= controlNode.textContent;
+	
+									switch (controlType) {
+										case 'checkbox':
+											control.checked = (controlValue === 'checked') ? true : false;
+											break;
+										case 'radio':
+											control.checked = (controlValue === 'checked') ? true : false;
+											break;
+										default:
+											control.value = controlValue;
+									}
+								}
+							}
+
+							break;
+						}
+					}
+				}
+
+				break;
+			}
 		}
 	}
 
-	//	Public methods
-//	---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// Public methods
+// ---------------------------------------------------------------------------
 	this.serverTalk = function (URL, requestType, requestData) {
 
 		ajax.open(requestType, URL);
@@ -212,31 +173,30 @@ function C_ajaxUnit_AJAX() {
 		}
 
 		ajax.send(requestData);
-	}
+	};
 
-//	---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
 	this.execute = function (thisAction) {
 		this.serverTalk('$URL?' + thisAction, 'GET', '');
 	};
 }
 
-//	---------------------------------------------------------------------------
-//									ajaxUnit
-//	---------------------------------------------------------------------------
-//	Process results returned from XmlHTTPRequest object
-//	---------------------------------------------------------------------------
+// ---------------------------------------------------------------------------
+// 		ajaxUnit
+// ---------------------------------------------------------------------------
+// Process results returned from XmlHTTPRequest object
+// ---------------------------------------------------------------------------
 function ajaxUnit(ajax) {
 	var postData = '$actionParse';
 
-	postData += '&readyState='		+ ajax.readyState;
-	postData += '&status='			+ ajax.status;
+	postData += '&readyState='	+ ajax.readyState;
+	postData += '&status='		+ ajax.status;
 	postData += '&responseText='	+ encodeURIComponent(ajax.responseText);
 
-	oAjaxUnit_ajax.serverTalk('$URL', 'POST', postData);
+	oAjaxUnit.serverTalk('$URL', 'POST', postData);
 }
 
-//	---------------------------------------------------------------------------
-//	Do stuff
-//	---------------------------------------------------------------------------
-oAjaxUnit		= new C_ajaxUnit();
-oAjaxUnit_ajax	= new C_ajaxUnit_AJAX();
+// ---------------------------------------------------------------------------
+// Do stuff
+// ---------------------------------------------------------------------------
+oAjaxUnit	= new C_ajaxUnit();

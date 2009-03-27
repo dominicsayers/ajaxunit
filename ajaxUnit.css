@@ -1,10 +1,10 @@
 /**
- * @package		ajaxUnit
- * @author		Dominic Sayers <dominic_sayers@hotmail.com>
+ * @package	ajaxUnit
+ * @author	Dominic Sayers <dominic_sayers@hotmail.com>
  * @copyright	2009 Dominic Sayers
- * @license		http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
- * @link		http://www.dominicsayers.com
- * @version		0.1 - First attempt
+ * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
+ * @link	http://www.dominicsayers.com
+ * @version	0.2 - Partially working :-)
  */
 @charset "UTF-8";
 
@@ -15,10 +15,17 @@ div#$package {
 	float:left;
 }
 
-p.$package					{float:left;margin:1px 0 8px 3px;}
-form.$package-form			{margin:0;}
+div#$package-parseTest {
+	font-family:"Segoe UI", Calibri, Arial, Helvetica, "sans serif";
+	font-size:11px;
+	line-height:100%;
+	float:left;
+}
+
+p.$package			{float:left;margin:1px 0 8px 3px;}
+form.$package-form		{margin:0;}
 fieldset.$package-fieldset	{padding:0;border:0;}
-input.$package				{float:left;margin:0;}
+input.$package			{float:left;margin:0;}
 
 input.$package-radio {
 	clear:left;
@@ -35,3 +42,13 @@ input.$package-button {
 }
 
 input.$package-buttonstate-0 {background-color:#FFFFFF;color:#444444;border-color:#666666 #333333 #333333 #666666;}
+
+span.$package-testlog {
+	font-weight:bold;
+	font-size:16px;
+	cursor:pointer;
+}
+
+div.$package-testlog {
+	display:none;
+}
