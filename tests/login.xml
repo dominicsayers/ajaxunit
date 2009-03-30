@@ -1,17 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <suite version="0.1" name="Login &amp; registration">
+	<parameters>
+		<root>/ezuser</root>
+	</parameters>
 	<tests>
 		<test name="Setup">
+			<include_path>
+				<reset />
+				<add>/ezUser</add>
+			</include_path>
+			<file>
+				<delete name="/ezUser/.ezuser_data.php" />
+				<copy src="/ezUser/template.ezuser_settings.php" dest="/ezUser/.ezuser_settings.php" />
+			</file>
+			<session>
+				<reset />
+			</session>
 			<cookies>
 				<delete name="ezUser1"/>
 				<delete name="ezUser2"/>
 				<delete name="ezUser3"/>
-				<set name="ajaxUnit_test_cookie" value="Mancunian" days="1"/>
+				<set name="ajaxUnit_test_cookie" value="Shepherd" days="1"/>
 			</cookies>
 		</test>
 		<test name="Home page">
 			<headers>
-				<location>/ezuser</location>
+				<location>/</location>
 			</headers>
 			<results>
 				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
@@ -92,11 +106,13 @@
 					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
 				/&gt;&#13;
 			&lt;/fieldset&gt;&#13;
-		&lt;/form&gt;</result></results>
+		&lt;/form&gt;</result>
+			</results>
 		</test>
 		<test name="Go to registration page">
 			<click id="ezUser-goaccount"/>
-			<results><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			<results>
+				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
 			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
 				&lt;input id= "ezUser-account-email"&#13;
 					tabindex	=	"1"&#13;
@@ -177,7 +193,8 @@
 				&lt;div id="ezUser-account-message" class="ezUser-message" onclick="ezUser_click(this)"&gt;&lt;/div&gt;&#13;
 				&lt;input id="ezUser-account-new" type="hidden" value="true" /&gt;&#13;
 			&lt;/fieldset&gt;&#13;
-		&lt;/form&gt;</result><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+		&lt;/form&gt;</result>
+				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
 			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
 				&lt;input id= "ezUser-username"&#13;
 					tabindex	=	"1"&#13;
@@ -255,7 +272,8 @@
 					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
 				/&gt;&#13;
 			&lt;/fieldset&gt;&#13;
-		&lt;/form&gt;</result></results>
+		&lt;/form&gt;</result>
+			</results>
 		</test>
 		<test name="Register new account">
 			<formfill>
@@ -269,7 +287,8 @@
 				<radio id="ezUser-account-radio-1">checked</radio>
 			</formfill>
 			<click id="ezUser-account-validate"/>
-			<results><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			<results>
+				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
 			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
 				&lt;input id= "ezUser-username"&#13;
 					tabindex	=	"1"&#13;
@@ -347,7 +366,8 @@
 					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
 				/&gt;&#13;
 			&lt;/fieldset&gt;&#13;
-		&lt;/form&gt;</result></results>
+		&lt;/form&gt;</result>
+			</results>
 		</test>
 	</tests>
 </suite>

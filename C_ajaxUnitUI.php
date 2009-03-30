@@ -69,8 +69,11 @@ class ajaxUnitUI implements ajaxUnitAPI {
 HTML;
 		}
 
-
-		return <<<HTML
+		if ($suiteList === '') {
+			$html = "<h2>ajaxUnit</h2>\n<p>There are are no test suites in the <em>$folder</em> folder</p>\n";
+		} else {
+			$html = <<<HTML
+		<h2>ajaxUnit</h2>
 		<form class="$package-form" action="$package.php" method="get">
 			<fieldset class="$package-fieldset">
 				<h3>Choose test suite to run:</h3>
@@ -88,6 +91,9 @@ $suiteList
 			</fieldset>
 		</form>
 HTML;
+		}
+
+		return $html;
 	}
 
 	public static /*.void.*/ function getControlPanel() {self::sendContent(self::htmlControlPanel(), self::PACKAGE);}
@@ -182,15 +188,15 @@ HTML;
 		<title>ajaxUnit</title>
 		<link type="text/css" rel="stylesheet" href="$URL?$actionCSS" title="ajaxUnit"/>
 		<script type="text/javascript">
-function {$package}_toggle_log(control, id) {
-	if (control.innerHTML === '+') {
-		control.innerHTML = '&ndash;';
-		document.getElementById(id).style.display = 'block';
-	} else {
-		control.innerHTML = '+';
-		document.getElementById(id).style.display = 'none';
-	}
-}
+			function {$package}_toggle_log(control, id) {
+				if (control.innerHTML === '+') {
+					control.innerHTML = '&ndash;';
+					document.getElementById(id).style.display = 'block';
+				} else {
+					control.innerHTML = '+';
+					document.getElementById(id).style.display = 'none';
+				}
+			}
 		</script>
 	</head>
 	<body>
@@ -198,9 +204,7 @@ function {$package}_toggle_log(control, id) {
 HTML;
 	}
 
-	public	static /*.void.*/	function getPageTop()	{self::sendContent(self::htmlPageTop(), self::PACKAGE);}
-
-	public static /*.string.*/	function htmlPageBottom() {
+	public static /*.string.*/ function htmlPageBottom() {
 		return <<<HTML
 		</div>
 	</body>
@@ -208,7 +212,8 @@ HTML;
 HTML;
 	}
 
-	public	static /*.void.*/	function getPageBottom()	{self::sendContent(self::htmlPageBottom(), self::PACKAGE);}
+	public	static /*.void.*/ function getPageTop()		{self::sendContent(self::htmlPageTop(),		self::PACKAGE);}
+	public	static /*.void.*/ function getPageBottom()	{self::sendContent(self::htmlPageBottom(),	self::PACKAGE);}
 }
 // End of class ajaxUnit
 ?>

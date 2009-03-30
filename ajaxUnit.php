@@ -26,7 +26,8 @@ if (!function_exists('__autoload')) {/*.void.*/ function __autoload(/*.string.*/
 if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 	// This script has been called directly by the client
 	if (is_array($_GET) && (count($_GET) > 0)) {
-		if (isset($_GET[ajaxUnitAPI::ACTION_SUITE]))		ajaxUnit::runTestSuite($_GET[ajaxUnitAPI::ACTION_SUITE],(bool) $_GET[ajaxUnitAPI::ACTION_DUMMY]);
+		$dummyRun = (isset($_GET[ajaxUnitAPI::ACTION_DUMMY])) ? (bool) $_GET[ajaxUnitAPI::ACTION_DUMMY] : false;
+		if (isset($_GET[ajaxUnitAPI::ACTION_SUITE]))		ajaxUnit::runTestSuite($_GET[ajaxUnitAPI::ACTION_SUITE], $dummyRun);
 		if (isset($_GET[ajaxUnitAPI::ACTION_PARSE]))		ajaxUnit::parseTest();
 		if (isset($_GET[ajaxUnitAPI::ACTION_CONTROL]))		ajaxUnitUI::getControlPanel();
 		if (isset($_GET[ajaxUnitAPI::ACTION_JAVASCRIPT]))	ajaxUnitUI::getJavascript();
