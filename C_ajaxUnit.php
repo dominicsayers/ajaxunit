@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://www.dominicsayers.com
- * @version	0.2 - Partially working :-)
+ * @version	0.3 - A little bit more
  */
 
 /*.
@@ -160,7 +160,7 @@ class ajaxUnit implements ajaxUnitAPI {
 	private static /*.string.*/ function addPath($name, $file = false) {
 		$parameters	= self::getTestContext(self::TAGNAME_PARAMETERS);
 		$root		= (isset($parameters['root'])) ? $parameters['root'] : '';
-		$delim		= (substr($name, 0, 1) === '/') ? '': '';
+		$delim		= ($name[0] === '/') ? '': '/';
 
 		if ($file) {
 			$base	= (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? (string) str_replace("\\", '/' , __FILE__) : __FILE__;
@@ -233,7 +233,8 @@ class ajaxUnit implements ajaxUnitAPI {
 					$name		= self::addPath($node->getAttribute(self::ATTRNAME_NAME)	, true);
 
 					self::appendLog("Deleting <em>$name</em>", $dummyRun);
-					if (!$dummyRun) unlink($name);
+
+					if (!$dummyRun && is_file($name)) unlink($name);
 					break;
 				}
 			}
@@ -478,7 +479,7 @@ class ajaxUnit implements ajaxUnitAPI {
 				$parameter = $node->childNodes->item($i);
 
 				if ($parameter->nodeType === XML_ELEMENT_NODE) {
-					self::appendLog("\${$parameter->nodeName} = {$parameter->nodeValue}", $dummyRun, 0, 'p', 3);
+					self::appendLog("{$parameter->nodeName} = {$parameter->nodeValue}", $dummyRun, 0, 'p', 3);
 					$context[self::TAGNAME_PARAMETERS][$parameter->nodeName] = $parameter->nodeValue;
 				}
 			}
@@ -598,6 +599,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		self::logResult($success);
 
 		if (!$success) {
+			self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
 			self::appendLog(ajaxUnitUI::htmlPageBottom(), false, 0, '', 0);
 			self::sendLogLink();
 			return;

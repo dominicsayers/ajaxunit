@@ -7,11 +7,11 @@
 		<test name="Setup">
 			<include_path>
 				<reset />
-				<add>/ezUser</add>
+				<add>/release/build/current</add>
 			</include_path>
 			<file>
-				<delete name="/ezUser/.ezuser_data.php" />
-				<copy src="/ezUser/template.ezuser_settings.php" dest="/ezUser/.ezuser_settings.php" />
+				<delete name="/release/build/current/.ezuser_data.php" />
+				<copy src="/release/build/current/template.ezuser_settings.php" dest="/release/build/current/.ezuser_settings.php" />
 			</file>
 			<session>
 				<reset />
@@ -20,12 +20,11 @@
 				<delete name="ezUser1"/>
 				<delete name="ezUser2"/>
 				<delete name="ezUser3"/>
-				<set name="ajaxUnit_test_cookie" value="Shepherd" days="1"/>
 			</cookies>
 		</test>
 		<test name="Home page">
 			<headers>
-				<location>/</location>
+				<location>release/test/tests/example.html</location>
 			</headers>
 			<results>
 				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
@@ -283,8 +282,6 @@
 				<text id="ezUser-account-username">FirstLast</text>
 				<text id="ezUser-account-password">password</text>
 				<text id="ezUser-account-confirm">password</text>
-				<checkbox id="ezUser-account-checkbox-1">checked</checkbox>
-				<radio id="ezUser-account-radio-1">checked</radio>
 			</formfill>
 			<click id="ezUser-account-validate"/>
 			<results>

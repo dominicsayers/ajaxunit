@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://www.dominicsayers.com
- * @version	0.2 - Partially working :-)
+ * @version	0.3 - A little bit more
  */
 interface ajaxUnitAPI {
 	/*.public.*/	const	PACKAGE			= 'ajaxUnit',

@@ -5,7 +5,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://www.dominicsayers.com
- * @version	0.2 - Partially working :-)
+ * @version	0.3 - A little bit more
  */
 
 /*.
@@ -13,7 +13,17 @@
 .*/
 
 set_include_path(get_include_path() . PATH_SEPARATOR . realpath(dirname(__FILE__)));
-if (!function_exists('__autoload')) {/*.void.*/ function __autoload(/*.string.*/ $className) {require "C_$className.php";}}
+if (!function_exists('__autoload')) {
+	/*.void.*/ function __autoload(/*.string.*/ $className) {
+		if (is_file("C_$className.php")) {
+			require "C_$className.php";
+		} else {
+			if (is_file("$className.php")) {
+				require "$className.php";
+			}
+		}
+	}
+}
 
 // ---------------------------------------------------------------------------
 // 								ajaxUnit.php
