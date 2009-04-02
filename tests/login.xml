@@ -1,17 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
-<suite version="0.1" name="Login &amp; registration">
+<suite version="0.2" name="Login &amp; registration">
 	<parameters>
-		<root>/ezuser</root>
+		<root>/ezuser/release/build/current</root>
+		<start>/ezuser/release/test/tests/example.html</start>
 	</parameters>
 	<tests>
 		<test name="Setup">
 			<include_path>
 				<reset />
-				<add>/release/build/current</add>
+				<add>$root</add>
 			</include_path>
 			<file>
-				<delete name="/release/build/current/.ezuser_data.php" />
-				<copy src="/release/build/current/template.ezuser_settings.php" dest="/release/build/current/.ezuser_settings.php" />
+				<delete name="$root/.ezuser_data.php" />
+				<copy src="$root/template.ezuser_settings.php" dest="$root/.ezuser_settings.php" />
 			</file>
 			<session>
 				<reset />
@@ -24,7 +25,7 @@
 		</test>
 		<test name="Home page">
 			<headers>
-				<location>release/test/tests/example.html</location>
+				<location>$start</location>
 			</headers>
 			<results>
 				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;

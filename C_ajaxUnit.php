@@ -7,8 +7,8 @@
  * @author	Dominic Sayers <dominic_sayers@hotmail.com>
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
- * @link	http://www.dominicsayers.com
- * @version	0.3 - A little bit more
+ * @link	http://code.google.com/p/ajaxunit/
+ * @version	0.4 - Now you can do parameter substitution in the test data
  */
 
 /*.
@@ -91,6 +91,16 @@ class ajaxUnit implements ajaxUnitAPI {
 		}
 	}
 
+	private static /*.mixed.*/ function getTestParameters($key = '') {
+		$parameters	= self::getTestContext(self::TAGNAME_PARAMETERS);
+
+		if ($key === '') {
+			return $parameters;
+		} else {
+			return (isset($parameters[$key])) ? $parameters[$key] : '';
+		}
+	}
+
 	private static /*.void.*/ function setInitialContext(/*.DOMElement.*/ &$test, /*.int.*/ $testIndex) {
 		// Build a string contianing a list of expected responses (1234...n) according to <results> child nodes
 		$resultsList	= $test->getElementsByTagName(self::TAGNAME_RESULT);	// Get the expected results
@@ -139,6 +149,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		$html		= '';
 
 		foreach ($context as $key => $value) $html .= "$key: $value<br />\n";
+
 		self::appendLog($html, $dummyRun);
 		self::appendLog('', $dummyRun, 'hr');
 	}
@@ -151,16 +162,24 @@ class ajaxUnit implements ajaxUnitAPI {
 		self::appendLog('<hr />', $dummyRun, 0, '', 3);
 	}
 
+	private static /*.string.*/ function getLogLink() {
+		return dirname($_SERVER['SCRIPT_NAME']) . "/" . self::getLogFilename();
+	}
+
 	private static /*.void.*/ function sendLogLink() {
-		$URL	= dirname($_SERVER['SCRIPT_NAME']) . "/" . self::getLogFilename();
+		$URL	= self::getLogLink();
 		$xml	= "<test><open url=\"$URL\" /></test>";
 		ajaxUnitUI::sendContent($xml, self::ACTION_PARSE, 'text/xml');
 	}
 
+	private static /*.string.*/ function substituteParameters($text) {
+		extract(self::getTestParameters());
+		return eval("return \"$text\";");
+	}
+
 	private static /*.string.*/ function addPath($name, $file = false) {
-		$parameters	= self::getTestContext(self::TAGNAME_PARAMETERS);
-		$root		= (isset($parameters['root'])) ? $parameters['root'] : '';
-		$delim		= ($name[0] === '/') ? '': '/';
+		$name	= self::substituteParameters($name);
+		$delim	= ($name[0] === '/') ? '': '/';
 
 		if ($file) {
 			$base	= (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? (string) str_replace("\\", '/' , __FILE__) : __FILE__;
@@ -169,7 +188,7 @@ class ajaxUnit implements ajaxUnitAPI {
 			$base	= '';
 		}
 
-		return "$base$root$delim$name";
+		return "$base$delim$name";
 	}
 
 // ---------------------------------------------------------------------------
@@ -189,7 +208,7 @@ class ajaxUnit implements ajaxUnitAPI {
 
 			if ($node->nodeType === XML_ELEMENT_NODE) {
 				$action	= $node->nodeName;
-				$name	= $node->getAttribute(self::ATTRNAME_NAME);
+				$name	= self::substituteParameters($node->getAttribute(self::ATTRNAME_NAME));
 
 				switch ($action) {
 				case self::TAGNAME_DELETE:
@@ -251,7 +270,7 @@ class ajaxUnit implements ajaxUnitAPI {
 
 			if ($node->nodeType === XML_ELEMENT_NODE) {
 				$type	= $node->nodeName;
-				$value	= $node->nodeValue;
+				$value	= self::substituteParameters($node->nodeValue);
 				$id	= $node->getAttribute(self::TAGNAME_ID);				
 
 				self::appendLog("Setting $type control <strong>$id</strong> to <em>$value</em>", $dummyRun);
@@ -269,7 +288,7 @@ class ajaxUnit implements ajaxUnitAPI {
 
 			if ($node->nodeType === XML_ELEMENT_NODE) {
 				$header	= $node->nodeName;
-				$value	= $node->nodeValue;				
+				$value	= $node->nodeValue;
 
 				if ($header === 'location') {
 					$path = self::addPath($value);
@@ -280,6 +299,7 @@ class ajaxUnit implements ajaxUnitAPI {
 						die;
 					}
 				} else {
+					$value = self::substituteParameters($value);
 					self::appendLog("Setting <strong>$header</strong> to <em>$value</em>", $dummyRun);
 					if (!$dummyRun) header("$header: $path");
 				}
@@ -297,12 +317,9 @@ class ajaxUnit implements ajaxUnitAPI {
 			$node = $nodeList->item($i);
 
 			if ($node->nodeType === XML_ELEMENT_NODE) {
-				$action	= $node->nodeName;
-				$value	= $node->nodeValue;
-
-				switch ($action) {
+				switch ($node->nodeName) {
 				case self::TAGNAME_ADD:
-					$path = self::addPath($value, true);
+					$path = self::addPath($node->nodeValue, true);
 					self::appendLog("Adding <em>$path</em> to include path", $dummyRun);
 
 					if (!$dummyRun) {
@@ -369,9 +386,7 @@ class ajaxUnit implements ajaxUnitAPI {
 			$node = $nodeList->item($i);
 
 			if ($node->nodeType === XML_ELEMENT_NODE) {
-				$action	= $node->nodeName;
-
-				switch ($action) {
+				switch ($node->nodeName) {
 				case self::TAGNAME_RESET:
 					self::appendLog("Resetting session...", $dummyRun);
 
@@ -493,8 +508,15 @@ class ajaxUnit implements ajaxUnitAPI {
 		$testNodes = $testList->length;
 
 		if (empty($testNodes)) {
-			self::appendLog("There are no tests defined in this test suite", $dummyRun, 0);
+			self::appendLog("There are no tests defined in this test suite", $dummyRun, 0, 'p', 3);
 			self::appendLog(ajaxUnitUI::htmlPageBottom(), $dummyRun, 0, '', 0);
+
+
+			if (!$dummyRun) {
+				$URL = self::getLogLink();
+				header("location: $URL");
+			}
+
 			return;
 		}
 
@@ -556,7 +578,7 @@ class ajaxUnit implements ajaxUnitAPI {
 			self::setTestContext(self::TAGNAME_RESPONSECOUNT, (string) $responseCount);
 		}
 
-		$expected = self::getTestContext(self::TAGNAME_EXPECTINGCOUNT);
+		$expected = $context[self::TAGNAME_EXPECTINGCOUNT];
 		self::appendLog("Response count is $responseCount (expecting $expected).");			
 
 		// Compare the results to the expected results

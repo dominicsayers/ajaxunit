@@ -3,8 +3,8 @@
  * @author	Dominic Sayers <dominic_sayers@hotmail.com>
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
- * @link	http://www.dominicsayers.com
- * @version	0.3 - A little bit more
+ * @link	http://code.google.com/p/ajaxunit/
+ * @version	0.4 - More test parameters added
  */
 /*global window, document, event, ActiveXObject */ // For JSLint
 var oAjaxUnit;
