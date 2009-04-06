@@ -1,32 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<suite version="0.2" name="Login &amp; registration">
+<suite version="0.3" name="Development code">
 	<parameters>
-		<root>/ezuser/release/build/current</root>
-		<start>/ezuser/release/test/tests/example.html</start>
+		<packageRoot>ezuser/ezUser</packageRoot>
 	</parameters>
 	<tests>
+		<test name="Check version">
+			<headers>
+				<Location>$testsFolder/$suite-about.html</Location>
+			</headers>
+			<results><result>&lt;pre&gt;
+    package	ezUser&#13;
+    author	Dominic Sayers &lt;dominic_sayers@hotmail.com&gt;&#13;
+    copyright	2009 Dominic Sayers&#13;
+    license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license&#13;
+    link	http://code.google.com/p/ezuser/&#13;
+    version	(development code)&#13;
+&lt;hr /&gt;
+&lt;/pre&gt;
+</result></results>
+		</test>
 		<test name="Setup">
 			<include_path>
-				<reset />
-				<add>$root</add>
+				<reset/>
+				<add>$documentRoot/$packageRoot</add>
 			</include_path>
 			<file>
-				<delete name="$root/.ezuser_data.php" />
-				<copy src="$root/template.ezuser_settings.php" dest="$root/.ezuser_settings.php" />
+				<delete name="$documentRoot/$packageRoot/.ezuser-data.php"/>
+				<copy src="$testRoot/$testsFolder/$suite-ezuser-settings.php" dest="$documentRoot/$packageRoot/.ezuser-settings.php"/>
 			</file>
 			<session>
-				<reset />
+				<reset/>
 			</session>
 			<cookies>
-				<delete name="ezUser1"/>
-				<delete name="ezUser2"/>
-				<delete name="ezUser3"/>
+				<delete name="ezUser1" />
+				<delete name="ezUser2" />
+				<delete name="ezUser3" />
 			</cookies>
 		</test>
 		<test name="Home page">
-			<headers>
-				<location>$start</location>
-			</headers>
+			<location url="$suite-example.html" />
 			<results>
 				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
 			&lt;fieldset class="ezUser-fieldset"&gt;&#13;

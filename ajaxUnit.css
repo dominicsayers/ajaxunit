@@ -4,14 +4,18 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.4 - Now you can do parameter substitution in the test data
+ * @version	0.5 - Code tidy
  */
 @charset "UTF-8";
+
+.dummy {} /* Webkit is ignoring the first item  so we'll put a dummy one in */
+
+div.$package-testlog	{display:none;}
 
 div#$package {
 	font-family:"Segoe UI", Calibri, Arial, Helvetica, "sans serif";
 	font-size:11px;
-	line-height:100%;
+	line-height:16px;
 	float:left;
 }
 
@@ -22,19 +26,13 @@ div#$package-parseTest {
 	float:left;
 }
 
-p.$package			{float:left;margin:1px 0 8px 3px;}
 form.$package-form		{margin:0;}
 fieldset.$package-fieldset	{padding:0;border:0;}
-input.$package			{float:left;margin:0;}
-
-input.$package-radio {
-	clear:left;
-}
 
 input.$package-button {
 	float:left;
 	padding:2px;
-	margin:3px 0 0 0;
+	margin:15px 0 0 0;
 	font-family:"Segoe UI", Calibri, Arial, Helvetica, "sans serif";
 	border-style:solid;
 	border-width:1px;
@@ -43,12 +41,9 @@ input.$package-button {
 
 input.$package-buttonstate-0 {background-color:#FFFFFF;color:#444444;border-color:#666666 #333333 #333333 #666666;}
 
+
 span.$package-testlog {
 	font-weight:bold;
 	font-size:16px;
 	cursor:pointer;
-}
-
-div.$package-testlog {
-	display:none;
 }

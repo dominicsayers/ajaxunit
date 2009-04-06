@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.4 - Now you can do parameter substitution in the test data
+ * @version	0.5 - Code tidy
  */
 
 /*.
@@ -91,17 +91,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		}
 	}
 
-	private static /*.mixed.*/ function getTestParameters($key = '') {
-		$parameters	= self::getTestContext(self::TAGNAME_PARAMETERS);
-
-		if ($key === '') {
-			return $parameters;
-		} else {
-			return (isset($parameters[$key])) ? $parameters[$key] : '';
-		}
-	}
-
-	private static /*.void.*/ function setInitialContext(/*.DOMElement.*/ &$test, /*.int.*/ $testIndex) {
+	private static /*.void.*/ function setInitialContext(/*.DOMElement.*/ &$test, /*.int.*/ $testIndex, $dummyRun = false) {
 		// Build a string contianing a list of expected responses (1234...n) according to <results> child nodes
 		$resultsList	= $test->getElementsByTagName(self::TAGNAME_RESULT);	// Get the expected results
 		$expected = $resultsList->length;
@@ -145,13 +135,14 @@ class ajaxUnit implements ajaxUnitAPI {
 	}
 
 	private static /*.void.*/ function logTestContext($dummyRun = false) {
+		$package	= self::PACKAGE;
 		$context	= self::getTestContext();
-		$html		= '';
 
-		foreach ($context as $key => $value) $html .= "$key: $value<br />\n";
-
-		self::appendLog($html, $dummyRun);
-		self::appendLog('', $dummyRun, 'hr');
+		self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$package-parameters')\">+</span> Global test parameters", $dummyRun, 0, 'p', 3);
+		self::appendLog("<div class=\"$package-testlog\" id=\"$package-parameters\">", $dummyRun, 0, '', 3);
+		foreach ($context as $key => $value) self::appendLog("$key = $value", $dummyRun);
+		self::appendLog('</div>', $dummyRun, 0, '', 3);
+		self::appendLog('<hr />', $dummyRun, 0, '', 3);
 	}
 
 	private static /*.void.*/ function logResult($success, $dummyRun = false) {
@@ -166,36 +157,29 @@ class ajaxUnit implements ajaxUnitAPI {
 		return dirname($_SERVER['SCRIPT_NAME']) . "/" . self::getLogFilename();
 	}
 
-	private static /*.void.*/ function sendLogLink() {
-		$URL	= self::getLogLink();
-		$xml	= "<test><open url=\"$URL\" /></test>";
+	private static /*.void.*/ function sendLogLink($dummyRun = false) {
+		if ($dummyRun) return;
+		$attrName	= self::ATTRNAME_URL;
+		$URL		= self::getLogLink();
+		$xml		= "<test><open $attrName=\"$URL\" /></test>";
 		ajaxUnitUI::sendContent($xml, self::ACTION_PARSE, 'text/xml');
 	}
 
-	private static /*.string.*/ function substituteParameters($text) {
-		extract(self::getTestParameters());
-		return eval("return \"$text\";");
+	private static /*.void.*/ function tidyUp($dummyRun = false) {
+		self::appendLog(ajaxUnitUI::htmlPageBottom(), $dummyRun, 0, '', 0);
+		self::sendLogLink($dummyRun);
 	}
 
-	private static /*.string.*/ function addPath($name, $file = false) {
-		$name	= self::substituteParameters($name);
-		$delim	= ($name[0] === '/') ? '': '/';
-
-		if ($file) {
-			$base	= (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') ? (string) str_replace("\\", '/' , __FILE__) : __FILE__;
-			$base	= substr($base, 0, strpos($_SERVER['SCRIPT_FILENAME'], $_SERVER['SCRIPT_NAME']));
-		} else {
-			$base	= '';
-		}
-
-		return "$base$delim$name";
+	private static /*.string.*/ function substituteParameters($text) {
+		extract(self::getTestContext());
+		return eval('return "' . addslashes($text) . '";');
 	}
 
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------
 	private static /*.boolean.*/ function doClick(/*.DOMElement.*/ $element, $dummyRun = false) {
-		$id = $element->getAttribute(self::TAGNAME_ID);
+		$id = $element->getAttribute(self::ATTRNAME_ID);
 		self::appendLog("Click button <strong>$id</strong>", $dummyRun, 2);
 		return true;
 	}
@@ -227,7 +211,6 @@ class ajaxUnit implements ajaxUnitAPI {
 				if (!$dummyRun) setcookie($name, $value, time() + 60 * 60 * 24 * $days);
 			}
 		}
-
 		return true;
 	}
 
@@ -242,14 +225,14 @@ class ajaxUnit implements ajaxUnitAPI {
 
 				switch ($action) {
 				case self::TAGNAME_COPY:
-					$source		= self::addPath($node->getAttribute(self::ATTRNAME_SOURCE)	, true);
-					$destination	= self::addPath($node->getAttribute(self::ATTRNAME_DESTINATION)	, true);
+					$source		= self::substituteParameters($node->getAttribute(self::ATTRNAME_SOURCE));
+					$destination	= self::substituteParameters($node->getAttribute(self::ATTRNAME_DESTINATION));
 
 					self::appendLog("Copying <em>$source</em> to <em>$destination</em>", $dummyRun);
 					if (!$dummyRun) copy($source, $destination);
 					break;
 				case self::TAGNAME_DELETE:
-					$name		= self::addPath($node->getAttribute(self::ATTRNAME_NAME)	, true);
+					$name		= self::substituteParameters($node->getAttribute(self::ATTRNAME_NAME));
 
 					self::appendLog("Deleting <em>$name</em>", $dummyRun);
 
@@ -271,7 +254,7 @@ class ajaxUnit implements ajaxUnitAPI {
 			if ($node->nodeType === XML_ELEMENT_NODE) {
 				$type	= $node->nodeName;
 				$value	= self::substituteParameters($node->nodeValue);
-				$id	= $node->getAttribute(self::TAGNAME_ID);				
+				$id	= $node->getAttribute(self::ATTRNAME_ID);				
 
 				self::appendLog("Setting $type control <strong>$id</strong> to <em>$value</em>", $dummyRun);
 			}
@@ -282,6 +265,7 @@ class ajaxUnit implements ajaxUnitAPI {
 
 	private static /*.boolean.*/ function doHeaders(/*.DOMNodeList.*/ $nodeList, $dummyRun = false) {
 		self::appendLog("Send HTTP headers", $dummyRun, 2);
+		if (headers_sent()) self::appendLog("<strong>Warning: headers have already been sent</strong>");
 
 		for ($i = 0; $i < $nodeList->length; $i++) {
 			$node = $nodeList->item($i);
@@ -290,18 +274,19 @@ class ajaxUnit implements ajaxUnitAPI {
 				$header	= $node->nodeName;
 				$value	= $node->nodeValue;
 
-				if ($header === 'location') {
-					$path = self::addPath($value);
-					self::appendLog("Setting <strong>$header</strong> to <em>$path</em>", $dummyRun);
+				$value	= self::substituteParameters($value);
+				self::appendLog("Setting <strong>$header</strong> to <em>$value</em>", $dummyRun);
 
-					if (!$dummyRun) {
-						header("$header: $path");
-						die;
+				if (!$dummyRun) {
+					if (strtolower($header) === 'location') {
+						header("Cache-Control: no-cache");
+						header("Pragma: no-cache");
+						header("$header: $value");
+						echo '.';
+						exit;
+					} else {
+						header("$header: $value");
 					}
-				} else {
-					$value = self::substituteParameters($value);
-					self::appendLog("Setting <strong>$header</strong> to <em>$value</em>", $dummyRun);
-					if (!$dummyRun) header("$header: $path");
 				}
 			}
 		}
@@ -319,7 +304,7 @@ class ajaxUnit implements ajaxUnitAPI {
 			if ($node->nodeType === XML_ELEMENT_NODE) {
 				switch ($node->nodeName) {
 				case self::TAGNAME_ADD:
-					$path = self::addPath($node->nodeValue, true);
+					$path = self::substituteParameters($node->nodeValue);
 					self::appendLog("Adding <em>$path</em> to include path", $dummyRun);
 
 					if (!$dummyRun) {
@@ -336,6 +321,12 @@ class ajaxUnit implements ajaxUnitAPI {
 		}
 
 		self::appendLog("New include path is <em>" . get_include_path() . "</em>", $dummyRun);
+		return true;
+	}
+
+	private static /*.boolean.*/ function doLocation(/*.DOMElement.*/ $element, $dummyRun = false) {
+		$url = self::substituteParameters($element->getAttribute(self::ATTRNAME_URL));
+		self::appendLog("Set location <strong>$url</strong>", $dummyRun, 2);
 		return true;
 	}
 
@@ -360,7 +351,12 @@ class ajaxUnit implements ajaxUnitAPI {
 					self::appendLog("Test data set #$indexText has already been matched with a previous result", $dummyRun, 6);
 				} else {
 					self::appendLog("Comparing result with test data set #$indexText...", $dummyRun, 6);
-					$success = ($results === $node->nodeValue) ? true : false;
+
+					if ($dummyRun) {
+						$success = true;
+					} else {
+						$success = (htmlspecialchars_decode($results) === htmlspecialchars_decode($node->nodeValue)) ? true : false;
+					}
 	
 					if ($success) {
 						self::appendLog("Match with test data set #$indexText", $dummyRun, 6);
@@ -369,6 +365,14 @@ class ajaxUnit implements ajaxUnitAPI {
 						$responseList	= substr($responseList, 0, $indexPos) . substr($responseList, $indexPos + 1);
 						self::setTestContext(self::TAGNAME_RESPONSELIST, $responseList);
 						break;
+/* debug
+} else {
+$str1 = htmlspecialchars_decode($results);
+$str2 = htmlspecialchars_decode($node->nodeValue);
+self::appendLog(strlen($str1) . "|" . strlen($str2) . "|" . strcmp($str1, $str2), $dummyRun, 8);
+self::appendLog("[$str1]", $dummyRun, 8);
+self::appendLog("[$str2]", $dummyRun, 8);
+*/
 					}
 				}
 			}
@@ -406,9 +410,11 @@ class ajaxUnit implements ajaxUnitAPI {
 		return true;
 	}
 
-	private static /*.boolean.*/ function initiateTest(/*.DOMDocument.*/ &$document, /*.DOMElement.*/ &$test, $dummyRun = false) {
+	private static /*.boolean.*/ function initiateTest(/*.DOMDocument.*/ &$document, /*.DOMElement.*/ &$test, /*.int.*/ $testIndex, $dummyRun = false) {
+		self::setInitialContext($test, $testIndex, $dummyRun);
+
 		$package	= self::PACKAGE;
-		$testName	= $test->getAttribute(self::ATTRNAME_NAME);
+		$testName	= $test->hasAttribute(self::ATTRNAME_NAME) ? $test->getAttribute(self::ATTRNAME_NAME) : "#" . ($testIndex + 1);
 		$testId		= htmlspecialchars($testName);
 
 		self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$package-$testId')\">+</span> Test <strong>$testName</strong>", $dummyRun, 0, 'p', 3);
@@ -430,19 +436,11 @@ class ajaxUnit implements ajaxUnitAPI {
 					case self::TAGNAME_COOKIES:	$success = self::doCookies	($stepList,	$dummyRun);					break;
 					case self::TAGNAME_FILE:	$success = self::doFileOps	($stepList,	$dummyRun);					break;
 					case self::TAGNAME_FORMFILL:	$success = self::doFormFill	($stepList,	$dummyRun);	$sendToBrowser = !$dummyRun;	break;
-					case self::TAGNAME_INCLUDEPATH:	$success = self::doIncludePath	($stepList,	$dummyRun);					break;
 					case self::TAGNAME_HEADERS:	$success = self::doHeaders	($stepList,	$dummyRun);					break;
+					case self::TAGNAME_INCLUDEPATH:	$success = self::doIncludePath	($stepList,	$dummyRun);					break;
+					case self::TAGNAME_LOCATION:	$success = self::doLocation	($step,		$dummyRun);	$sendToBrowser = !$dummyRun;	break;
 					case self::TAGNAME_SESSION:	$success = self::doSession	($stepList,	$dummyRun);					break;
-					case self::TAGNAME_RESULTS:
-						if ($dummyRun) {
-							$results = '';
-							self::doResults($stepList, $results, $dummyRun);
-							$success = true;
-							break;
-						} else {
-							// Remove bulky results node before we send to the browser
-							$test->removeChild($step);
-						}
+					case self::TAGNAME_RESULTS:	if (!$dummyRun) $test->removeChild($step);
 				}
 
 				if (!$success) break;
@@ -453,9 +451,10 @@ class ajaxUnit implements ajaxUnitAPI {
 			if ($sendToBrowser) {
 				// We've got the next test details so send them to the browser script
 				self::appendLog("Sending instructions to browser", false, 2);
-				ajaxUnitUI::sendContent($document->saveXML($test), self::ACTION_PARSE, 'text/xml');
+				$xml = self::substituteParameters($document->saveXML($test));
+				ajaxUnitUI::sendContent($xml, self::ACTION_PARSE, 'text/xml');
 			} else {
-				self::logResult($success, $dummyRun);
+				self::parseTest($dummyRun); // Move on to the next test
 			}
 		}
 
@@ -465,11 +464,23 @@ class ajaxUnit implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------
 // Public methods
 // ---------------------------------------------------------------------------
+// 	runTestSuite - called to initiate a named series of tests
+// ---------------------------------------------------------------------------
 	public static /*.void.*/ function runTestSuite(/*.string.*/ $suite, $dummyRun = false) {
+		$testRoot	= dirname(__FILE__);
+		$isWindows	= (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
+		$posLastDelim	= strrpos($testRoot, ($isWindows) ? '\\' : '/');
+		$documentRoot	= $_SERVER['SCRIPT_FILENAME'];
+		$documentRoot	= realpath(substr($documentRoot, 0, strpos($documentRoot, $_SERVER['SCRIPT_NAME'])));
+	
 		$context = /*.(array[string]string).*/ array();
 		$context[self::TAGNAME_UID]		= date('YmdHis');
 		$context[self::TAGNAME_SUITE]		= $suite;
 		$context[self::TAGNAME_STATUS]		= self::STATUS_INPROGRESS;
+		$context[self::TAGNAME_TESTSFOLDER]	= self::TESTS_FOLDER;
+		$context[self::TAGNAME_TESTROOT]	= $testRoot;
+		$context[self::TAGNAME_DOCROOT]		= $documentRoot;
+		
 		self::setTestContext($context);
 
 		$document	= self::getDOMDocument($suite);
@@ -487,21 +498,14 @@ class ajaxUnit implements ajaxUnitAPI {
 		$node		= ($nodeList->length > 0) ? $nodeList->item(0) : new DOMElement(self::TAGNAME_PARAMETERS);
 
 		if ($node->hasChildNodes()) {
-			self::appendLog("<strong>Global test parameters</strong>", $dummyRun, 0, 'p', 3);
-			$context = /*.(array[string]string).*/ array();
-
 			for ($i = 0; $i < $node->childNodes->length; $i++) {
 				$parameter = $node->childNodes->item($i);
-
-				if ($parameter->nodeType === XML_ELEMENT_NODE) {
-					self::appendLog("{$parameter->nodeName} = {$parameter->nodeValue}", $dummyRun, 0, 'p', 3);
-					$context[self::TAGNAME_PARAMETERS][$parameter->nodeName] = $parameter->nodeValue;
-				}
+				if ($parameter->nodeType === XML_ELEMENT_NODE) $context[$parameter->nodeName] = $parameter->nodeValue;
 			}
-
-			self::setTestContext($context);
-			self::appendLog("<hr />", $dummyRun, 0, '', 3);
 		}		
+
+		self::setTestContext($context);
+		self::logTestContext($dummyRun);
 
 		// Run tests
 		$testList = self::getTestList($document);
@@ -509,51 +513,50 @@ class ajaxUnit implements ajaxUnitAPI {
 
 		if (empty($testNodes)) {
 			self::appendLog("There are no tests defined in this test suite", $dummyRun, 0, 'p', 3);
-			self::appendLog(ajaxUnitUI::htmlPageBottom(), $dummyRun, 0, '', 0);
-
-
-			if (!$dummyRun) {
-				$URL = self::getLogLink();
-				header("location: $URL");
-			}
-
+			self::setTestContext(self::TAGNAME_STATUS, self::STATUS_FINISHED);
+			self::tidyUp($dummyRun);
 			return;
 		}
 
 		$success = true;
 
+		// Run the first test (it will advance the tests by itself from then on)
 		for ($i = 0; $i < $testNodes; $i++) {
 			$test = $testList->item($i);
 
 			if ($test->nodeType === XML_ELEMENT_NODE) {
-				self::setInitialContext($test, $i);
-				$success = self::initiateTest($document, $test, $dummyRun);
-				if (!$success) break;
+				$success = self::initiateTest($document, $test, $i, $dummyRun);
+				break;
 			}
 		}
 
-		self::appendLog(ajaxUnitUI::htmlPageBottom(), $dummyRun, 0, '', 0);
+//		self::appendLog(ajaxUnitUI::htmlPageBottom(), $dummyRun, 0, '', 0);
 	}
 
-	public static /*.void.*/ function parseTest() {
-		do {
-			// Get some context for this test
+// ---------------------------------------------------------------------------
+// 	parseTest - called by the browser when it receives AJAX responseText
+// ---------------------------------------------------------------------------
+	public static /*.void.*/ function parseTest($dummyRun = false) {
+		// Get some context for this test
+		$context = self::getTestContext();
+
+		// Are we actually running tests at the moment?
+		if (!isset($context[self::TAGNAME_STATUS]) || in_array($context[self::TAGNAME_STATUS], array('', self::STATUS_FINISHED, self::STATUS_FAIL))) {
+			self::appendLog('No testing in progress', $dummyRun);
+			exit;
+		}
+
+		// Wait for previous reponse to be parsed
+		while ((bool) $context[self::TAGNAME_INPROGRESS]) {
+			self::appendLog("(Another response is being parsed. Waiting for 1 second)", $dummyRun, 2);
+			sleep(1);
 			$context = self::getTestContext();
-		
-			// Wait for previous reponse to be parsed
-			if ((bool) $context[self::TAGNAME_INPROGRESS]) {
-				self::appendLog("(Another response is being parsed. Waiting for 1 second)", false, 2);
-				sleep(1);
-			} else {
-				break;
-			}
-		} while (true);
+		}
 
 		self::setTestContext(self::TAGNAME_INPROGRESS, (string) true);
-		self::appendLog("Test results being parsed at request of browser", false, 2);
+//		self::appendLog("Test results being parsed at request of browser", $dummyRun, 2);
 
 		// Get some context for this test
-		$context	= self::getTestContext();
 		$suite		= $context[self::TAGNAME_SUITE];
 		$testIndex	= (int) $context[self::TAGNAME_INDEX];
 		$document	= self::getDOMDocument($suite);		// Get the test suite information
@@ -561,70 +564,78 @@ class ajaxUnit implements ajaxUnitAPI {
 		$test		= $testList->item($testIndex);		// Get this particular test
 		$contextText	= ($test->hasAttribute(self::ATTRNAME_NAME)) ? "Test name is <strong>" . $test->getAttribute(self::ATTRNAME_NAME) : "Test index is <strong>$testIndex";
 
-		self::appendLog("$contextText</strong>");
-
-		// Check response count is (a) valid and (b) all we are expecting on this page
-		if (!isset($context[self::TAGNAME_RESPONSECOUNT])) {
-			self::appendLog("<strong>No response count set!</strong>");			
-			die; // Invalid response count
-		}
-
-		$responseCount = (int) $context[self::TAGNAME_RESPONSECOUNT];
-
-		if (++$responseCount < 1) {
-			self::appendLog("<strong>Response count hasn't been set correctly! ($responseCount)</strong>");			
-			die; // Invalid response count
-		} else {
-			self::setTestContext(self::TAGNAME_RESPONSECOUNT, (string) $responseCount);
-		}
+		self::appendLog("$contextText</strong>", $dummyRun);
 
 		$expected = $context[self::TAGNAME_EXPECTINGCOUNT];
-		self::appendLog("Response count is $responseCount (expecting $expected).");			
 
-		// Compare the results to the expected results
-		$resultsNode = $test->getElementsByTagName(self::TAGNAME_RESULTS)->item(0);
-
-		if ($resultsNode->hasAttribute(self::ATTRNAME_UPDATE)) {
-			// Use these as model results
-			self::appendLog("Using these as model results");			
-			$updateStatus = $resultsNode->getAttribute(self::ATTRNAME_UPDATE);
-
-			if ($updateStatus !== self::STATUS_INPROGRESS) {
-				self::appendLog("Clearing existing model results", false, 6);			
-				// Clear away the children & set the status
-				while ($resultsNode->hasChildNodes()) $resultsNode->removeChild($resultsNode->lastChild);
-				$resultsNode->setAttribute(self::ATTRNAME_UPDATE, self::STATUS_INPROGRESS);
-			}
-
-			self::appendLog("Adding this result", false, 6);			
-			$resultsNode->appendChild(new DOMElement(self::TAGNAME_RESULT, $_POST['responseText']));	// Add model result
-
-			if ($responseCount === $expected) {
-				self::appendLog("No more results expected", false, 6);			
-				$resultsNode->removeAttribute(self::ATTRNAME_UPDATE);
-			}
-
-			// Write out the test suite
-			self::appendLog("Updating test suite", false, 6);			
-			self::updateTestSuite($suite, $document);
+		if ($expected < 1) {
+			self::appendLog("No responses expected", $dummyRun);
+			$success = true;			
+			self::logResult($success, $dummyRun);
 		} else {
-			// Compare these results against the model results
-			$success = self::doResults($resultsNode->childNodes, $_POST['responseText']);	// Is it the same?
-		}
+			// Check response count is (a) valid and (b) all we are expecting on this page
+			if (!isset($context[self::TAGNAME_RESPONSECOUNT])) {
+				self::appendLog("<strong>No response count set!</strong>", $dummyRun);			
+				exit; // Invalid response count
+			}
 
-		if ($responseCount < $expected) {
-			self::appendLog("Waiting for further responses from browser", false, 2);			
-			self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
-			die;
-		}
+			$responseCount = (int) $context[self::TAGNAME_RESPONSECOUNT];
 
-		self::logResult($success);
+			if (++$responseCount < 1) {
+				self::appendLog("<strong>Response count hasn't been set correctly! ($responseCount)</strong>", $dummyRun);			
+				exit; // Invalid response count
+			} else {
+				self::setTestContext(self::TAGNAME_RESPONSECOUNT, (string) $responseCount);
+			}
 
-		if (!$success) {
-			self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
-			self::appendLog(ajaxUnitUI::htmlPageBottom(), false, 0, '', 0);
-			self::sendLogLink();
-			return;
+			self::appendLog("Response count is $responseCount (expecting $expected).", $dummyRun);			
+
+			// Compare the results to the expected results
+			$resultsNode = $test->getElementsByTagName(self::TAGNAME_RESULTS)->item(0);
+	
+			if ($resultsNode->hasAttribute(self::ATTRNAME_UPDATE)) {
+				// Use these as model results
+				self::appendLog("Using these as model results", $dummyRun);			
+				$updateStatus = $resultsNode->getAttribute(self::ATTRNAME_UPDATE);
+	
+				if ($updateStatus !== self::STATUS_INPROGRESS) {
+					self::appendLog("Clearing existing model results", $dummyRun, 6);			
+					// Clear away the children & set the status
+					while ($resultsNode->hasChildNodes()) $resultsNode->removeChild($resultsNode->lastChild);
+					$resultsNode->setAttribute(self::ATTRNAME_UPDATE, self::STATUS_INPROGRESS);
+				}
+	
+				self::appendLog("Adding this result", $dummyRun, 6);			
+				$resultsNode->appendChild(new DOMElement(self::TAGNAME_RESULT, $_POST['responseText']));	// Add model result
+	
+				if ($responseCount >= $expected) {
+					self::appendLog("No more results expected", $dummyRun, 6);			
+					$resultsNode->removeAttribute(self::ATTRNAME_UPDATE);
+				}
+	
+				// Write out the test suite
+				self::appendLog("Updating test suite", $dummyRun, 6);			
+				if (!$dummyRun) self::updateTestSuite($suite, $document);
+				$success = true;
+			} else {
+				// Compare these results against the model results
+				$results	= ($dummyRun) ? '' : $_POST['responseText'];
+				$success	= self::doResults($resultsNode->childNodes, $results, $dummyRun);	// Is it the same?
+			}
+	
+			if (!$dummyRun && ($responseCount < $expected)) {
+				self::appendLog("Waiting for further responses from browser", $dummyRun, 2);			
+				self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
+				exit;
+			}
+	
+			self::logResult($success, $dummyRun);
+	
+			if (!$success) {
+				self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
+				self::tidyUp($dummyRun);
+				return;
+			}
 		}
 
 		// Get the next test and send it to the client for form filling etc.
@@ -636,15 +647,12 @@ class ajaxUnit implements ajaxUnitAPI {
 		} while (true);
 
 		if ($success) {
-			self::setInitialContext($test, $testIndex);
-			$success = self::initiateTest($document, $test);
+			$success = self::initiateTest($document, $test, $testIndex, $dummyRun);
 		} else {
 			// No more tests
-			self::appendLog("No more tests found", false, 'p', 0, 2);			
-			$content = 'Finished';
-			ajaxUnitUI::sendContent($content, self::ACTION_PARSE);
-			self::setTestContext(self::TAGNAME_STATUS, self::STATUS_SUCCESS);
-			self::sendLogLink();
+			self::appendLog("No more tests found", $dummyRun, 'p', 0, 2);			
+			self::setTestContext(self::TAGNAME_STATUS, self::STATUS_FINISHED);
+			self::tidyUp($dummyRun);
 		}
 	}
 

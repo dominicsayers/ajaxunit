@@ -1,6 +1,6 @@
 <?php
 // ---------------------------------------------------------------------------
-// 								ajaxUnitUI
+// 		ajaxUnitUI
 // ---------------------------------------------------------------------------
 /**
  * @package	ajaxUnit
@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.4 - Now you can do parameter substitution in the test data
+ * @version	0.5 - Code tidy
  */
 class ajaxUnitUI implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------
@@ -30,11 +30,16 @@ class ajaxUnitUI implements ajaxUnitAPI {
 	public static /*.void.*/ function sendContent(/*.string.*/ &$content, /*.string.*/ $component, $contentType = '') {
 		// Send headers first
 		if (!headers_sent()) {
-			$package	= self::PACKAGE;
-			$component	= ($component === $package) ? $component : "$package-$component";
+			$package 	= self::PACKAGE;
+
+			$defaultType	= ($component	=== 'container')	? "text/html"	: "application/$package"; // Webkit oddity
+			$contentType	= ($contentType	=== '')			? $defaultType	: $contentType;
+			$component	= ($component	=== $package)		? $package	: "$package-$component";
+
+			header("Cache-Control: no-cache");
 			header("Package: $package");
 			header(self::componentHeader() . ": $component");
-			if ($contentType !== '') header("Content-type: $contentType");
+			header("Content-type: $contentType");
 		}
 
 		// Send content
@@ -52,20 +57,20 @@ class ajaxUnitUI implements ajaxUnitAPI {
 		$actionSuite	= self::ACTION_SUITE;
 		$actionDummy	= self::ACTION_DUMMY;
 		$package	= self::PACKAGE;
-		$folder		= ajaxUnit::TESTS_FOLDER;
-		$extension	= ajaxUnit::TESTS_EXTENSION;
+		$folder		= self::TESTS_FOLDER;
+		$extension	= self::TESTS_EXTENSION;
 		$suiteList	= "";
 
 		foreach (glob("$folder/*.$extension") as $filename) {
-			$suite		= basename($filename, '.' . ajaxUnit::TESTS_EXTENSION);
+			$suite		= basename($filename, '.' . self::TESTS_EXTENSION);
 			$document	= new DOMDocument();
 			$document->load($filename);
 
-			$suiteNode	= $document->getElementsByTagName("suite")->item(0);
-			$suiteName	= $suiteNode->getAttribute("name");
+			$suiteNode	= $document->getElementsByTagName(self::ACTION_SUITE)->item(0);
+			$suiteName	= $suiteNode->getAttribute(self::ATTRNAME_NAME);
+
 			$suiteList	.= <<<HTML
-				<input class="$package $package-radio" type="radio" name="$actionSuite" value="$suite" />
-				<p class="$package">$suiteName</p>
+				<input class="$package $package-radio" type="radio" name="$actionSuite" value="$suite" /> $suiteName<br />
 HTML;
 		}
 
@@ -84,9 +89,8 @@ $suiteList
 					type		=	"submit"
 					class		=	"$package-button $package-buttonstate-0"
 				/>
-				<div style="float:left;margin:14px 0 0 8px;">
-					<input class="$package $package-checkbox" type="checkbox" name = "$actionDummy" value="true" />
-					<p class="$package">Dummy run</p>
+				<div style="float:left;margin:9px 0 0 8px;">
+					<p style="margin:7px 0 0 3px;"><input class="$package $package-checkbox" type="checkbox" name = "$actionDummy" value="true" /> Dummy run</p>
 				</div>
 			</fieldset>
 		</form>
@@ -117,6 +121,17 @@ HTML;
 		$actionCSS		= self::ACTION_CSS;
 		$actionParse		= self::ACTION_PARSE;
 
+		$tagCheckbox		= self::TAGNAME_CHECKBOX;
+		$tagClick		= self::TAGNAME_CLICK;
+		$tagFormFill		= self::TAGNAME_FORMFILL;
+		$tagOpen		= self::TAGNAME_OPEN;
+		$tagLocation		= self::TAGNAME_LOCATION;
+		$tagRadio		= self::TAGNAME_RADIO;
+		$tagText		= self::TAGNAME_TEXT;
+
+		$attrID			= self::ATTRNAME_ID;
+		$attrURL		= self::ATTRNAME_URL;
+
 		eval('$js = "' . file_get_contents("$package.js") . "\";");
 		return $js;
 	}
@@ -125,10 +140,11 @@ HTML;
 
 // ---------------------------------------------------------------------------
 	private static /*.string.*/ function htmlAddScript() {
-		$package		= self::PACKAGE;
+//		$package		= self::PACKAGE;
 		$actionJavascript	= self::ACTION_JAVASCRIPT;
 		$URL			= self::thisURL();
 
+/* This doesn't work in Webkit
 		return <<<HTML
 	<script type="text/javascript">
 		if (typeof C_{$package} === 'undefined') {
@@ -137,6 +153,13 @@ HTML;
 			{$package}_node.src	= '$URL?$actionJavascript';
 			document.getElementsByTagName('head')[0].appendChild({$package}_node);
 		}
+	</script>
+HTML;
+*/
+
+		return <<<HTML
+	<script type="text/javascript">
+		document.write(unescape('%3Cscript src="$URL?$actionJavascript" type="text/javascript"%3E%3C/script%3E'));
 	</script>
 HTML;
 	}

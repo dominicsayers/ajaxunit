@@ -4,7 +4,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.4 - More test parameters added
+ * @version	0.5 - Code tidy
  */
 /*global window, document, event, ActiveXObject */ // For JSLint
 var oAjaxUnit;
@@ -16,34 +16,16 @@ var oAjaxUnit;
 // ---------------------------------------------------------------------------
 function C_ajaxUnit() {
 // ---------------------------------------------------------------------------
-	this.setFocus = function () {
-		var textBox = document.getElementById('$package-suite');
+	this.fillContainer = function (id, html) {
+		var container = document.getElementById(id);
 
-		if (textBox !== null) {
-			if (textBox.disabled !== 'disabled') {
-				textBox.focus();
-				textBox.select();
-			}
-		}
-	};
-
-// ---------------------------------------------------------------------------
-	this.replaceHTML = function (id, html) {
-		var newElement, originalElement;
-
-		originalElement = document.getElementById(id);
-
-		if (originalElement === null) {
+		if (container === null || typeof(container) === 'undefined') {
 			return;
 		}
 
-		if (typeof(originalElement) === 'undefined') {
-			return;
-		}
-
-		newElement = originalElement.cloneNode(false);
-		newElement.innerHTML = html;
-		originalElement.parentNode.replaceChild(newElement, originalElement);
+// IE6		container.class		= id;
+		container.className	= id;
+		container.innerHTML	= html;
 	};
 
 // ---------------------------------------------------------------------------
@@ -102,8 +84,7 @@ function C_ajaxUnit() {
 					document.getElementsByTagName('head')[0].appendChild(ajaxUnit_node);
 				}
 
-				that.replaceHTML(id, ajax.responseText);
-				that.setFocus(id);
+				that.fillContainer(id, ajax.responseText);
 				break;
 			case '$package-$actionParse':
 				if (ajax.responseXML === null) {
@@ -118,30 +99,34 @@ function C_ajaxUnit() {
 
 					if (step.nodeType === window.Node.ELEMENT_NODE) {
 						switch (step.nodeName) {
-						case 'open':
-							window.open(step.getAttribute('url'));
+						case '$tagLocation':
+							var url = step.getAttribute('$attrURL')
+							window.location.assign(url);
 							break;
-						case 'click':
-							controlId = step.getAttribute('id');
+						case '$tagOpen':
+							window.open(step.getAttribute('$attrURL'));
+							break;
+						case '$tagClick':
+							controlId = step.getAttribute('$attrID');
 							document.getElementById(controlId).click();
 							break;
-						case 'formfill':
+						case '$tagFormFill':
 							var j, controlNode, control, controlType, controlValue, controlList = step.childNodes;
 
 							for (j = 0; j < controlList.length; j++) {
 								controlNode	= controlList[j];
 
 								if (controlNode.nodeType === window.Node.ELEMENT_NODE) {
-									controlId	= controlNode.getAttribute('id');
+									controlId	= controlNode.getAttribute('$attrID');
 									control		= document.getElementById(controlId);
 									controlType	= controlNode.nodeName;
 									controlValue	= controlNode.textContent;
 	
 									switch (controlType) {
-										case 'checkbox':
+										case '$tagCheckbox':
 											control.checked = (controlValue === 'checked') ? true : false;
 											break;
-										case 'radio':
+										case '$tagRadio':
 											control.checked = (controlValue === 'checked') ? true : false;
 											break;
 										default:

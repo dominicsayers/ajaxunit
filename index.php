@@ -3,13 +3,14 @@
 
 <head>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+	<link rel="shortcut icon" href="ajaxUnit.ico" />
 	<title>ajaxUnit - run tests</title>
 </head>
 
 <body>
 <?php
 	require_once 'ajaxUnit.php';
-	ajaxUnitUI::getContainer(ajaxUnitAPI::ACTION_CONTROL);
+	ajaxUnitUI::getContainer(ajaxUnitUI::ACTION_CONTROL);
 ?>
 </body>
 
