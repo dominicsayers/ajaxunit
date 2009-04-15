@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.5 - Code tidy
+ * @version	0.7 - Now logs actions performed on each page
  */
 interface ajaxUnitAPI {
 	/*.public.*/	const	PACKAGE			= 'ajaxUnit',
@@ -28,7 +28,7 @@ interface ajaxUnitAPI {
 				TAGNAME_COOKIES		= 'cookies',
 				TAGNAME_COPY		= 'copy',
 				TAGNAME_DELETE		= 'delete',
-				TAGNAME_DOCROOT		= 'documentRoot',
+				TAGNAME_WEBROOT		= 'webRoot',
 				TAGNAME_EXPECTINGCOUNT	= 'expectingCount',
 				TAGNAME_FILE		= 'file',
 				TAGNAME_FORMFILL	= 'formfill',
@@ -51,6 +51,7 @@ interface ajaxUnitAPI {
 				TAGNAME_SUITE		= 'suite',
 				TAGNAME_TEST		= 'test',
 				TAGNAME_TESTSFOLDER	= 'testsFolder',
+				TAGNAME_TESTPATH	= 'testPath',
 				TAGNAME_TESTROOT	= 'testRoot',
 				TAGNAME_TEXT		= 'text',
 				TAGNAME_UID		= 'uid',

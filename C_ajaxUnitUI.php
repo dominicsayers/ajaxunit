@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.5 - Code tidy
+ * @version	0.7 - Now logs actions performed on each page
  */
 class ajaxUnitUI implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------
@@ -27,7 +27,7 @@ class ajaxUnitUI implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------
 	private static /*.string.*/ function componentHeader() {return self::PACKAGE . "-component";}
 
-	public static /*.void.*/ function sendContent(/*.string.*/ &$content, /*.string.*/ $component, $contentType = '') {
+	public static /*.void.*/ function sendContent(/*.string.*/ $content, /*.string.*/ $component, $contentType = '') {
 		// Send headers first
 		if (!headers_sent()) {
 			$package 	= self::PACKAGE;
@@ -36,10 +36,12 @@ class ajaxUnitUI implements ajaxUnitAPI {
 			$contentType	= ($contentType	=== '')			? $defaultType	: $contentType;
 			$component	= ($component	=== $package)		? $package	: "$package-$component";
 
-			header("Cache-Control: no-cache");
+			header("Cache-Control: no-cache");	// Damn fool Internet Explorer caching feature
+			header("Expires: -1");			// Ditto
+			header("Pragma: no-cache");		// Ditto
+			header("Content-type: $contentType");
 			header("Package: $package");
 			header(self::componentHeader() . ": $component");
-			header("Content-type: $contentType");
 		}
 
 		// Send content
@@ -100,7 +102,10 @@ HTML;
 		return $html;
 	}
 
-	public static /*.void.*/ function getControlPanel() {self::sendContent(self::htmlControlPanel(), self::PACKAGE);}
+	public static /*.void.*/ function getControlPanel() {
+		$html = self::htmlControlPanel();
+		self::sendContent($html, self::PACKAGE);
+	}
 
 // ---------------------------------------------------------------------------
 	private static /*.string.*/ function htmlCSS() {
@@ -110,7 +115,10 @@ HTML;
 		return $css;
 	}
 
-	public static /*.void.*/ function getCSS() {self::sendContent(self::htmlCSS(), 'CSS', 'text/css');}
+	public static /*.void.*/ function getCSS() {
+		$html = self::htmlCSS();
+		self::sendContent($html, 'CSS', 'text/css');
+	}
 
 // ---------------------------------------------------------------------------
 	private static /*.string.*/ function htmlJavascript() {
@@ -136,7 +144,10 @@ HTML;
 		return $js;
 	}
 
-	public static /*.void.*/ function getJavascript() {self::sendContent(self::htmlJavascript(), 'Javascript', 'text/javascript');}
+	public static /*.void.*/ function getJavascript() {
+		$html = self::htmlJavascript();
+		self::sendContent($html, 'Javascript', 'text/javascript');	
+	}
 
 // ---------------------------------------------------------------------------
 	private static /*.string.*/ function htmlAddScript() {
@@ -164,7 +175,10 @@ HTML;
 HTML;
 	}
 
-	public static /*.void.*/ function addScript() {self::sendContent(self::htmlAddScript(), 'addScript');}
+	public static /*.void.*/ function addScript() {
+		$html = self::htmlAddScript();
+		self::sendContent($html, 'addScript');
+	}
 
 // ---------------------------------------------------------------------------
 	private static /*.string.*/ function htmlContainer($action = self::ACTION_PARSE) {
@@ -175,11 +189,14 @@ HTML;
 		return <<<HTML
 	<div id="$divId"></div>
 $addScript
-	<script type="text/javascript">oAjaxUnit.execute('$action');</script>
+	<script type="text/javascript">var obj = new C_ajaxUnit; obj.execute('$action');</script>
 HTML;
 	}
 
-	public static /*.void.*/ function getContainer($action = self::ACTION_PARSE) {self::sendContent(self::htmlContainer($action), 'container');}
+	public static /*.void.*/ function getContainer($action = self::ACTION_PARSE) {
+		$html = self::htmlContainer($action);
+		self::sendContent($html, 'container');
+	}
 
 // ---------------------------------------------------------------------------
 	private	static /*.string.*/	function htmlAbout()	{
@@ -192,10 +209,17 @@ HTML;
 		return $html;
 	}
 
-	public	static /*.void.*/	function getAbout()		{self::sendContent(self::htmlAbout(), 'about');}
+	public	static /*.void.*/	function getAbout()		{
+		$html = self::htmlAbout();
+		self::sendContent($html, 'about');
+	}
 
 	private	static /*.string.*/	function htmlSourceCode()	{return (string) highlight_file(__FILE__, 1);}
-	public	static /*.void.*/	function getSourceCode()	{self::sendContent(self::htmlSourceCode(), 'sourceCode');}
+
+	public	static /*.void.*/	function getSourceCode()	{
+		$html = self::htmlSourceCode();
+		self::sendContent($html, 'sourceCode');
+	}
 
 // ---------------------------------------------------------------------------
 	public static /*.string.*/ function htmlPageTop() {
@@ -235,8 +259,15 @@ HTML;
 HTML;
 	}
 
-	public	static /*.void.*/ function getPageTop()		{self::sendContent(self::htmlPageTop(),		self::PACKAGE);}
-	public	static /*.void.*/ function getPageBottom()	{self::sendContent(self::htmlPageBottom(),	self::PACKAGE);}
+	public	static /*.void.*/ function getPageTop() {
+		$html = self::htmlPageTop();
+		self::sendContent($html, self::PACKAGE);
+	}
+
+	public	static /*.void.*/ function getPageBottom() {
+		$html = self::htmlPageBottom();
+		self::sendContent($html, self::PACKAGE);
+	}
 }
 // End of class ajaxUnit
 ?>

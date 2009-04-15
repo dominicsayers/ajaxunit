@@ -4,11 +4,11 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.5 - Code tidy
+ * @version	0.7 - Now logs actions performed on each page
  */
 @charset "UTF-8";
 
-.dummy {} /* Webkit is ignoring the first item  so we'll put a dummy one in */
+.dummy {} /* Webkit is ignoring the first item so we'll put a dummy one in */
 
 div.$package-testlog	{display:none;}
 
@@ -17,13 +17,7 @@ div#$package {
 	font-size:11px;
 	line-height:16px;
 	float:left;
-}
-
-div#$package-parseTest {
-	font-family:"Segoe UI", Calibri, Arial, Helvetica, "sans serif";
-	font-size:11px;
-	line-height:100%;
-	float:left;
+	margin:0;
 }
 
 form.$package-form		{margin:0;}
@@ -41,9 +35,6 @@ input.$package-button {
 
 input.$package-buttonstate-0 {background-color:#FFFFFF;color:#444444;border-color:#666666 #333333 #333333 #666666;}
 
-
-span.$package-testlog {
-	font-weight:bold;
-	font-size:16px;
-	cursor:pointer;
-}
+span.$package-testlog	{font-weight:bold;font-size:16px;cursor:pointer;}
+p.$package-testlog	{margin:inherit;}
+pre.$package-testlog	{margin:inherit;background-color:#F0F0F0;display:none;}

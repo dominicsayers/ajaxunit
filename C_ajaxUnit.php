@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.5 - Code tidy
+ * @version	0.7 - Now logs actions performed on each page
  */
 
 /*.
@@ -92,7 +92,7 @@ class ajaxUnit implements ajaxUnitAPI {
 	}
 
 	private static /*.void.*/ function setInitialContext(/*.DOMElement.*/ &$test, /*.int.*/ $testIndex, $dummyRun = false) {
-		// Build a string contianing a list of expected responses (1234...n) according to <results> child nodes
+		// Build a string containing a list of expected responses (1234...n) according to <results> child nodes
 		$resultsList	= $test->getElementsByTagName(self::TAGNAME_RESULT);	// Get the expected results
 		$expected = $resultsList->length;
 		$responseList = '';
@@ -115,12 +115,15 @@ class ajaxUnit implements ajaxUnitAPI {
 	}
 
 	private static /*.void.*/ function appendLog(/*.string.*/ $text, $dummyRun = false, $textIndent = 4, $tag = 'p', $htmlIndent = 4) {
-		$marginLeft = ($textIndent === 0) ? '' : " style=\"margin-left:{$textIndent}em\"";
+		$package	= self::PACKAGE;
+		$marginLeft	= ($textIndent === 0) ? '' : " style=\"margin-left:{$textIndent}em\"";
 
 		if ($tag === 'p') {
-			$openTag = "<p$marginLeft>"	; $closeTag = '</p>';
+			$openTag	= "<p$marginLeft class=\"$package-testlog\">";
+			$closeTag	= '</p>';
 		} else {
-			$openTag = ''			; $closeTag = '';
+			$openTag	= '';
+			$closeTag	= '';
 		}
 
 		$html = str_pad('', $htmlIndent, "\t") . "$openTag$text$closeTag\n";
@@ -175,6 +178,38 @@ class ajaxUnit implements ajaxUnitAPI {
 		return eval('return "' . addslashes($text) . '";');
 	}
 
+	private static /*.void.*/ function investigateDifference(/*.string.*/ $results, /*.string.*/ $expected, /*.string.*/ $unique, $dummyRun = false) {
+		$package	= self::PACKAGE;
+		$context	= self::getTestContext();
+		$diffID		= $package . '-diff-' . $context[self::TAGNAME_INDEX] . '-' . $context[self::TAGNAME_RESPONSECOUNT] . '-' . $unique;
+
+		$resultsMetric	= strlen($results);
+		$expectedMetric	= strlen($expected);
+		$analysis	= "Response has $resultsMetric characters, expected response has $expectedMetric<br />\n";
+
+		$resultsMetric	= str_word_count($results);
+		$expectedMetric	= str_word_count($expected);
+		$analysis	.= "\t\t\t\tResponse has $resultsMetric words, expected response has $expectedMetric<br />\n";
+
+		$percentage	= 0;
+		$metric		= similar_text($results, $expected, $percentage);
+		$percentage	= number_format($percentage, 2);
+		$analysis	.= "\t\t\t\tText similarity: $metric characters ($percentage%)";
+
+		self::appendLog($analysis, $dummyRun, 6);
+
+		// If we happen to have PEAR Text_Diff available then use it
+		@include_once 'Text/Diff.php';
+		@include_once 'Text/Diff/Renderer.php';
+
+		if (class_exists('Text_Diff') && class_exists('Text_Diff_Renderer')) {
+			$diff		= new Text_Diff(explode("\r\n", $results), explode("\r\n", $expected));
+			$renderer	= new Text_Diff_Renderer();
+			$diffText	= htmlspecialchars($renderer->render($diff));
+			self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$diffID')\">+</span> Diff results", $dummyRun, 6);
+			self::appendLog("<pre class=\"$package-testlog\" id=\"$diffID\">$diffText</pre>", $dummyRun, 8, '');
+		}
+	}
 // ---------------------------------------------------------------------------
 // Actions
 // ---------------------------------------------------------------------------
@@ -351,11 +386,13 @@ class ajaxUnit implements ajaxUnitAPI {
 					self::appendLog("Test data set #$indexText has already been matched with a previous result", $dummyRun, 6);
 				} else {
 					self::appendLog("Comparing result with test data set #$indexText...", $dummyRun, 6);
+					$results	= htmlspecialchars_decode($results);
+					$expected	= htmlspecialchars_decode($node->nodeValue);
 
 					if ($dummyRun) {
 						$success = true;
 					} else {
-						$success = (htmlspecialchars_decode($results) === htmlspecialchars_decode($node->nodeValue)) ? true : false;
+						$success = ($results === $expected) ? true : false; // This is the whole point of all this!
 					}
 	
 					if ($success) {
@@ -365,14 +402,8 @@ class ajaxUnit implements ajaxUnitAPI {
 						$responseList	= substr($responseList, 0, $indexPos) . substr($responseList, $indexPos + 1);
 						self::setTestContext(self::TAGNAME_RESPONSELIST, $responseList);
 						break;
-/* debug
-} else {
-$str1 = htmlspecialchars_decode($results);
-$str2 = htmlspecialchars_decode($node->nodeValue);
-self::appendLog(strlen($str1) . "|" . strlen($str2) . "|" . strcmp($str1, $str2), $dummyRun, 8);
-self::appendLog("[$str1]", $dummyRun, 8);
-self::appendLog("[$str2]", $dummyRun, 8);
-*/
+					} else {
+						self::investigateDifference($results, $expected, (string) $i, $dummyRun);
 					}
 				}
 			}
@@ -396,7 +427,6 @@ self::appendLog("[$str2]", $dummyRun, 8);
 
 					if (!$dummyRun) {
 						session_start();
-						session_unset();
 						session_destroy();
 						$_SESSION = array();
 					}
@@ -467,20 +497,15 @@ self::appendLog("[$str2]", $dummyRun, 8);
 // 	runTestSuite - called to initiate a named series of tests
 // ---------------------------------------------------------------------------
 	public static /*.void.*/ function runTestSuite(/*.string.*/ $suite, $dummyRun = false) {
+		$context	= /*.(array[string]string).*/ array();
 		$testRoot	= dirname(__FILE__);
-		$isWindows	= (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN');
-		$posLastDelim	= strrpos($testRoot, ($isWindows) ? '\\' : '/');
-		$documentRoot	= $_SERVER['SCRIPT_FILENAME'];
-		$documentRoot	= realpath(substr($documentRoot, 0, strpos($documentRoot, $_SERVER['SCRIPT_NAME'])));
 	
-		$context = /*.(array[string]string).*/ array();
-		$context[self::TAGNAME_UID]		= date('YmdHis');
+		$context[self::TAGNAME_UID]		= gmdate('YmdHis');
 		$context[self::TAGNAME_SUITE]		= $suite;
 		$context[self::TAGNAME_STATUS]		= self::STATUS_INPROGRESS;
 		$context[self::TAGNAME_TESTSFOLDER]	= self::TESTS_FOLDER;
 		$context[self::TAGNAME_TESTROOT]	= $testRoot;
-		$context[self::TAGNAME_DOCROOT]		= $documentRoot;
-		
+
 		self::setTestContext($context);
 
 		$document	= self::getDOMDocument($suite);
@@ -503,6 +528,16 @@ self::appendLog("[$str2]", $dummyRun, 8);
 				if ($parameter->nodeType === XML_ELEMENT_NODE) $context[$parameter->nodeName] = $parameter->nodeValue;
 			}
 		}		
+
+		if (isset($context[self::TAGNAME_TESTPATH])) {
+			$scriptDir	= dirname($_SERVER['SCRIPT_FILENAME']);
+			$webRoot	= substr($scriptDir, 0 , strpos($scriptDir, $context[self::TAGNAME_TESTPATH]) - 1);
+		} else {
+			$context[self::TAGNAME_TESTPATH] = '';
+			$webRoot	= $_SERVER['DOCUMENT_ROOT'];
+		}
+
+		$context[self::TAGNAME_WEBROOT] = $webRoot;
 
 		self::setTestContext($context);
 		self::logTestContext($dummyRun);
@@ -632,8 +667,8 @@ self::appendLog("[$str2]", $dummyRun, 8);
 			self::logResult($success, $dummyRun);
 	
 			if (!$success) {
-				self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
 				self::tidyUp($dummyRun);
+				self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
 				return;
 			}
 		}
