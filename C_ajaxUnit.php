@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.7 - Now logs actions performed on each page
+ * @version	0.8 - New action 'post' uploads arbitrary HTML element as result
  */
 
 /*.
@@ -28,7 +28,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		self::makeFolder(self::TESTS_FOLDER);
 		return self::TESTS_FOLDER . "/$suite." . self::TESTS_EXTENSION;
 	}
-	
+
 	private static /*.DOMDocument.*/ function getDOMDocument(/*.string.*/ $suite) {
 		$document = new DOMDocument();
 		$document->load(self::getSuiteFilename($suite));
@@ -206,9 +206,12 @@ class ajaxUnit implements ajaxUnitAPI {
 			$diff		= new Text_Diff(explode("\r\n", $results), explode("\r\n", $expected));
 			$renderer	= new Text_Diff_Renderer();
 			$diffText	= htmlspecialchars($renderer->render($diff));
-			self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$diffID')\">+</span> Diff results", $dummyRun, 6);
-			self::appendLog("<pre class=\"$package-testlog\" id=\"$diffID\">$diffText</pre>", $dummyRun, 8, '');
+		} else {
+			$diffText	= "Results:\n" . htmlspecialchars($results) . "\nExpected:\n" . htmlspecialchars($expected);
 		}
+
+		self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$diffID')\">+</span> Actual results compared with expected results", $dummyRun, 6);
+		self::appendLog("<pre class=\"$package-testlog\" id=\"$diffID\">$diffText</pre>", $dummyRun, 8, '');
 	}
 // ---------------------------------------------------------------------------
 // Actions
@@ -289,7 +292,7 @@ class ajaxUnit implements ajaxUnitAPI {
 			if ($node->nodeType === XML_ELEMENT_NODE) {
 				$type	= $node->nodeName;
 				$value	= self::substituteParameters($node->nodeValue);
-				$id	= $node->getAttribute(self::ATTRNAME_ID);				
+				$id	= $node->getAttribute(self::ATTRNAME_ID);
 
 				self::appendLog("Setting $type control <strong>$id</strong> to <em>$value</em>", $dummyRun);
 			}
@@ -365,6 +368,12 @@ class ajaxUnit implements ajaxUnitAPI {
 		return true;
 	}
 
+	private static /*.boolean.*/ function doPost(/*.DOMElement.*/ $element, $dummyRun = false) {
+		$id = $element->getAttribute(self::ATTRNAME_ID);
+		self::appendLog("Posting contents of element <strong>$id</strong>", $dummyRun, 2);
+		return true;
+	}
+
 	private static /*.boolean.*/ function doResults(/*.DOMNodeList.*/ $nodeList, /*.string.*/ &$results, $dummyRun = false) {
 		self::appendLog("Compare actual results with expected", $dummyRun);
 
@@ -388,13 +397,14 @@ class ajaxUnit implements ajaxUnitAPI {
 					self::appendLog("Comparing result with test data set #$indexText...", $dummyRun, 6);
 					$results	= htmlspecialchars_decode($results);
 					$expected	= htmlspecialchars_decode($node->nodeValue);
+					if (get_magic_quotes_gpc()) $expected = addslashes($expected);	// magic_quotes_gpc will go away soon, but for now
 
 					if ($dummyRun) {
 						$success = true;
 					} else {
 						$success = ($results === $expected) ? true : false; // This is the whole point of all this!
 					}
-	
+
 					if ($success) {
 						self::appendLog("Match with test data set #$indexText", $dummyRun, 6);
 						// Remove this results set from the list of responses we are expecting
@@ -469,6 +479,7 @@ class ajaxUnit implements ajaxUnitAPI {
 					case self::TAGNAME_HEADERS:	$success = self::doHeaders	($stepList,	$dummyRun);					break;
 					case self::TAGNAME_INCLUDEPATH:	$success = self::doIncludePath	($stepList,	$dummyRun);					break;
 					case self::TAGNAME_LOCATION:	$success = self::doLocation	($step,		$dummyRun);	$sendToBrowser = !$dummyRun;	break;
+					case self::TAGNAME_POST:	$success = self::doPost		($step,		$dummyRun);	$sendToBrowser = !$dummyRun;	break;
 					case self::TAGNAME_SESSION:	$success = self::doSession	($stepList,	$dummyRun);					break;
 					case self::TAGNAME_RESULTS:	if (!$dummyRun) $test->removeChild($step);
 				}
@@ -499,7 +510,7 @@ class ajaxUnit implements ajaxUnitAPI {
 	public static /*.void.*/ function runTestSuite(/*.string.*/ $suite, $dummyRun = false) {
 		$context	= /*.(array[string]string).*/ array();
 		$testRoot	= dirname(__FILE__);
-	
+
 		$context[self::TAGNAME_UID]		= gmdate('YmdHis');
 		$context[self::TAGNAME_SUITE]		= $suite;
 		$context[self::TAGNAME_STATUS]		= self::STATUS_INPROGRESS;
@@ -513,7 +524,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		$suiteNode 	= $document->getElementsByTagName(self::TAGNAME_SUITE)->item(0);
 		$suiteName	= htmlspecialchars($suiteNode->getAttribute(self::ATTRNAME_NAME));
 		$suiteVersion	= $suiteNode->getAttribute("version");
-		
+
 		self::appendLog(ajaxUnitUI::htmlPageTop(), $dummyRun, 0, '', 0);
 		self::appendLog("<h3>$text run of test suite \"$suiteName\" version $suiteVersion</h3>", $dummyRun, 0, '', 3);
 		self::appendLog("<hr />", $dummyRun, 0, '', 3);
@@ -527,7 +538,7 @@ class ajaxUnit implements ajaxUnitAPI {
 				$parameter = $node->childNodes->item($i);
 				if ($parameter->nodeType === XML_ELEMENT_NODE) $context[$parameter->nodeName] = $parameter->nodeValue;
 			}
-		}		
+		}
 
 		if (isset($context[self::TAGNAME_TESTPATH])) {
 			$scriptDir	= dirname($_SERVER['SCRIPT_FILENAME']);
@@ -605,51 +616,51 @@ class ajaxUnit implements ajaxUnitAPI {
 
 		if ($expected < 1) {
 			self::appendLog("No responses expected", $dummyRun);
-			$success = true;			
+			$success = true;
 			self::logResult($success, $dummyRun);
 		} else {
 			// Check response count is (a) valid and (b) all we are expecting on this page
 			if (!isset($context[self::TAGNAME_RESPONSECOUNT])) {
-				self::appendLog("<strong>No response count set!</strong>", $dummyRun);			
+				self::appendLog("<strong>No response count set!</strong>", $dummyRun);
 				exit; // Invalid response count
 			}
 
 			$responseCount = (int) $context[self::TAGNAME_RESPONSECOUNT];
 
 			if (++$responseCount < 1) {
-				self::appendLog("<strong>Response count hasn't been set correctly! ($responseCount)</strong>", $dummyRun);			
+				self::appendLog("<strong>Response count hasn't been set correctly! ($responseCount)</strong>", $dummyRun);
 				exit; // Invalid response count
 			} else {
 				self::setTestContext(self::TAGNAME_RESPONSECOUNT, (string) $responseCount);
 			}
 
-			self::appendLog("Response count is $responseCount (expecting $expected).", $dummyRun);			
+			self::appendLog("Response count is $responseCount (expecting $expected).", $dummyRun);
 
 			// Compare the results to the expected results
 			$resultsNode = $test->getElementsByTagName(self::TAGNAME_RESULTS)->item(0);
-	
+
 			if ($resultsNode->hasAttribute(self::ATTRNAME_UPDATE)) {
 				// Use these as model results
-				self::appendLog("Using these as model results", $dummyRun);			
+				self::appendLog("Using these as model results", $dummyRun);
 				$updateStatus = $resultsNode->getAttribute(self::ATTRNAME_UPDATE);
-	
+
 				if ($updateStatus !== self::STATUS_INPROGRESS) {
-					self::appendLog("Clearing existing model results", $dummyRun, 6);			
+					self::appendLog("Clearing existing model results", $dummyRun, 6);
 					// Clear away the children & set the status
 					while ($resultsNode->hasChildNodes()) $resultsNode->removeChild($resultsNode->lastChild);
 					$resultsNode->setAttribute(self::ATTRNAME_UPDATE, self::STATUS_INPROGRESS);
 				}
-	
-				self::appendLog("Adding this result", $dummyRun, 6);			
+
+				self::appendLog("Adding this result", $dummyRun, 6);
 				$resultsNode->appendChild(new DOMElement(self::TAGNAME_RESULT, $_POST['responseText']));	// Add model result
-	
+
 				if ($responseCount >= $expected) {
-					self::appendLog("No more results expected", $dummyRun, 6);			
+					self::appendLog("No more results expected", $dummyRun, 6);
 					$resultsNode->removeAttribute(self::ATTRNAME_UPDATE);
 				}
-	
+
 				// Write out the test suite
-				self::appendLog("Updating test suite", $dummyRun, 6);			
+				self::appendLog("Updating test suite", $dummyRun, 6);
 				if (!$dummyRun) self::updateTestSuite($suite, $document);
 				$success = true;
 			} else {
@@ -657,15 +668,15 @@ class ajaxUnit implements ajaxUnitAPI {
 				$results	= ($dummyRun) ? '' : $_POST['responseText'];
 				$success	= self::doResults($resultsNode->childNodes, $results, $dummyRun);	// Is it the same?
 			}
-	
+
 			if (!$dummyRun && ($responseCount < $expected)) {
-				self::appendLog("Waiting for further responses from browser", $dummyRun, 2);			
+				self::appendLog("Waiting for further responses from browser", $dummyRun, 2);
 				self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
 				exit;
 			}
-	
+
 			self::logResult($success, $dummyRun);
-	
+
 			if (!$success) {
 				self::tidyUp($dummyRun);
 				self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
@@ -685,7 +696,7 @@ class ajaxUnit implements ajaxUnitAPI {
 			$success = self::initiateTest($document, $test, $testIndex, $dummyRun);
 		} else {
 			// No more tests
-			self::appendLog("No more tests found", $dummyRun, 'p', 0, 2);			
+			self::appendLog("No more tests found", $dummyRun, 'p', 0, 2);
 			self::setTestContext(self::TAGNAME_STATUS, self::STATUS_FINISHED);
 			self::tidyUp($dummyRun);
 		}

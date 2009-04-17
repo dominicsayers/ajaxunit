@@ -9,7 +9,8 @@
 			<headers>
 				<Location>$testsFolder/$suite-about.html</Location>
 			</headers>
-			<results><result>&lt;pre&gt;
+			<results>
+				<result>&lt;pre&gt;
     package	ezUser&#13;
     author	Dominic Sayers &lt;dominic_sayers@hotmail.com&gt;&#13;
     copyright	2009 Dominic Sayers&#13;
@@ -18,7 +19,8 @@
     version	(development code)&#13;
 &lt;hr /&gt;
 &lt;/pre&gt;
-</result></results>
+</result>
+			</results>
 		</test>
 		<test name="Setup">
 			<include_path>
@@ -40,7 +42,8 @@
 		</test>
 		<test name="Home page">
 			<location url="$suite-example.html"/>
-			<results><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			<results>
+				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
 			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
 				&lt;input id= "ezUser-username"&#13;
 					tabindex	=	"1"&#13;
@@ -117,7 +120,8 @@
 					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
 				/&gt;&#13;
 			&lt;/fieldset&gt;&#13;
-		&lt;/form&gt;</result></results>
+		&lt;/form&gt;</result>
+			</results>
 		</test>
 		<test name="Go to registration page">
 			<click id="ezUser-goaccount"/>
@@ -273,6 +277,102 @@
 				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;/div&gt;&#13;
 				&lt;input id="ezUser-account-new" type="hidden" value="true" /&gt;&#13;
 			&lt;/fieldset&gt;&#13;
+		&lt;/form&gt;</result>
+			</results>
+		</test>
+		<test name="Register new account - no email address">
+			<formfill>
+				<text id="ezUser-account-email"/>
+				<text id="ezUser-account-firstName">First</text>
+				<text id="ezUser-account-lastName">Last</text>
+				<text id="ezUser-account-username">FirstLast</text>
+				<text id="ezUser-account-password">password</text>
+				<text id="ezUser-account-confirm">password</text>
+			</formfill>
+			<click id="ezUser-account-validate"/>
+			<results><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;input id= "ezUser-account-email"&#13;
+					tabindex	=	"1"&#13;
+					value		=	""&#13;
+					type		=	"text"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-firstName"&#13;
+					tabindex	=	"2"&#13;
+					value		=	"First"&#13;
+					type		=	"text"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-firstName"&gt;First name:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-lastName"&#13;
+					tabindex	=	"3"&#13;
+					value		=	"Last"&#13;
+					type		=	"text"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-username"&#13;
+					tabindex	=	"4"&#13;
+					value		=	"FirstLast"&#13;
+					type		=	"text"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-password"&#13;
+					tabindex	=	"5"&#13;
+					value		=	"************"&#13;
+					type		=	"password"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-confirm"&#13;
+					tabindex	=	"6"&#13;
+					value		=	"************"&#13;
+					type		=	"password"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;div id="ezUser-account-message" class="ezUser-message ezUser-message-plain" onclick="ezUser_click(this)"&gt;* = mandatory field&lt;/div&gt;&#13;
+				&lt;input id="ezUser-account-validate" value="OK"&#13;
+					tabindex	=	"7"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-account-cancel" value="Cancel"&#13;
+					tabindex	=	"8"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;div id="ezUser-account-text" class="ezUser-text ezUser-message-fail" onclick="ezUser_click(this)"&gt;Please provide an email address&lt;/div&gt;&#13;
+				&lt;input id="ezUser-account-new" type="hidden" value="true" /&gt;&#13;
+			&lt;/fieldset&gt;&#13;
 		&lt;/form&gt;</result></results>
 		</test>
 		<test name="Register new account - fail validation on email address">
@@ -285,7 +385,8 @@
 				<text id="ezUser-account-confirm">password</text>
 			</formfill>
 			<click id="ezUser-account-validate"/>
-			<results><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			<results>
+				<result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
 			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
 				&lt;input id= "ezUser-account-email"&#13;
 					tabindex	=	"1"&#13;
@@ -370,14 +471,14 @@
 			&lt;/fieldset&gt;&#13;
 		&lt;/form&gt;</result></results>
 		</test>
-		<test name="Register new account">
+		<test name="Register new account - no password">
 			<formfill>
 				<text id="ezUser-account-email">first.last@example.com</text>
 				<text id="ezUser-account-firstName">First</text>
 				<text id="ezUser-account-lastName">Last</text>
 				<text id="ezUser-account-username">FirstLast</text>
-				<text id="ezUser-account-password">password</text>
-				<text id="ezUser-account-confirm">password</text>
+				<text id="ezUser-account-password"/>
+				<text id="ezUser-account-confirm"/>
 			</formfill>
 			<click id="ezUser-account-validate"/>
 			<results><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
@@ -386,7 +487,6 @@
 					tabindex	=	"1"&#13;
 					value		=	"first.last@example.com"&#13;
 					type		=	"text"&#13;
-					disabled	=	"disabled"&#13;
 					class		=	"ezUser-text"&#13;
 					onkeypress	=	"ezUser_keyPress(event)"&#13;
 					size		=	"40"&#13;
@@ -396,7 +496,6 @@
 					tabindex	=	"2"&#13;
 					value		=	"First"&#13;
 					type		=	"text"&#13;
-					disabled	=	"disabled"&#13;
 					class		=	"ezUser-text"&#13;
 					onkeypress	=	"ezUser_keyPress(event)"&#13;
 					size		=	"40"&#13;
@@ -406,7 +505,6 @@
 					tabindex	=	"3"&#13;
 					value		=	"Last"&#13;
 					type		=	"text"&#13;
-					disabled	=	"disabled"&#13;
 					class		=	"ezUser-text"&#13;
 					onkeypress	=	"ezUser_keyPress(event)"&#13;
 					size		=	"40"&#13;
@@ -415,6 +513,140 @@
 				&lt;input id= "ezUser-account-username"&#13;
 					tabindex	=	"4"&#13;
 					value		=	"FirstLast"&#13;
+					type		=	"text"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-password"&#13;
+					tabindex	=	"5"&#13;
+					value		=	""&#13;
+					type		=	"password"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-confirm"&#13;
+					tabindex	=	"6"&#13;
+					value		=	""&#13;
+					type		=	"password"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;div id="ezUser-account-message" class="ezUser-message ezUser-message-plain" onclick="ezUser_click(this)"&gt;* = mandatory field&lt;/div&gt;&#13;
+				&lt;input id="ezUser-account-validate" value="OK"&#13;
+					tabindex	=	"7"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
+				&lt;input id="ezUser-account-cancel" value="Cancel"&#13;
+					tabindex	=	"8"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;div id="ezUser-account-text" class="ezUser-text ezUser-message-fail" onclick="ezUser_click(this)"&gt;Password cannot be blank&lt;/div&gt;&#13;
+				&lt;input id="ezUser-account-new" type="hidden" value="true" /&gt;&#13;
+			&lt;/fieldset&gt;&#13;
+		&lt;/form&gt;</result></results>
+		</test>
+		<test name="Register new account - passwords different">
+			<formfill>
+				<text id="ezUser-account-email">first.last@example.com</text>
+				<text id="ezUser-account-firstName">First</text>
+				<text id="ezUser-account-lastName">Last</text>
+				<text id="ezUser-account-username">FirstLast</text>
+				<text id="ezUser-account-password">password</text>
+				<text id="ezUser-account-confirm">not password</text>
+			</formfill>
+			<click id="ezUser-account-validate"/>
+			<post id="ezUser-account"/>
+			<results><result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;form class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id="ezUser-account-email" tabindex="1" value="first.last@example.com" class="ezUser-text" onkeypress="ezUser_keyPress(event)" size="40" type="text"&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;
+				&lt;input id="ezUser-account-firstName" tabindex="2" value="First" class="ezUser-text" onkeypress="ezUser_keyPress(event)" size="40" type="text"&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-firstName"&gt;First name:&lt;/label&gt;
+				&lt;input id="ezUser-account-lastName" tabindex="3" value="Last" class="ezUser-text" onkeypress="ezUser_keyPress(event)" size="40" type="text"&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;
+				&lt;input id="ezUser-account-username" tabindex="4" value="FirstLast" class="ezUser-text" onkeypress="ezUser_keyPress(event)" size="40" type="text"&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
+				&lt;input id="ezUser-account-password" tabindex="5" value="" class="ezUser-text" onkeypress="ezUser_keyPress(event)" size="40" type="password"&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;
+				&lt;input id="ezUser-account-confirm" tabindex="6" value="" class="ezUser-text" onkeypress="ezUser_keyPress(event)" size="40" type="password"&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;
+			&lt;/fieldset&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;div id="ezUser-account-message" class="ezUser-message ezUser-message-plain" onclick="ezUser_click(this)"&gt;* = mandatory field&lt;/div&gt;
+				&lt;input id="ezUser-account-validate" value="OK" tabindex="7" class="ezUser-button ezUser-action ezUser-buttonstate-0" onclick="ezUser_click(this)" onmouseover="ezUser_setButtonState(this, 1, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onfocus="ezUser_setButtonState(this, 2, true)" onblur="ezUser_setButtonState(this, 2, false)" type="button"&gt;
+				&lt;input id="ezUser-account-cancel" value="Cancel" tabindex="8" class="ezUser-button ezUser-action ezUser-buttonstate-0" onclick="ezUser_click(this)" onmouseover="ezUser_setButtonState(this, 1, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onfocus="ezUser_setButtonState(this, 2, true)" onblur="ezUser_setButtonState(this, 2, false)" type="button"&gt;			&lt;/fieldset&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;div id="ezUser-account-text" class="ezUser-text ezUser-message-fail" onclick="ezUser_click(this)"&gt;Passwords are not the same&lt;/div&gt;
+				&lt;input id="ezUser-account-new" value="true" type="hidden"&gt;
+			&lt;/fieldset&gt;
+		&lt;/form&gt;&lt;/div&gt;</result></results>
+		</test>
+		<test name="Register new account">
+			<formfill>
+				<text id="ezUser-account-email">dominic_sayers@hotmail.com</text>
+				<text id="ezUser-account-firstName">Dominic</text>
+				<text id="ezUser-account-lastName">Sayers</text>
+				<text id="ezUser-account-username">dominicsayers</text>
+				<text id="ezUser-account-password">password</text>
+				<text id="ezUser-account-confirm">password</text>
+			</formfill>
+			<click id="ezUser-account-validate"/>
+			<results><result>		&lt;form class="ezUser-form" onsubmit="return false"&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
+				&lt;input id= "ezUser-account-email"&#13;
+					tabindex	=	"1"&#13;
+					value		=	"dominic_sayers@hotmail.com"&#13;
+					type		=	"text"&#13;
+					disabled	=	"disabled"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-firstName"&#13;
+					tabindex	=	"2"&#13;
+					value		=	"Dominic"&#13;
+					type		=	"text"&#13;
+					disabled	=	"disabled"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-firstName"&gt;First name:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-lastName"&#13;
+					tabindex	=	"3"&#13;
+					value		=	"Sayers"&#13;
+					type		=	"text"&#13;
+					disabled	=	"disabled"&#13;
+					class		=	"ezUser-text"&#13;
+					onkeypress	=	"ezUser_keyPress(event)"&#13;
+					size		=	"40"&#13;
+				/&gt;&#13;
+				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;&#13;
+				&lt;input id= "ezUser-account-username"&#13;
+					tabindex	=	"4"&#13;
+					value		=	"dominicsayers"&#13;
 					type		=	"text"&#13;
 					disabled	=	"disabled"&#13;
 					class		=	"ezUser-text"&#13;
@@ -444,7 +676,7 @@
 				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;&#13;
 			&lt;/fieldset&gt;&#13;
 			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;p class="ezUser-text"&gt;* = mandatory field&lt;/p&gt;&#13;
+				&lt;div id="ezUser-account-message" class="ezUser-message ezUser-message-plain" onclick="ezUser_click(this)"&gt;* = mandatory field&lt;/div&gt;&#13;
 				&lt;input id="ezUser-account-edit" value="Edit"&#13;
 					tabindex	=	"7"&#13;
 					type		=	"button"&#13;
@@ -457,11 +689,61 @@
 				/&gt;&#13;
 			&lt;/fieldset&gt;&#13;
 			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;div id="ezUser-account-message" class="ezUser-message ezUser-message-text" onclick="ezUser_click(this)"&gt;Your account has been created and a confirmation email has been sent. Please click on the link in the confirmation email to verify your account. If you haven't received the confirmation email then &lt;a href=""&gt;click here&lt;/a&gt; to resend it.&lt;/div&gt;&#13;
+				&lt;div id="ezUser-account-text" class="ezUser-text ezUser-message-text" onclick="ezUser_click(this)"&gt;Your account has been created and a confirmation email has been sent. Please click on the link in the confirmation email to verify your account.&lt;/div&gt;&#13;
+				&lt;input id="ezUser-account-resend" value="Resend"&#13;
+					tabindex	=	"9"&#13;
+					type		=	"button"&#13;
+					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"&#13;
+					onclick		=	"ezUser_click(this)"&#13;
+					onmouseover	=	"ezUser_setButtonState(this, 1, true)"&#13;
+					onmouseout	=	"ezUser_setButtonState(this, 1, false)"&#13;
+					onfocus		=	"ezUser_setButtonState(this, 2, true)"&#13;
+					onblur		=	"ezUser_setButtonState(this, 2, false)"&#13;
+				/&gt;&#13;
 				&lt;input id="ezUser-account-new" type="hidden" value="false" /&gt;&#13;
 			&lt;/fieldset&gt;&#13;
-		&lt;/form&gt;</result>
-			</results>
+		&lt;/form&gt;</result></results>
+		</test>
+		<test name="Resend confirmation email">
+			<click id="ezUser-account-resend"/>
+			<results><result>Verification email has been resent.</result></results>
+		</test>
+		<test name="Register new account - duplicate username">
+			<click id="ezUser-goaccount"/>
+			<formfill>
+				<text id="ezUser-account-email">dominic_sayers2@hotmail.com</text>
+				<text id="ezUser-account-firstName">Dominic</text>
+				<text id="ezUser-account-lastName">Sayers</text>
+				<text id="ezUser-account-username">dominicsayers</text>
+				<text id="ezUser-account-password">password</text>
+				<text id="ezUser-account-confirm">password</text>
+			</formfill>
+			<click id="ezUser-account-validate"/>
+			<results><result/></results>
+		</test>
+		<test name="Register new account - duplicate email address">
+			<formfill>
+				<text id="ezUser-account-email">dominic_sayers@hotmail.com</text>
+				<text id="ezUser-account-firstName">Dominic</text>
+				<text id="ezUser-account-lastName">Sayers</text>
+				<text id="ezUser-account-username">dominicsayers2</text>
+				<text id="ezUser-account-password">password</text>
+				<text id="ezUser-account-confirm">password</text>
+			</formfill>
+			<click id="ezUser-account-validate"/>
+			<results><result/></results>
+		</test>
+		<test name="Register new account - no username">
+			<formfill>
+				<text id="ezUser-account-email">first.last@example.com</text>
+				<text id="ezUser-account-firstName">First</text>
+				<text id="ezUser-account-lastName">Last</text>
+				<text id="ezUser-account-username"/>
+				<text id="ezUser-account-password">password</text>
+				<text id="ezUser-account-confirm">password</text>
+			</formfill>
+			<click id="ezUser-account-validate"/>
+			<results><result/></results>
 		</test>
 	</tests>
 </suite>

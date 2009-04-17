@@ -8,11 +8,11 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.7 - Now logs actions performed on each page
+ * @version	0.8 - New action 'post' uploads arbitrary HTML element as result
  */
 class ajaxUnitUI implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------
-// Configuration settings
+// Helper functions
 // ---------------------------------------------------------------------------
 	private static /*.string.*/ function thisURL() {
 		$package = self::PACKAGE;
@@ -22,9 +22,6 @@ class ajaxUnitUI implements ajaxUnitAPI {
 		return dirname(substr($file, strpos($_SERVER['SCRIPT_FILENAME'], $_SERVER['SCRIPT_NAME']))) . "/$package.php";
 	}
 
-// ---------------------------------------------------------------------------
-// Helper functions
-// ---------------------------------------------------------------------------
 	private static /*.string.*/ function componentHeader() {return self::PACKAGE . "-component";}
 
 	public static /*.void.*/ function sendContent(/*.string.*/ $content, /*.string.*/ $component, $contentType = '') {
@@ -52,6 +49,31 @@ class ajaxUnitUI implements ajaxUnitAPI {
 		return self::PACKAGE;
 	}
 
+	private static /*.resource.*/ function asyncJobStart(/*.string.*/ $url, $server = '', $port = 80, $conn_timeout = 30, $rw_timeout = 86400) {
+		$server	= ($server === '') ? $_SERVER['HTTP_HOST'] : $server;
+		$errno	= '';
+		$errstr	= '';
+
+		set_time_limit(0);
+
+		$fp = fsockopen($server, $port, $errno, $errstr, $conn_timeout);
+
+		if (!$fp) {
+			echo "$errstr ($errno)<br />\n";
+			return false;
+		}
+
+		$out = "GET $url HTTP/1.1\r\n";
+		$out .= "Host: $server\r\n";
+		$out .= "Connection: Close\r\n\r\n";
+
+		stream_set_blocking($fp, false);
+		stream_set_timeout($fp, $rw_timeout);
+		fwrite($fp, $out);
+
+		return $fp;
+	}
+
 // ---------------------------------------------------------------------------
 // UI features
 // ---------------------------------------------------------------------------
@@ -62,6 +84,12 @@ class ajaxUnitUI implements ajaxUnitAPI {
 		$folder		= self::TESTS_FOLDER;
 		$extension	= self::TESTS_EXTENSION;
 		$suiteList	= "";
+
+		$URL		= self::thisURL();
+		$host		= $_SERVER['HTTP_HOST'];
+		$s		= ($_SERVER['SERVER_PROTOCOL'] === 'HTTPS') ? 's' : '';
+		$tidyURL	= "http$s://$host$URL?" . self::ACTION_LOGTIDY;
+		self::asyncJobStart($tidyURL);
 
 		foreach (glob("$folder/*.$extension") as $filename) {
 			$suite		= basename($filename, '.' . self::TESTS_EXTENSION);
@@ -134,6 +162,7 @@ HTML;
 		$tagFormFill		= self::TAGNAME_FORMFILL;
 		$tagOpen		= self::TAGNAME_OPEN;
 		$tagLocation		= self::TAGNAME_LOCATION;
+		$tagPost		= self::TAGNAME_POST;
 		$tagRadio		= self::TAGNAME_RADIO;
 		$tagText		= self::TAGNAME_TEXT;
 
@@ -146,7 +175,7 @@ HTML;
 
 	public static /*.void.*/ function getJavascript() {
 		$html = self::htmlJavascript();
-		self::sendContent($html, 'Javascript', 'text/javascript');	
+		self::sendContent($html, 'Javascript', 'text/javascript');
 	}
 
 // ---------------------------------------------------------------------------
@@ -211,14 +240,14 @@ HTML;
 
 	public	static /*.void.*/	function getAbout()		{
 		$html = self::htmlAbout();
-		self::sendContent($html, 'about');
+		self::sendContent($html, 'about', 'text/html');
 	}
 
 	private	static /*.string.*/	function htmlSourceCode()	{return (string) highlight_file(__FILE__, 1);}
 
 	public	static /*.void.*/	function getSourceCode()	{
 		$html = self::htmlSourceCode();
-		self::sendContent($html, 'sourceCode');
+		self::sendContent($html, 'sourceCode', 'text/html');
 	}
 
 // ---------------------------------------------------------------------------
@@ -267,6 +296,24 @@ HTML;
 	public	static /*.void.*/ function getPageBottom() {
 		$html = self::htmlPageBottom();
 		self::sendContent($html, self::PACKAGE);
+	}
+
+// ---------------------------------------------------------------------------
+	public static /*.void.*/ function tidyLogFiles() {
+		$folder		= self::LOG_FOLDER;
+		$extension	= self::LOG_EXTENSION;
+
+		foreach (glob("$folder/*.$extension") as $filename) {
+			if (is_file($filename)) {
+				$ageInHours = floor((time() - filemtime($filename))/(60*60));
+				if ($ageInHours > self::LOG_MAXHOURS) {
+					echo "Deleting $filename\n";
+					unlink($filename);
+				} else {
+					echo "Not deleting $filename because it's too recent\n";
+				}
+			}
+		}
 	}
 }
 // End of class ajaxUnit

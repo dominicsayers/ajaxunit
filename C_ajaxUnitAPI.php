@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.7 - Now logs actions performed on each page
+ * @version	0.8 - New action 'post' uploads arbitrary HTML element as result
  */
 interface ajaxUnitAPI {
 	/*.public.*/	const	PACKAGE			= 'ajaxUnit',
@@ -21,6 +21,7 @@ interface ajaxUnitAPI {
 				ACTION_PARSE		= 'parse',
 				ACTION_SUITE		= 'suite',
 				ACTION_SOURCECODE	= 'source',
+				ACTION_LOGTIDY		= 'logtidy',
 
 				TAGNAME_ADD		= 'add',
 				TAGNAME_CHECKBOX	= 'checkbox',
@@ -39,6 +40,7 @@ interface ajaxUnitAPI {
 				TAGNAME_LOCATION	= 'location',
 				TAGNAME_OPEN		= 'open',
 				TAGNAME_PARAMETERS	= 'parameters',
+				TAGNAME_POST		= 'post',
 				TAGNAME_RADIO		= 'radio',
 				TAGNAME_RESET		= 'reset',
 				TAGNAME_RESPONSECOUNT	= 'responseCount',
@@ -74,7 +76,8 @@ interface ajaxUnitAPI {
 				TESTS_EXTENSION		= 'xml',
 				LOG_FOLDER		= 'logs',
 				LOG_EXTENSION		= 'html',
-				CONTEXT_FOLDER		= 'logs';
+				CONTEXT_FOLDER		= 'logs',
+				LOG_MAXHOURS		= 12;
 }
 // End of interface ajaxUnitAPI
 ?>
