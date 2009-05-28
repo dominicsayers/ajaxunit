@@ -1,4 +1,5 @@
 <?php header("Location: .."); ?>
 <settings>
-	<accountPage>/ezuser/release/test/tests/dev-example-both.html</accountPage>
+	<accountPage>../../test/tests/release-example-both.html</accountPage>
+	<adminEmail>dominic.sayers+ezUserTesting@gmail.com</adminEmail>
 </settings>

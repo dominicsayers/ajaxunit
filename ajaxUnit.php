@@ -5,7 +5,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.8 - New action 'post' uploads arbitrary HTML element as result
+ * @version	0.10 - Stable release with long-term support
  */
 
 /*.
@@ -44,7 +44,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 		if (isset($_GET[ajaxUnit::ACTION_CSS]))		ajaxUnitUI::getCSS();
 		if (isset($_GET[ajaxUnit::ACTION_ABOUT]))	ajaxUnitUI::getAbout();
 		if (isset($_GET[ajaxUnit::ACTION_SOURCECODE]))	ajaxUnitUI::getSourceCode();
-		if (isset($_GET[ajaxUnit::ACTION_LOGTIDY]))	ajaxUnitUI::tidyLogFiles();
+		if (isset($_GET[ajaxUnit::ACTION_LOGTIDY]))	{ajaxUnitUI::tidyLogFiles(); ajaxUnitUI::getControlPanel();}
 	} else {
 		if (is_array($_POST) && (count($_POST) > 0)) {
 			ajaxUnit::parseTest();

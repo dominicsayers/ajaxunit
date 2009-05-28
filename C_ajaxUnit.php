@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.8 - New action 'post' uploads arbitrary HTML element as result
+ * @version	0.10 - Stable release with long-term support
  */
 
 /*.
@@ -51,16 +51,16 @@ class ajaxUnit implements ajaxUnitAPI {
 	private static /*.void.*/ function setTestContext(/*.mixed.*/ $newContext, $value = '') {
 		$filename = self::getContextFilename();
 
-		if (!is_file($filename)) {
-			$handle		= fopen($filename, 'wb');
-			$context	= /*.(array[string]string).*/ array();
-		} else {
+		if (is_file($filename)) {
 			$handle		= fopen($filename, 'r+b');
 			$serial		= fread($handle, 8192);
 			$context	= /*.(array[string]string).*/ unserialize($serial);
 
 			rewind($handle);
 			ftruncate($handle, 0);
+		} else {
+			$handle		= fopen($filename, 'wb');
+			$context	= /*.(array[string]string).*/ array();
 		}
 
 		if (is_array($newContext)) {
@@ -94,8 +94,9 @@ class ajaxUnit implements ajaxUnitAPI {
 	private static /*.void.*/ function setInitialContext(/*.DOMElement.*/ &$test, /*.int.*/ $testIndex, $dummyRun = false) {
 		// Build a string containing a list of expected responses (1234...n) according to <results> child nodes
 		$resultsList	= $test->getElementsByTagName(self::TAGNAME_RESULT);	// Get the expected results
-		$expected = $resultsList->length;
-		$responseList = '';
+		$expected	= $resultsList->length;
+		$responseList	= '';
+
 		for ($i = 0; $i < $expected; $i++) $responseList .= (string) $i;
 
 		$context = /*.(array[string]string).*/ array();
@@ -143,7 +144,7 @@ class ajaxUnit implements ajaxUnitAPI {
 
 		self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$package-parameters')\">+</span> Global test parameters", $dummyRun, 0, 'p', 3);
 		self::appendLog("<div class=\"$package-testlog\" id=\"$package-parameters\">", $dummyRun, 0, '', 3);
-		foreach ($context as $key => $value) self::appendLog("$key = $value", $dummyRun);
+		foreach ($context as $key => $value) self::appendLog("$key = " . htmlspecialchars(substr($value, 0, 64)), $dummyRun);
 		self::appendLog('</div>', $dummyRun, 0, '', 3);
 		self::appendLog('<hr />', $dummyRun, 0, '', 3);
 	}
@@ -203,9 +204,11 @@ class ajaxUnit implements ajaxUnitAPI {
 		@include_once 'Text/Diff/Renderer.php';
 
 		if (class_exists('Text_Diff') && class_exists('Text_Diff_Renderer')) {
-			$diff		= new Text_Diff(explode("\r\n", $results), explode("\r\n", $expected));
+			$originalLevel	= error_reporting(E_ALL); // Somebody teach these PEAR guys to write code, please.
+			$diff		= new Text_Diff(explode("\r\n", $expected), explode("\r\n", $results));
 			$renderer	= new Text_Diff_Renderer();
 			$diffText	= htmlspecialchars($renderer->render($diff));
+			error_reporting($originalLevel); // Back to E_STRICT
 		} else {
 			$diffText	= "Results:\n" . htmlspecialchars($results) . "\nExpected:\n" . htmlspecialchars($expected);
 		}
@@ -396,7 +399,7 @@ class ajaxUnit implements ajaxUnitAPI {
 				} else {
 					self::appendLog("Comparing result with test data set #$indexText...", $dummyRun, 6);
 					$results	= htmlspecialchars_decode($results);
-					$expected	= htmlspecialchars_decode($node->nodeValue);
+					$expected	= htmlspecialchars_decode(self::substituteParameters($node->nodeValue));
 					if (get_magic_quotes_gpc()) $expected = addslashes($expected);	// magic_quotes_gpc will go away soon, but for now
 
 					if ($dummyRun) {
@@ -481,6 +484,7 @@ class ajaxUnit implements ajaxUnitAPI {
 					case self::TAGNAME_LOCATION:	$success = self::doLocation	($step,		$dummyRun);	$sendToBrowser = !$dummyRun;	break;
 					case self::TAGNAME_POST:	$success = self::doPost		($step,		$dummyRun);	$sendToBrowser = !$dummyRun;	break;
 					case self::TAGNAME_SESSION:	$success = self::doSession	($stepList,	$dummyRun);					break;
+					case self::TAGNAME_STOP:	$success = false;										break;
 					case self::TAGNAME_RESULTS:	if (!$dummyRun) $test->removeChild($step);
 				}
 

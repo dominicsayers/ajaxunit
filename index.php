@@ -10,7 +10,7 @@
 <body>
 <?php
 	require_once 'ajaxUnit.php';
-	ajaxUnitUI::getContainer(ajaxUnitUI::ACTION_CONTROL);
+	ajaxUnitUI::getContainer(ajaxUnitUI::ACTION_LOGTIDY);
 ?>
 </body>
 

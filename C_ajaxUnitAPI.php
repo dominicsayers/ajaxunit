@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.8 - New action 'post' uploads arbitrary HTML element as result
+ * @version	0.10 - Stable release with long-term support
  */
 interface ajaxUnitAPI {
 	/*.public.*/	const	PACKAGE			= 'ajaxUnit',
@@ -50,6 +50,7 @@ interface ajaxUnitAPI {
 				TAGNAME_SESSION		= 'session',
 				TAGNAME_SET		= 'set',
 				TAGNAME_STATUS		= 'status',
+				TAGNAME_STOP		= 'stop',
 				TAGNAME_SUITE		= 'suite',
 				TAGNAME_TEST		= 'test',
 				TAGNAME_TESTSFOLDER	= 'testsFolder',

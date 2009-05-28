@@ -4,10 +4,11 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.8 - New action 'post' uploads arbitrary HTML element as result
+ * @version	0.10 - Stable release with long-term support
  */
+/*jslint eqeqeq: true, immed: true, nomen: true, strict: true, undef: true*/
 /*global window, document, event, ActiveXObject */ // For JSLint
-//var oAjaxUnit;
+'use strict';
 var oAjaxUnit = [];
 
 // ---------------------------------------------------------------------------
@@ -92,7 +93,7 @@ function C_ajaxUnit() {
 	this.addStyleSheet = function () {
 		var i, sheetsCount = document.styleSheets.length, found = false;
 
-		for (i=0; i<sheetsCount; i++) {
+		for (i = 0; i < sheetsCount; i++) {
 			if (document.styleSheets[i].title === '$package') {
 				found = true;
 			}
@@ -127,7 +128,7 @@ function C_ajaxUnit() {
 			container	= document.getElementById(id);
 
 		if (container === null || typeof(container) === 'undefined') {
-			var styleText = '.$package-log {width:400px;font-family:\"Segoe UI\", Calibri, Arial, Helvetica, \"sans serif\";font-size:11px;line-height:16px;margin:0;clear:left;background-color:#FFFF88;}';
+			var styleText = '.$package-log {width:420px;font-family:\"Segoe UI\", Calibri, Arial, Helvetica, \"sans serif\";font-size:11px;line-height:16px;margin:0;clear:left;background-color:#FFFF88;}';
 
 			container		= document.createElement('style');
 			container.type		= 'text/css';
@@ -147,7 +148,7 @@ function C_ajaxUnit() {
 			document.getElementsByTagName('body')[0].appendChild(container);
 		}
 
-		element			= document.createElement('p');
+		var element		= document.createElement('p');
 		element.className	= id;
 		element.innerHTML	= text;
 
@@ -157,14 +158,14 @@ function C_ajaxUnit() {
 // ---------------------------------------------------------------------------
 	this.doActions = function (actionNode) {
 		this.logAppend('Doing prescribed actions:');
-
+//this.logAppend('<!-- ' + actionNode.innerHTML + ' -->'); // debug
 		if (actionNode === null) {
 			this.logAppend(' - nothing to do');
 			return;
 		}
 
 		// Do whatever the test dictates
-		var i, url, controlId, step, stepList = actionNode.firstChild.childNodes;
+		var i, url, control, controlId, step, stepList = actionNode.firstChild.childNodes;
 
 		for (i = 0; i < stepList.length; i++) {
 			step = stepList[i];
@@ -203,7 +204,7 @@ function C_ajaxUnit() {
 					break;
 				case '$tagFormFill':
 					this.logAppend(' - filling form fields');
-					var j, controlNode, control, controlType, controlValue, controlList = step.childNodes;
+					var j, controlNode, controlType, controlValue, controlList = step.childNodes;
 
 					for (j = 0; j < controlList.length; j++) {
 						controlNode	= controlList[j];
@@ -213,6 +214,12 @@ function C_ajaxUnit() {
 							controlType	= controlNode.nodeName;
 							controlValue	= (typeof controlNode.textContent === 'undefined') ? controlNode.text : controlNode.textContent;
 							control		= document.getElementById(controlId);
+
+							if (controlId === 'ezUser-account-username') {
+							if (typeof controlValue === 'undefined' || controlValue === null) {
+								controlValue = '';
+							}
+							}
 
 							this.logAppend(' - - setting ' + controlId + ' (' + controlType + ') to ' + controlValue);
 
@@ -225,7 +232,7 @@ function C_ajaxUnit() {
 									control.checked = (controlValue === 'checked') ? true : false;
 									break;
 								default:
-									control.value = controlValue;
+									control.defaultValue = controlValue;
 							}
 						}
 					}
@@ -257,8 +264,3 @@ function ajaxUnit(ajax) {
 	thisAjaxUnit.logAppend('Relaying an XMLHttpRequest response to $URL');
 	thisAjaxUnit.serverTalk('$URL', 'POST', postData);
 }
-
-// ---------------------------------------------------------------------------
-// Do stuff
-// ---------------------------------------------------------------------------
-//oAjaxUnit	= new C_ajaxUnit();

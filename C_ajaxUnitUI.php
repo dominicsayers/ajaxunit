@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.8 - New action 'post' uploads arbitrary HTML element as result
+ * @version	0.10 - Stable release with long-term support
  */
 class ajaxUnitUI implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------
@@ -29,7 +29,8 @@ class ajaxUnitUI implements ajaxUnitAPI {
 		if (!headers_sent()) {
 			$package 	= self::PACKAGE;
 
-			$defaultType	= ($component	=== 'container')	? "text/html"	: "application/$package"; // Webkit oddity
+//			$defaultType	= ($component	=== 'container')	? "text/html"	: "application/$package"; // Webkit oddity
+			$defaultType	= "text/html";
 			$contentType	= ($contentType	=== '')			? $defaultType	: $contentType;
 			$component	= ($component	=== $package)		? $package	: "$package-$component";
 
@@ -45,33 +46,8 @@ class ajaxUnitUI implements ajaxUnitAPI {
 		echo $content;
 	}
 
-	private static /*.string.*/ function getDivId(/*.string.*/ $action) {
+	private static /*.string.*/ function getInstance(/*.string.*/ $action) {
 		return self::PACKAGE;
-	}
-
-	private static /*.resource.*/ function asyncJobStart(/*.string.*/ $url, $server = '', $port = 80, $conn_timeout = 30, $rw_timeout = 86400) {
-		$server	= ($server === '') ? $_SERVER['HTTP_HOST'] : $server;
-		$errno	= '';
-		$errstr	= '';
-
-		set_time_limit(0);
-
-		$fp = fsockopen($server, $port, $errno, $errstr, $conn_timeout);
-
-		if (!$fp) {
-			echo "$errstr ($errno)<br />\n";
-			return false;
-		}
-
-		$out = "GET $url HTTP/1.1\r\n";
-		$out .= "Host: $server\r\n";
-		$out .= "Connection: Close\r\n\r\n";
-
-		stream_set_blocking($fp, false);
-		stream_set_timeout($fp, $rw_timeout);
-		fwrite($fp, $out);
-
-		return $fp;
 	}
 
 // ---------------------------------------------------------------------------
@@ -84,12 +60,6 @@ class ajaxUnitUI implements ajaxUnitAPI {
 		$folder		= self::TESTS_FOLDER;
 		$extension	= self::TESTS_EXTENSION;
 		$suiteList	= "";
-
-		$URL		= self::thisURL();
-		$host		= $_SERVER['HTTP_HOST'];
-		$s		= ($_SERVER['SERVER_PROTOCOL'] === 'HTTPS') ? 's' : '';
-		$tidyURL	= "http$s://$host$URL?" . self::ACTION_LOGTIDY;
-		self::asyncJobStart($tidyURL);
 
 		foreach (glob("$folder/*.$extension") as $filename) {
 			$suite		= basename($filename, '.' . self::TESTS_EXTENSION);
@@ -212,11 +182,11 @@ HTML;
 // ---------------------------------------------------------------------------
 	private static /*.string.*/ function htmlContainer($action = self::ACTION_PARSE) {
 		$package	= self::PACKAGE;
-		$divId		= self::getDivId($action);
+		$instance	= self::getInstance($action);
 		$addScript	= self::htmlAddScript();
 
 		return <<<HTML
-	<div id="$divId"></div>
+	<div id="$instance"></div>
 $addScript
 	<script type="text/javascript">var obj = new C_ajaxUnit; obj.execute('$action');</script>
 HTML;
@@ -307,10 +277,10 @@ HTML;
 			if (is_file($filename)) {
 				$ageInHours = floor((time() - filemtime($filename))/(60*60));
 				if ($ageInHours > self::LOG_MAXHOURS) {
-					echo "Deleting $filename\n";
+//					echo "Deleting $filename\n";
 					unlink($filename);
-				} else {
-					echo "Not deleting $filename because it's too recent\n";
+//				} else {
+//					echo "Not deleting $filename because it's too recent\n";
 				}
 			}
 		}
