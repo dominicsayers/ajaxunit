@@ -5,7 +5,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.10 - Stable release with long-term support
+ * @version	0.11 - Browser can now report local errors and terminate testing
  */
 
 /*.
@@ -38,6 +38,7 @@ if (basename($_SERVER['PHP_SELF']) === basename(__FILE__)) {
 	if (is_array($_GET) && (count($_GET) > 0)) {
 		$dummyRun = (isset($_GET[ajaxUnit::ACTION_DUMMY])) ? (bool) $_GET[ajaxUnit::ACTION_DUMMY] : false;
 		if (isset($_GET[ajaxUnit::ACTION_SUITE]))	ajaxUnit::runTestSuite($_GET[ajaxUnit::ACTION_SUITE], $dummyRun);
+		if (isset($_GET[ajaxUnit::ACTION_END]))		ajaxUnit::endTestSuite($_GET[ajaxUnit::ACTION_END], $dummyRun);
 		if (isset($_GET[ajaxUnit::ACTION_PARSE]))	ajaxUnit::parseTest();
 		if (isset($_GET[ajaxUnit::ACTION_CONTROL]))	ajaxUnitUI::getControlPanel();
 		if (isset($_GET[ajaxUnit::ACTION_JAVASCRIPT]))	ajaxUnitUI::getJavascript();

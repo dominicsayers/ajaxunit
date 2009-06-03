@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.10 - Stable release with long-term support
+ * @version	0.11 - Browser can now report local errors and terminate testing
  */
 
 /*.
@@ -52,8 +52,9 @@ class ajaxUnit implements ajaxUnitAPI {
 		$filename = self::getContextFilename();
 
 		if (is_file($filename)) {
-			$handle		= fopen($filename, 'r+b');
-			$serial		= fread($handle, 8192);
+			$handle		= fopen($filename, 'r+b'); // Lock the file
+
+			$serial		= file_get_contents($filename);
 			$context	= /*.(array[string]string).*/ unserialize($serial);
 
 			rewind($handle);
@@ -64,7 +65,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		}
 
 		if (is_array($newContext)) {
-			$context = array_merge($context, $newContext);
+			$context = (is_array($context)) ? array_merge($context, $newContext): $newContext;
 		} else {
 			$context[$newContext] = $value;
 		}
@@ -79,9 +80,9 @@ class ajaxUnit implements ajaxUnitAPI {
 		if (!is_file($filename)) {
 			$context	= /*.(array[string]string).*/ array();
 		} else {
-			$handle		= fopen($filename, 'rb');
-			$serial		= fread($handle, 8192);
+			$serial		= file_get_contents($filename);
 			$context	= /*.(array[string]string).*/ unserialize($serial);
+			if (!is_array($context)) $context = array();
 		}
 
 		if ($key === '') {
@@ -673,6 +674,13 @@ class ajaxUnit implements ajaxUnitAPI {
 				$success	= self::doResults($resultsNode->childNodes, $results, $dummyRun);	// Is it the same?
 			}
 
+			if (!$success) {
+				self::logResult($success, $dummyRun);
+				self::tidyUp($dummyRun);
+				self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
+				return;
+			}
+
 			if (!$dummyRun && ($responseCount < $expected)) {
 				self::appendLog("Waiting for further responses from browser", $dummyRun, 2);
 				self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
@@ -680,12 +688,6 @@ class ajaxUnit implements ajaxUnitAPI {
 			}
 
 			self::logResult($success, $dummyRun);
-
-			if (!$success) {
-				self::tidyUp($dummyRun);
-				self::setTestContext(self::TAGNAME_INPROGRESS, (string) false);
-				return;
-			}
 		}
 
 		// Get the next test and send it to the client for form filling etc.
@@ -700,12 +702,19 @@ class ajaxUnit implements ajaxUnitAPI {
 			$success = self::initiateTest($document, $test, $testIndex, $dummyRun);
 		} else {
 			// No more tests
-			self::appendLog("No more tests found", $dummyRun, 'p', 0, 2);
+			self::appendLog("No more tests found", $dummyRun, 0, 'p', 3);
 			self::setTestContext(self::TAGNAME_STATUS, self::STATUS_FINISHED);
 			self::tidyUp($dummyRun);
 		}
 	}
 
+	public static /*.void.*/ function endTestSuite($message = '', $dummyRun = false) {
+		self::appendLog("Testing ended at request of browser", $dummyRun);
+		if ($message !== '') self::appendLog($message, $dummyRun);
+		self::logResult(false, $dummyRun);
+		self::setTestContext(self::TAGNAME_STATUS, self::STATUS_FINISHED);
+		self::tidyUp($dummyRun);
+	}
 }
 // End of class ajaxUnit
 ?>

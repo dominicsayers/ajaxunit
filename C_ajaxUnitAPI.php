@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.10 - Stable release with long-term support
+ * @version	0.11 - Browser can now report local errors and terminate testing
  */
 interface ajaxUnitAPI {
 	/*.public.*/	const	PACKAGE			= 'ajaxUnit',
@@ -20,6 +20,7 @@ interface ajaxUnitAPI {
 				ACTION_JAVASCRIPT	= 'js',
 				ACTION_PARSE		= 'parse',
 				ACTION_SUITE		= 'suite',
+				ACTION_END		= 'end',
 				ACTION_SOURCECODE	= 'source',
 				ACTION_LOGTIDY		= 'logtidy',
 

@@ -4,7 +4,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.10 - Stable release with long-term support
+ * @version	0.11 - Browser can now report local errors and terminate testing
  */
 /*jslint eqeqeq: true, immed: true, nomen: true, strict: true, undef: true*/
 /*global window, document, event, ActiveXObject */ // For JSLint
@@ -123,10 +123,13 @@ function C_ajaxUnit() {
 	};
 
 // ---------------------------------------------------------------------------
-	this.logAppend = function(text) {
+	this.logAppend = function(text, fail) {
 		var	id		= '$package-log',
-			container	= document.getElementById(id);
+			container	= document.getElementById(id),
+			markupStart	= '',
+			markupEnd	= '';
 
+		// if log div doesn't exist then add it to the page
 		if (container === null || typeof(container) === 'undefined') {
 			var styleText = '.$package-log {width:420px;font-family:\"Segoe UI\", Calibri, Arial, Helvetica, \"sans serif\";font-size:11px;line-height:16px;margin:0;clear:left;background-color:#FFFF88;}';
 
@@ -148,9 +151,14 @@ function C_ajaxUnit() {
 			document.getElementsByTagName('body')[0].appendChild(container);
 		}
 
+		// Log a fail?
+		if (arguments.length === 1)	fail = false;
+		if (fail)			{markupStart = '<strong>'; markupEnd = '</strong>'; this.execute('end=' + encodeURI(text));}
+
+		// Add to the log
 		var element		= document.createElement('p');
 		element.className	= id;
-		element.innerHTML	= text;
+		element.innerHTML	= markupStart + text + markupEnd;
 
 		container.appendChild(element);
 	};
@@ -183,24 +191,35 @@ function C_ajaxUnit() {
 					window.open(url);
 					break;
 				case '$tagClick':
-					controlId = step.getAttribute('$attrID');
-					this.logAppend(' - clicking button ' + controlId);
-					document.getElementById(controlId).click();
+					controlId	= step.getAttribute('$attrID');
+					control		= document.getElementById(controlId);
+
+					if (control === null) {
+						this.logAppend(' - No control with id ' + controlId, true);
+					} else {
+						this.logAppend(' - clicking button ' + controlId);
+						control.click();
+					}
+
 					break;
 				case '$tagPost':
 					var element, html, postData;
 
 					controlId	= step.getAttribute('$attrID');
-					control		= document.getElementById(controlId).cloneNode(true);
-					element		= document.createElement('dummy');
+					control		= document.getElementById(controlId);
 
-					element.appendChild(control);
+					if (control === null) {
+						this.logAppend(' - No control with id ' + controlId, true);
+					} else {
+						element		= document.createElement('dummy')
+						element.appendChild(control.cloneNode(true));
+						html		= element.innerHTML;
+						postData	= '$actionParse&responseText='	+ encodeURIComponent(html);
 
-					html		= element.innerHTML;
-					postData	= '$actionParse&responseText='	+ encodeURIComponent(html);
+						this.logAppend(' - posting element ' + controlId);
+						this.serverTalk('$URL', 'POST', postData);
+					}
 
-					this.logAppend(' - posting element ' + controlId);
-					this.serverTalk('$URL', 'POST', postData);
 					break;
 				case '$tagFormFill':
 					this.logAppend(' - filling form fields');
@@ -215,24 +234,21 @@ function C_ajaxUnit() {
 							controlValue	= (typeof controlNode.textContent === 'undefined') ? controlNode.text : controlNode.textContent;
 							control		= document.getElementById(controlId);
 
-							if (controlId === 'ezUser-account-username') {
-							if (typeof controlValue === 'undefined' || controlValue === null) {
-								controlValue = '';
-							}
-							}
-
-							this.logAppend(' - - setting ' + controlId + ' (' + controlType + ') to ' + controlValue);
-
-
-							switch (controlType) {
-								case '$tagCheckbox':
-									control.checked = (controlValue === 'checked') ? true : false;
-									break;
-								case '$tagRadio':
-									control.checked = (controlValue === 'checked') ? true : false;
-									break;
-								default:
-									control.defaultValue = controlValue;
+							if (control === null) {
+								this.logAppend(' - - No control with id ' + controlId, true);
+							} else {
+								this.logAppend(' - - setting ' + controlId + ' (' + controlType + ') to ' + controlValue);
+	
+								switch (controlType) {
+									case '$tagCheckbox':
+										control.checked = (controlValue === 'checked') ? true : false;
+										break;
+									case '$tagRadio':
+										control.checked = (controlValue === 'checked') ? true : false;
+										break;
+									default:
+										control.defaultValue = controlValue;
+								}
 							}
 						}
 					}
@@ -250,9 +266,6 @@ function C_ajaxUnit() {
 // Process results returned from XMLHttpRequest object
 // ---------------------------------------------------------------------------
 function ajaxUnit(ajax) {
-// Uncomment the next line to pause between tests
-//	alert('Pausing between tests');
-
 	var postData = '$actionParse';
 	postData += '&readyState='	+ ajax.readyState;
 	postData += '&status='		+ ajax.status;
