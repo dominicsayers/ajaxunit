@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.11 - Browser can now report local errors and terminate testing
+ * @version	0.12 - Better handling of form values
  */
 class ajaxUnitUI implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------

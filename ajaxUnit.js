@@ -4,7 +4,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.11 - Browser can now report local errors and terminate testing
+ * @version	0.12 - Better handling of form values
  */
 /*jslint eqeqeq: true, immed: true, nomen: true, strict: true, undef: true*/
 /*global window, document, event, ActiveXObject */ // For JSLint
@@ -241,13 +241,14 @@ function C_ajaxUnit() {
 	
 								switch (controlType) {
 									case '$tagCheckbox':
-										control.checked = (controlValue === 'checked') ? true : false;
+										control.checked		= (controlValue === 'checked') ? true : false;
 										break;
 									case '$tagRadio':
-										control.checked = (controlValue === 'checked') ? true : false;
+										control.checked		= (controlValue === 'checked') ? true : false;
 										break;
 									default:
-										control.defaultValue = controlValue;
+										control.defaultValue	= controlValue;
+										control.value		= controlValue;
 								}
 							}
 						}
