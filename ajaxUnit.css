@@ -4,37 +4,34 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.13 - Refactored javascript. Now only exposes a postResponse method
+ * @version	0.15 - Tidied up results log and in-play logging
  */
 @charset "UTF-8";
 
 .dummy {} /* Webkit is ignoring the first item so we'll put a dummy one in */
 
-div.$package-testlog	{display:none;}
+form.$package-form		{margin:0;}
+fieldset.$package-fieldset	{padding:0;border:0;}
+input.$package-buttonstate-0	{background-color:#FFFFFF;color:#444444;border-color:#666666 #333333 #333333 #666666;}
+div.$package-testlog		{display:none;}
+span.$package-testlog		{font-weight:bold;font-size:16px;cursor:pointer;}
+p.$package-testlog		{margin:0;}
+pre.$package-testlog		{margin:0;background-color:#F0F0F0;display:none;}
 
 div#$package {
-	font-family:"Segoe UI", Calibri, Arial, Helvetica, "sans serif";
+	font-family:Segoe UI, Calibri, Arial, Helvetica, sans-serif;
 	font-size:11px;
 	line-height:16px;
 	float:left;
 	margin:0;
 }
 
-form.$package-form		{margin:0;}
-fieldset.$package-fieldset	{padding:0;border:0;}
-
 input.$package-button {
 	float:left;
 	padding:2px;
 	margin:15px 0 0 0;
-	font-family:"Segoe UI", Calibri, Arial, Helvetica, "sans serif";
+	font-family:Segoe UI, Calibri, Arial, Helvetica, sans-serif;
 	border-style:solid;
 	border-width:1px;
 	cursor:pointer;
 }
-
-input.$package-buttonstate-0 {background-color:#FFFFFF;color:#444444;border-color:#666666 #333333 #333333 #666666;}
-
-span.$package-testlog	{font-weight:bold;font-size:16px;cursor:pointer;}
-p.$package-testlog	{margin:inherit;}
-pre.$package-testlog	{margin:inherit;background-color:#F0F0F0;display:none;}

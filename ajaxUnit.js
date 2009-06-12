@@ -4,7 +4,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.13 - Refactored javascript. Now only exposes a postResponse method
+ * @version	0.15 - Tidied up results log and in-play logging
  */
 /*jslint eqeqeq: true, immed: true, nomen: true, strict: true, undef: true*/
 /*global window, document, event, ActiveXObject */ // For JSLint
@@ -17,30 +17,57 @@ var ajaxUnitInstances = [];
 // The main ajaxUnit client-side class
 // ---------------------------------------------------------------------------
 function C_ajaxUnit() {
+	if (!(this instanceof arguments.callee)) {throw Error('Constructor called as a function');}
+
 // ---------------------------------------------------------------------------
 // Private methods
 // ---------------------------------------------------------------------------
 	function getXMLHttpRequest() {
-		if (typeof(window.XMLHttpRequest) === 'undefined') {
-			try {
-				return new ActiveXObject('MSXML3.XMLHTTP');
-			} catch (errMSXML3) {}
-
-			try {
-				return new ActiveXObject('MSXML2.XMLHTTP.3.0');
-			} catch (errMSXML2) {}
-
-			try {
-				return new ActiveXObject('Msxml2.XMLHTTP');
-			} catch (errMsxml2) {}
-
-			try {
-				return new ActiveXObject('Microsoft.XMLHTTP');
-			} catch (errMicrosoft) {}
-
+		if (typeof window.XMLHttpRequest === 'undefined') {
+			try {return new ActiveXObject('MSXML3.XMLHTTP');}	catch (errMSXML3) {}
+			try {return new ActiveXObject('MSXML2.XMLHTTP.3.0');}	catch (errMSXML2) {}
+			try {return new ActiveXObject('Msxml2.XMLHTTP');}	catch (errMsxml2) {}
+			try {return new ActiveXObject('Microsoft.XMLHTTP');}	catch (errMicrosoft) {}
 			return null;
 		} else {
 			return new window.XMLHttpRequest();
+		}
+	}
+
+	// Private properties
+	var ajax = getXMLHttpRequest(), that = this;
+
+// ---------------------------------------------------------------------------
+	function fillContainer(id, html) {
+		var container = document.getElementById(id);
+		if (container === null || typeof container === 'undefined') {return;}
+// IE6		container.class		= id;
+		container.className	= id;
+		container.innerHTML	= html;
+	}
+
+// ---------------------------------------------------------------------------
+	function addStyleSheet() {
+		var	htmlHead	= document.getElementsByTagName('head')[0],
+			nodeList	= htmlHead.getElementsByTagName('link'),
+			elementCount	= nodeList.length,
+			found		= false,
+			i, node;
+
+		for (i = 0; i < elementCount; i++) {
+			if (nodeList[i].title === '$package') {
+				found = true;
+				break;
+			}
+		}
+
+		if (found === false) {
+			node		= document.createElement('link');
+			node.type	= 'text/css';
+			node.rel	= 'stylesheet';
+			node.href	= '$URL?$actionCSS';
+			node.title	= '$package';
+			htmlHead.appendChild(node);
 		}
 	}
 
@@ -52,29 +79,15 @@ function C_ajaxUnit() {
 			markupEnd	= '';
 
 		// if log div doesn't exist then add it to the page
-		if (container === null || typeof(container) === 'undefined') {
-			var styleText = '.$package-log {width:420px;font-family:\"Segoe UI\", Calibri, Arial, Helvetica, \"sans serif\";font-size:11px;line-height:16px;margin:0;clear:left;background-color:#FFFF88;}';
-
-			container	= document.createElement('style');
-			container.type	= 'text/css';
-
-			if (typeof container.textContent === 'undefined') {
-				container.text = styleText;
-			} else {
-				container.textContent = styleText;
-			}
-
-			document.getElementsByTagName('head')[0].appendChild(container);
-
+		if (container === null || typeof container === 'undefined') {
 			container		= document.createElement('div');
 			container.id		= id;
-			container.className	= id;
-
+			container.style.cssText	= 'width:420px;font-family:Segoe UI, Calibri, Arial, Helvetica, sans-serif;font-size:11px;line-height:16px;margin:0;clear:left;background-color:#FFFF88;';
 			document.getElementsByTagName('body')[0].appendChild(container);
 		}
 
 		// Log a fail?
-		if (arguments.length === 1)	fail = false;
+		if (arguments.length === 1) {fail = false;}
 
 		if (fail)			{
 			markupStart	= '<strong>'; 
@@ -84,82 +97,11 @@ function C_ajaxUnit() {
 
 		// Add to the log
 		var element		= document.createElement('p');
-		element.className	= id;
+		element.style.margin	= 0;
 		element.innerHTML	= markupStart + text + markupEnd;
 
 		container.appendChild(element);
-	}
-
-// ---------------------------------------------------------------------------
-	function serverTalk(requestType, requestData) {
-		var URL = '$URL';
-
-		logAppend('Relaying an XMLHttpRequest response to $URL');
-
-		if (requestType ==='POST') {
-			ajax.open(requestType, URL);
-			ajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-		} else {
-			ajax.open(requestType, URL + '?' + requestData);
-			requestData = '';
-		}
-
-		ajax.onreadystatechange = handleServerResponse;
-		ajax.setRequestHeader('If-Modified-Since', new Date(0));	// Internet Explorer caching 'feature'
-		ajax.send(requestData);
-	}
-
-// ---------------------------------------------------------------------------
-	function addStyleSheet() {
-		var i, sheetsCount = document.styleSheets.length, found = false;
-
-		for (i = 0; i < sheetsCount; i++) {
-			if (document.styleSheets[i].title === '$package') {
-				found = true;
-			}
-		}
-
-		if (!found) {
-			var css_node	= document.createElement('link');
-			css_node.type	= 'text/css';
-			css_node.rel	= 'stylesheet';
-			css_node.href	= '$URL?$actionCSS';
-			css_node.title	= '$package';
-			document.getElementsByTagName('head')[0].appendChild(css_node);
-		}
-	}
-
-// ---------------------------------------------------------------------------
-	function fillContainer(id, html) {
-		var container = document.getElementById(id);
-		if (container === null || typeof(container) === 'undefined') return;
-// IE6		container.class		= id;
-		container.className	= id;
-		container.innerHTML	= html;
-	}
-
-	// Private properties
-	var ajax = getXMLHttpRequest(), that = this;
-
-// ---------------------------------------------------------------------------
-	function handleServerResponse() {
-		if ((ajax.readyState === 4) && (ajax.status === 200)) {
-			var id = ajax.getResponseHeader('$componentHeader');
-
-			switch (id) {
-			case '$package':
-				// Show the test console
-				addStyleSheet();
-				fillContainer(id, ajax.responseText);
-				break;
-			case '$package-$actionParse':
-				logAppend('Actions received from test controller');
-				doActions(ajax.responseXML);
-				break;
-			default:
-				logAppend('Response received, but no <em>$componentHeader</em> header.');
-			}
-		}
+// 		window.alert(text); // Uncomment this to step through the tests
 	}
 
 // ---------------------------------------------------------------------------
@@ -190,7 +132,7 @@ function C_ajaxUnit() {
 
 // ---------------------------------------------------------------------------
 	function doStep(step) {
-		var url, control, controlId
+		var url, control, controlId, controlNode;
 
 		switch (step.nodeName) {
 		case '$tagLocation':
@@ -224,7 +166,7 @@ function C_ajaxUnit() {
 			if (control === null) {
 				logAppend(' - No control with id ' + controlId, true);
 			} else {
-				element		= document.createElement('dummy')
+				element		= document.createElement('dummy');
 				element.appendChild(control.cloneNode(true));
 				html		= element.innerHTML;
 				postData	= '$actionParse&responseText='	+ encodeURIComponent(html);
@@ -240,7 +182,7 @@ function C_ajaxUnit() {
 
 			for (j = 0; j < controlList.length; j++) {
 				controlNode = controlList[j];
-				if (controlNode.nodeType === 1) doFormFill(controlNode);
+				if (controlNode.nodeType === 1) {doFormFill(controlNode);}
 			}
 
 			break;
@@ -261,19 +203,62 @@ function C_ajaxUnit() {
 
 		for (i = 0; i < stepList.length; i++) {
 			step = stepList[i];
-			if (step.nodeType === 1) doStep(step);
+			if (step.nodeType === 1) {doStep(step);}
 		}
 	}
 
 // ---------------------------------------------------------------------------
-// Public method
+	function handleServerResponse() {
+		if ((ajax.readyState === 4) && (ajax.status === 200)) {
+			var id = ajax.getResponseHeader('$componentHeader');
+
+			switch (id) {
+			case '$package':
+				// Show the test console
+				addStyleSheet();
+				fillContainer(id, ajax.responseText);
+				break;
+			case '$package-$actionParse':
+				logAppend('Actions received from test controller');
+				doActions(ajax.responseXML);
+				break;
+			default:
+				logAppend('Response received, but no <em>$componentHeader</em> header.');
+			}
+		}
+	}
+
 // ---------------------------------------------------------------------------
-	this.postResponse = function(appAjax) {
+	function serverTalk(requestType, requestData) {
+		var URL = '$URL';
+
+		if (requestType === 'POST') {
+			ajax.open(requestType, URL);
+			ajax.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+		} else {
+			ajax.open(requestType, URL + '?' + requestData);
+			requestData = '';
+		}
+
+		ajax.onreadystatechange = handleServerResponse;
+		ajax.setRequestHeader('If-Modified-Since', new Date(0));	// Internet Explorer caching 'feature'
+		ajax.send(requestData);
+	}
+
+// ---------------------------------------------------------------------------
+// Public methods
+// ---------------------------------------------------------------------------
+	this.getResponse = function (action) {
+		serverTalk('GET', action);
+	};
+
+	this.postResponse = function (appAjax) {
 		var	postData = '$actionParse';
 			postData += '&readyState='	+ appAjax.readyState;
 			postData += '&status='		+ appAjax.status;
 			postData += '&responseText='	+ encodeURIComponent(appAjax.responseText);
 
+		logAppend('Relaying an XMLHttpRequest response to $URL');
 		serverTalk('POST', postData);
 	};
 }

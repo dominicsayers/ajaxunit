@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.13 - Refactored javascript. Now only exposes a postResponse method
+ * @version	0.15 - Tidied up results log and in-play logging
  */
 class ajaxUnitUI implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------
@@ -188,7 +188,7 @@ HTML;
 		return <<<HTML
 	<div id="$instance"></div>
 $addScript
-	<script type="text/javascript">var obj = new C_ajaxUnit; obj.execute('$action');</script>
+	<script type="text/javascript">var obj = new C_ajaxUnit; obj.getResponse('$action');</script>
 HTML;
 	}
 
@@ -223,7 +223,6 @@ HTML;
 // ---------------------------------------------------------------------------
 	public static /*.string.*/ function htmlPageTop() {
 		$package		= self::PACKAGE;
-		$actionJavascript	= self::ACTION_JAVASCRIPT;
 		$actionCSS		= self::ACTION_CSS;
 		$URL			= self::thisURL();
 
@@ -231,8 +230,21 @@ HTML;
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
 		<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-		<title>ajaxUnit</title>
+		<title>$package</title>
 		<link type="text/css" rel="stylesheet" href="$URL?$actionCSS" title="ajaxUnit"/>
+	</head>
+	<body>
+		<div id="$package">
+			<a id="top" href="#bottom">bottom &raquo;</a>
+HTML;
+	}
+
+	public static /*.string.*/ function htmlPageBottom() {
+		$package = self::PACKAGE;
+
+		return <<<HTML
+			<a id="bottom" href="#top">&laquo; top</a>
+		</div>
 		<script type="text/javascript">
 			function {$package}_toggle_log(control, id) {
 				if (control.innerHTML === '+') {
@@ -243,16 +255,9 @@ HTML;
 					document.getElementById(id).style.display = 'none';
 				}
 			}
-		</script>
-	</head>
-	<body>
-		<div id="$package">
-HTML;
-	}
 
-	public static /*.string.*/ function htmlPageBottom() {
-		return <<<HTML
-		</div>
+			document.getElementById('bottom').scrollIntoView(true);
+		</script>
 	</body>
 </html>
 HTML;
