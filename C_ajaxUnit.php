@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.15 - Tidied up results log and in-play logging
+ * @version	0.16 - Fixed cookie-handling problem (new class ajaxUnitCookies)
  */
 
 /*.
@@ -156,6 +156,12 @@ class ajaxUnit implements ajaxUnitAPI {
 		self::appendLog('</div>', $dummyRun, 0, '', 3);
 		self::appendLog("Result: <strong>$successText</strong>", $dummyRun, 0, 'p', 3);
 		self::appendLog('<hr />', $dummyRun, 0, '', 3);
+
+		if ($success) {
+			// Increment successful test counter
+			$count = (int) self::getTestContext(self::TAGNAME_COUNT);
+			self::setTestContext(self::TAGNAME_COUNT, (string) ++$count);
+		}
 	}
 
 	private static /*.string.*/ function getLogLink() {
@@ -171,6 +177,8 @@ class ajaxUnit implements ajaxUnitAPI {
 	}
 
 	private static /*.void.*/ function tidyUp($dummyRun = false) {
+		$count = ltrim(self::getTestContext(self::TAGNAME_COUNT));
+		self::appendLog("$count tests successfully completed", $dummyRun, 0, 'p', 3);
 		self::appendLog(ajaxUnitUI::htmlPageBottom(), $dummyRun, 0, '', 0);
 		self::sendLogLink($dummyRun);
 	}
@@ -205,7 +213,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		@include_once 'Text/Diff/Renderer.php';
 
 		if (class_exists('Text_Diff') && class_exists('Text_Diff_Renderer')) {
-			$originalLevel	= error_reporting(E_ALL); // Somebody teach these PEAR guys to write code, please.
+			$originalLevel	= error_reporting(E_ALL); // Somebody teach these PEAR guys to write code, please.</hubris>
 			$diff		= new Text_Diff(explode("\n", $expected), explode("\n", $results));
 			$renderer	= new Text_Diff_Renderer();
 			$diffText	= htmlspecialchars($renderer->render($diff));
@@ -227,6 +235,7 @@ class ajaxUnit implements ajaxUnitAPI {
 	}
 
 	private static /*.boolean.*/ function doCookies(/*.DOMNodeList.*/ $nodeList, $dummyRun = false) {
+		$package	= self::PACKAGE;
 		self::appendLog("Update cookies", $dummyRun, 2);
 
 		for ($i = 0; $i < $nodeList->length; $i++) {
@@ -236,23 +245,25 @@ class ajaxUnit implements ajaxUnitAPI {
 				$action	= $node->nodeName;
 				$name	= self::substituteParameters($node->getAttribute(self::ATTRNAME_NAME));
 
-				switch ($action) {
-				case self::TAGNAME_DELETE:
-					$value	= '';
-					$days	= -1;
-					break;
-				case self::TAGNAME_SET:
+				if ($dummyRun) {
 					$value	= $node->getAttribute(self::ATTRNAME_VALUE);
 					$days	= $node->getAttribute(self::ATTRNAME_DAYS);
-					break;
+					self::appendLog("$action: $name -> $value ($days)", $dummyRun);
+				} else {
+					switch ($action) {
+					case self::TAGNAME_DELETE:
+						self::appendLog(ajaxUnitCookies::remove($name), $dummyRun);
+						break;
+					case self::TAGNAME_SET:
+						$value	= $node->getAttribute(self::ATTRNAME_VALUE);
+						$days	= $node->getAttribute(self::ATTRNAME_DAYS);
+						self::appendLog(ajaxUnitCookies::set($name, $value, $days), $dummyRun);
+						break;
+					}
 				}
-
-				$actionText = ($action === self::TAGNAME_SET) ? ", value = <em>$value</em>, expires in $days days." : '';
-				self::appendLog("$action cookie <strong>$name</strong>$actionText", $dummyRun);
-
-				if (!$dummyRun) setcookie($name, $value, time() + 60 * 60 * 24 * $days);
 			}
 		}
+
 		return true;
 	}
 
@@ -378,7 +389,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		return true;
 	}
 
-	private static /*.boolean.*/ function doResults(/*.DOMNodeList.*/ $nodeList, /*.string.*/ &$results, $dummyRun = false) {
+	private static /*.boolean.*/ function doResults(/*.DOMNodeList.*/ $nodeList, /*.string.*/ $results, $dummyRun = false) {
 		self::appendLog("Compare actual results with expected", $dummyRun);
 
 		// Each <result> element is a potential match for $results
@@ -399,6 +410,7 @@ class ajaxUnit implements ajaxUnitAPI {
 					self::appendLog("Test data set #$indexText has already been matched with a previous result", $dummyRun, 6);
 				} else {
 					self::appendLog("Comparing result with test data set #$indexText...", $dummyRun, 6);
+//if (substr($results, 0, 2) === "\r\n") $results = substr($results, 2); // Needed this for a while because I accidentally added a CRLF at the start of a PHP script and didn't notice. Fixed now.
 					$results	= htmlspecialchars_decode($results);
 					$expected	= htmlspecialchars_decode(self::substituteParameters($node->nodeValue));
 					if (get_magic_quotes_gpc()) $expected = addslashes($expected);	// magic_quotes_gpc will go away soon, but for now
@@ -424,7 +436,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		}
 
 		$result = ($success) ? "Match found!" : "No match found";
-		self::appendLog("$result", $dummyRun, 6);
+		self::appendLog($result, $dummyRun, 6);
 		return $success;
 	}
 
@@ -521,6 +533,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		$context[self::TAGNAME_STATUS]		= self::STATUS_INPROGRESS;
 		$context[self::TAGNAME_TESTSFOLDER]	= self::TESTS_FOLDER;
 		$context[self::TAGNAME_TESTROOT]	= $testRoot;
+		$context[self::TAGNAME_COUNT]		= (string) 0;
 
 		self::setTestContext($context);
 
@@ -594,6 +607,7 @@ class ajaxUnit implements ajaxUnitAPI {
 		// Are we actually running tests at the moment?
 		if (!isset($context[self::TAGNAME_STATUS]) || in_array($context[self::TAGNAME_STATUS], array('', self::STATUS_FINISHED, self::STATUS_FAIL))) {
 			self::appendLog('No testing in progress', $dummyRun);
+			ajaxUnitUI::sendContent('No testing in progress', 'logmessage');
 			exit;
 		}
 

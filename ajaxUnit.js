@@ -4,7 +4,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.15 - Tidied up results log and in-play logging
+ * @version	0.16 - Fixed cookie-handling problem (new class ajaxUnitCookies)
  */
 /*jslint eqeqeq: true, immed: true, nomen: true, strict: true, undef: true*/
 /*global window, document, event, ActiveXObject */ // For JSLint
@@ -116,6 +116,8 @@ function C_ajaxUnit() {
 		} else {
 			logAppend(' - - setting ' + controlId + ' (' + controlType + ') to ' + controlValue);
 
+			control.focus();
+
 			switch (controlType) {
 				case '$tagCheckbox':
 					control.checked		= (controlValue === 'checked') ? true : false;
@@ -221,6 +223,9 @@ function C_ajaxUnit() {
 			case '$package-$actionParse':
 				logAppend('Actions received from test controller');
 				doActions(ajax.responseXML);
+				break;
+			case '$package-logmessage':
+				logAppend(ajax.responseText);
 				break;
 			default:
 				logAppend('Response received, but no <em>$componentHeader</em> header.');
