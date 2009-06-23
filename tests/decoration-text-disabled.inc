@@ -1,0 +1,5 @@
+					type		=	"text"
+					disabled	=	"disabled"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
