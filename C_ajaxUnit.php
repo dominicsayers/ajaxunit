@@ -8,11 +8,10 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.16 - Fixed cookie-handling problem (new class ajaxUnitCookies)
+ * @version	0.17 - Now with XInclude so you can componentize your test scripts (see examples)
  */
 
 /*.
-	require_module 'standard';
 	require_module 'dom';
 .*/
 
@@ -30,8 +29,11 @@ class ajaxUnit implements ajaxUnitAPI {
 	}
 
 	private static /*.DOMDocument.*/ function getDOMDocument(/*.string.*/ $suite) {
+		$filename = self::getSuiteFilename($suite);
 		$document = new DOMDocument();
-		$document->load(self::getSuiteFilename($suite));
+		$document->documentURI = $filename;
+		$document->load($filename);
+		$document->xinclude();
 		return $document;
 	}
 
@@ -150,6 +152,16 @@ class ajaxUnit implements ajaxUnitAPI {
 		self::appendLog('<hr />', $dummyRun, 0, '', 3);
 	}
 
+	private static /*.void.*/ function logTestScript(/*.DOMDocument.*/ $document, $dummyRun = false) {
+		$package	= self::PACKAGE;
+
+		self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$package-script')\">+</span> Test script", $dummyRun, 0, 'p', 3);
+		self::appendLog("<div class=\"$package-testlog\" id=\"$package-script\">", $dummyRun, 0, '', 3);
+		self::appendLog('<pre>' . htmlspecialchars($document->saveXML()) . '</pre>', $dummyRun);
+		self::appendLog('</div>', $dummyRun, 0, '', 3);
+		self::appendLog('<hr />', $dummyRun, 0, '', 3);
+	}
+
 	private static /*.void.*/ function logResult($success, $dummyRun = false) {
 		$successText = ($success) ? self::STATUS_SUCCESS : self::STATUS_FAIL;
 		self::setTestContext(self::TAGNAME_STATUS, $successText);
@@ -224,6 +236,12 @@ class ajaxUnit implements ajaxUnitAPI {
 
 		self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$diffID')\">+</span> Actual results compared with expected results", $dummyRun, 6);
 		self::appendLog("<pre class=\"$package-testlog\" id=\"$diffID\">$diffText</pre>", $dummyRun, 8, '');
+
+		self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$diffID-expected')\">+</span> Expected results", $dummyRun, 6);
+		self::appendLog("<pre class=\"$package-testlog\" id=\"$diffID-expected\">" . bin2hex($expected) . "</pre>", $dummyRun, 8, '');
+
+		self::appendLog("<span class=\"$package-testlog\" onclick=\"{$package}_toggle_log(this, '$diffID-results')\">+</span> Actuals results", $dummyRun, 6);
+		self::appendLog("<pre class=\"$package-testlog\" id=\"$diffID-results\">" . bin2hex($results) . "</pre>", $dummyRun, 8, '');
 	}
 // ---------------------------------------------------------------------------
 // Actions
@@ -383,6 +401,12 @@ class ajaxUnit implements ajaxUnitAPI {
 		return true;
 	}
 
+	private static /*.boolean.*/ function doLogAppend(/*.DOMElement.*/ $element, $dummyRun = false) {
+		$content = self::substituteParameters($element->nodeValue);
+		self::appendLog("Adding to browser log: <strong>$content</strong>", $dummyRun, 2);
+		return true;
+	}
+
 	private static /*.boolean.*/ function doPost(/*.DOMElement.*/ $element, $dummyRun = false) {
 		$id = $element->getAttribute(self::ATTRNAME_ID);
 		self::appendLog("Posting contents of element <strong>$id</strong>", $dummyRun, 2);
@@ -410,15 +434,23 @@ class ajaxUnit implements ajaxUnitAPI {
 					self::appendLog("Test data set #$indexText has already been matched with a previous result", $dummyRun, 6);
 				} else {
 					self::appendLog("Comparing result with test data set #$indexText...", $dummyRun, 6);
-//if (substr($results, 0, 2) === "\r\n") $results = substr($results, 2); // Needed this for a while because I accidentally added a CRLF at the start of a PHP script and didn't notice. Fixed now.
 					$results	= htmlspecialchars_decode($results);
 					$expected	= htmlspecialchars_decode(self::substituteParameters($node->nodeValue));
+					$expected	= str_replace(chr(0xEF).chr(0xBB).chr(0xBF), '', $expected); // Get rid of stray UTF-8 BOMs from XIncluded files
 					if (get_magic_quotes_gpc()) $expected = addslashes($expected);	// magic_quotes_gpc will go away soon, but for now
 
 					if ($dummyRun) {
 						$success = true;
 					} else {
 						$success = ($results === $expected) ? true : false; // This is the whole point of all this!
+
+						if (!$success) {
+							self::appendLog("Byte-for-byte match not successful, trying looser EOL definition...", $dummyRun, 6);
+							// Try substituting \r\n for \n in strings (because bits of either may come from a Windows file)
+							$results	= str_replace("\r\n", "\n", $results); 
+							$expected	= str_replace("\r\n", "\n", $expected); 
+							$success	= ($results === $expected) ? true : false;
+						}
 					}
 
 					if ($success) {
@@ -495,6 +527,7 @@ class ajaxUnit implements ajaxUnitAPI {
 					case self::TAGNAME_HEADERS:	$success = self::doHeaders	($stepList,	$dummyRun);					break;
 					case self::TAGNAME_INCLUDEPATH:	$success = self::doIncludePath	($stepList,	$dummyRun);					break;
 					case self::TAGNAME_LOCATION:	$success = self::doLocation	($step,		$dummyRun);	$sendToBrowser = !$dummyRun;	break;
+					case self::TAGNAME_LOGAPPEND:	$success = self::doLogAppend	($step,		$dummyRun);	$sendToBrowser = !$dummyRun;	break;
 					case self::TAGNAME_POST:	$success = self::doPost		($step,		$dummyRun);	$sendToBrowser = !$dummyRun;	break;
 					case self::TAGNAME_SESSION:	$success = self::doSession	($stepList,	$dummyRun);					break;
 					case self::TAGNAME_STOP:	$success = false;										break;
@@ -546,6 +579,9 @@ class ajaxUnit implements ajaxUnitAPI {
 		self::appendLog(ajaxUnitUI::htmlPageTop(), $dummyRun, 0, '', 0);
 		self::appendLog("<h3>$text run of test suite \"$suiteName\" version $suiteVersion</h3>", $dummyRun, 0, '', 3);
 		self::appendLog("<hr />", $dummyRun, 0, '', 3);
+
+		// Add test script to log
+		self::logTestScript($document, $dummyRun);
 
 		// Get global parameters
 		$nodeList	= $document->getElementsByTagName(self::TAGNAME_PARAMETERS);

@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.16 - Fixed cookie-handling problem (new class ajaxUnitCookies)
+ * @version	0.17 - Now with XInclude so you can componentize your test scripts (see examples)
  */
 class ajaxUnitUI implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------
@@ -67,11 +67,14 @@ class ajaxUnitUI implements ajaxUnitAPI {
 			$document->load($filename);
 
 			$suiteNode	= $document->getElementsByTagName(self::ACTION_SUITE)->item(0);
-			$suiteName	= $suiteNode->getAttribute(self::ATTRNAME_NAME);
+			
+			if ($suiteNode->hasAttribute(self::ATTRNAME_NAME)) {
+				$suiteName	= $suiteNode->getAttribute(self::ATTRNAME_NAME);
 
-			$suiteList	.= <<<HTML
+				$suiteList	.= <<<HTML
 				<input class="$package $package-radio" type="radio" name="$actionSuite" value="$suite" /> $suiteName<br />
 HTML;
+			}
 		}
 
 		if ($suiteList === '') {
@@ -132,6 +135,7 @@ HTML;
 		$tagFormFill		= self::TAGNAME_FORMFILL;
 		$tagOpen		= self::TAGNAME_OPEN;
 		$tagLocation		= self::TAGNAME_LOCATION;
+		$tagLogAppend		= self::TAGNAME_LOGAPPEND;
 		$tagPost		= self::TAGNAME_POST;
 		$tagRadio		= self::TAGNAME_RADIO;
 		$tagText		= self::TAGNAME_TEXT;

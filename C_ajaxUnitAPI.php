@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.16 - Fixed cookie-handling problem (new class ajaxUnitCookies)
+ * @version	0.17 - Now with XInclude so you can componentize your test scripts (see examples)
  */
 interface ajaxUnitAPI {
 	/*.public.*/	const	PACKAGE			= 'ajaxUnit',
@@ -40,6 +40,7 @@ interface ajaxUnitAPI {
 				TAGNAME_INDEX		= 'index',
 				TAGNAME_INPROGRESS	= 'inProgress',
 				TAGNAME_LOCATION	= 'location',
+				TAGNAME_LOGAPPEND	= 'logAppend',
 				TAGNAME_OPEN		= 'open',
 				TAGNAME_PARAMETERS	= 'parameters',
 				TAGNAME_POST		= 'post',
