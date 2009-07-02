@@ -20,7 +20,7 @@
 					onfocus		=	"ezUser_setButtonState(this, 2, true)"
 					onblur		=	"ezUser_setButtonState(this, 2, false)"
 				/>
-				<div id="ezUser-fullName" class="ezUser-fullName">Dominic Sayers</div>
+				<div id="ezUser-fullName" class="ezUser-fullName">Dominic _Z*! - Sayers</div>
 			</fieldset>
 			<fieldset class="ezUser-fieldset">
 				<div id="ezUser-message" class="ezUser-message" onclick="ezUser_click(this)"><p class="ezUser-message-hidden"></p></div>

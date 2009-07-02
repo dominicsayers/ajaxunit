@@ -2,7 +2,7 @@
 			<fieldset class="ezUser-fieldset">
 				<input id="ezUser-username" tabindex="3201" value="" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text">
 				<label class="ezUser-label" for="ezUser-username">Username:</label>
-				<input id="ezUser-password" tabindex="3202" value="" onfocus="ezUser_passwordFocus(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password">
+				<input id="ezUser-password" tabindex="3202" value="" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password">
 				<label class="ezUser-label" for="ezUser-password">Password:</label>
 			</fieldset>
 			<fieldset class="ezUser-fieldset">

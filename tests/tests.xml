@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<suite version="0.7" xmlns:xi="http://www.w3.org/2001/XInclude">
+<suite version="0.9" xmlns:xi="http://www.w3.org/2001/XInclude">
 	<tests>
 		<test name="Check version">
 			<headers><Location>$testsFolder/$suite-about.html</Location></headers>
@@ -124,27 +124,29 @@
 			</formfill>
 			<click id="ezUser-account-validate"/>
 			<results>
-				<result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-account-email"&#13;
-					tabindex	=	"3211"&#13;
-					value		=	"dominic_sayers2@hotmail.com"&#13;
+				<result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;!-- Mode is 'edit', new flag is true (originally mode was 'result', new flag was true) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-account-email"
+					tabindex	=	"3211"
+					value		=	"dominic_sayers2@hotmail.com"
 <xi:include parse="text" href="decoration-text.inc" />
-				/&gt;&#13;
+				/&gt;
 <xi:include parse="text" href="ezUser-account-firstnamelastname.html.inc" />
-				&lt;input id= "ezUser-account-username"&#13;
-					tabindex	=	"3214"&#13;
-					value		=	"dominicsayers"&#13;
+				&lt;input id= "ezUser-account-username"
+					tabindex	=	"3214"
+					value		=	"dominicsayers"
 <xi:include parse="text" href="decoration-text.inc" />
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;&#13;
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
 <xi:include parse="text" href="ezUser-account-password.html.inc" />
-			&lt;/fieldset&gt;&#13;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-account-OKCancel.html.inc" />
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;This username already exists&lt;/p&gt;&lt;/div&gt;&#13;
-				&lt;input id="ezUser-account-new" type="hidden" value="true" /&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;This username already exists&lt;/p&gt;&lt;/div&gt;
+				&lt;input id="ezUser-account-new"			type="hidden" value="true" /&gt;
+				&lt;input id="ezUser-account-useSavedPassword"	type="hidden" value="true" /&gt;
+			&lt;/fieldset&gt;
 		&lt;/form&gt;]]&gt;&lt;/ezUser&gt;</result>
 			</results>
 		</test>
@@ -158,27 +160,29 @@
 				<text id="ezUser-account-confirm">password</text>
 			</formfill>
 			<click id="ezUser-account-validate"/>
-			<results><result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-account-email"&#13;
-					tabindex	=	"3211"&#13;
-					value		=	"dominic_sayers@hotmail.com"&#13;
+			<results><result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;!-- Mode is 'edit', new flag is true (originally mode was 'result', new flag was true) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-account-email"
+					tabindex	=	"3211"
+					value		=	"dominic_sayers@hotmail.com"
 <xi:include parse="text" href="decoration-text.inc" />
-				/&gt;&#13;
+				/&gt;
 <xi:include parse="text" href="ezUser-account-firstnamelastname.html.inc" />
-				&lt;input id= "ezUser-account-username"&#13;
-					tabindex	=	"3214"&#13;
-					value		=	"dominicsayers2"&#13;
+				&lt;input id= "ezUser-account-username"
+					tabindex	=	"3214"
+					value		=	"dominicsayers2"
 <xi:include parse="text" href="decoration-text.inc" />
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;&#13;
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
 <xi:include parse="text" href="ezUser-account-password.html.inc" />
-			&lt;/fieldset&gt;&#13;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-account-OKCancel.html.inc" />
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;Email address is already registered&lt;/p&gt;&lt;/div&gt;&#13;
-				&lt;input id="ezUser-account-new" type="hidden" value="true" /&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;Email address is already registered&lt;/p&gt;&lt;/div&gt;
+				&lt;input id="ezUser-account-new"			type="hidden" value="true" /&gt;
+				&lt;input id="ezUser-account-useSavedPassword"	type="hidden" value="true" /&gt;
+			&lt;/fieldset&gt;
 		&lt;/form&gt;]]&gt;&lt;/ezUser&gt;</result></results>
 		</test>
 		<test name="Register new account - no username">
@@ -192,7 +196,8 @@
 			</formfill>
 			<click id="ezUser-account-validate"/>
 			<post id="ezUser-account"/>
-			<results><result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+			<results><result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;!-- Mode is 'edit', new flag is true (originally mode was 'result', new flag was true) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;input id="ezUser-account-email" tabindex="3211" value="first.last2@example.com" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;
@@ -202,9 +207,9 @@
 				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;
 				&lt;input id="ezUser-account-username" tabindex="3214" value="" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
-				&lt;input id="ezUser-account-password" tabindex="3215" value="password" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-password" tabindex="3215" value="password" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;
-				&lt;input id="ezUser-account-confirm" tabindex="3216" value="password" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-confirm" tabindex="3216" value="password" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;
 			&lt;/fieldset&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
@@ -215,6 +220,7 @@
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;The username cannot be blank&lt;/p&gt;&lt;/div&gt;
 				&lt;input id="ezUser-account-new" value="true" type="hidden"&gt;
+				&lt;input id="ezUser-account-useSavedPassword" value="true" type="hidden"&gt;
 			&lt;/fieldset&gt;
 		&lt;/form&gt;&lt;/div&gt;</result></results>
 		</test>
@@ -231,28 +237,29 @@
 			</formfill>
 			<click id="ezUser-signin"/>
 			<results>
-				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-username"&#13;
-					tabindex	=	"3201"&#13;
-					value		=	""&#13;
-					type		=	"text"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-password"&#13;
-					tabindex	=	"3202"&#13;
-					value		=	""&#13;
-					type		=	"password"&#13;
-					onfocus		=	"ezUser_passwordFocus(this)"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-username"
+					tabindex	=	"3201"
+					value		=	""
+					type		=	"text"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;
+				&lt;input id= "ezUser-password"
+					tabindex	=	"3202"
+					value		=	""
+					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-loginfail.inc" /></result>
 			</results>
 		</test>
@@ -263,28 +270,29 @@
 			</formfill>
 			<click id="ezUser-signin"/>
 			<results>
-				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-username"&#13;
-					tabindex	=	"3201"&#13;
-					value		=	"unknown"&#13;
-					type		=	"text"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-password"&#13;
-					tabindex	=	"3202"&#13;
-					value		=	""&#13;
-					type		=	"password"&#13;
-					onfocus		=	"ezUser_passwordFocus(this)"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-username"
+					tabindex	=	"3201"
+					value		=	"unknown"
+					type		=	"text"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;
+				&lt;input id= "ezUser-password"
+					tabindex	=	"3202"
+					value		=	""
+					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-loginfail.inc" /></result>
 			</results>
 		</test>
@@ -295,28 +303,29 @@
 			</formfill>
 			<click id="ezUser-signin"/>
 			<results>
-				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-username"&#13;
-					tabindex	=	"3201"&#13;
-					value		=	""&#13;
-					type		=	"text"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-password"&#13;
-					tabindex	=	"3202"&#13;
-					value		=	""&#13;
-					type		=	"password"&#13;
-					onfocus		=	"ezUser_passwordFocus(this)"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-username"
+					tabindex	=	"3201"
+					value		=	""
+					type		=	"text"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;
+				&lt;input id= "ezUser-password"
+					tabindex	=	"3202"
+					value		=	""
+					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-loginfail.inc" /></result>
 			</results>
 		</test>
@@ -327,28 +336,29 @@
 			</formfill>
 			<click id="ezUser-signin"/>
 			<results>
-				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-username"&#13;
-					tabindex	=	"3201"&#13;
-					value		=	"unknown"&#13;
-					type		=	"text"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-password"&#13;
-					tabindex	=	"3202"&#13;
-					value		=	""&#13;
-					type		=	"password"&#13;
-					onfocus		=	"ezUser_passwordFocus(this)"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-username"
+					tabindex	=	"3201"
+					value		=	"unknown"
+					type		=	"text"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;
+				&lt;input id= "ezUser-password"
+					tabindex	=	"3202"
+					value		=	""
+					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-loginfail.inc" /></result>
 			</results>
 		</test>
@@ -359,28 +369,29 @@
 			</formfill>
 			<click id="ezUser-signin"/>
 			<results>
-				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-username"&#13;
-					tabindex	=	"3201"&#13;
-					value		=	"dominicsayers"&#13;
-					type		=	"text"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-password"&#13;
-					tabindex	=	"3202"&#13;
-					value		=	""&#13;
-					type		=	"password"&#13;
-					onfocus		=	"ezUser_passwordFocus(this)"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-username"
+					tabindex	=	"3201"
+					value		=	"dominicsayers"
+					type		=	"text"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;
+				&lt;input id= "ezUser-password"
+					tabindex	=	"3202"
+					value		=	""
+					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-loginfail.inc" /></result>
 			</results>
 		</test>
@@ -391,28 +402,29 @@
 			</formfill>
 			<click id="ezUser-signin"/>
 			<results>
-				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-username"&#13;
-					tabindex	=	"3201"&#13;
-					value		=	"dominicsayers"&#13;
-					type		=	"text"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-password"&#13;
-					tabindex	=	"3202"&#13;
-					value		=	""&#13;
-					type		=	"password"&#13;
-					onfocus		=	"ezUser_passwordFocus(this)"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+				<result>&lt;ezUser container="ezUser"&gt;&lt;![CDATA[		&lt;form id="ezUser-signin-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-username"
+					tabindex	=	"3201"
+					value		=	"dominicsayers"
+					type		=	"text"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-username"&gt;Username:&lt;/label&gt;
+				&lt;input id= "ezUser-password"
+					tabindex	=	"3202"
+					value		=	""
+					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-password"&gt;Password:&lt;/label&gt;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-loginfail.inc" /></result>
 			</results>
 		</test>
@@ -422,9 +434,7 @@
 				<text id="ezUser-password">password</text>
 			</formfill>
 			<click id="ezUser-signin"/>
-			<results>
-				<result><xi:include parse="text" href="ezUser-dashboard.html.inc" /></result>
-			</results>
+			<results><result><xi:include parse="text" href="ezUser-dashboard.html.inc" /></result></results>
 		</test>
 		<test name="Register new account - no email address2">
 			<formfill>
@@ -438,7 +448,8 @@
 			<click id="ezUser-account-validate"/>
 			<post id="ezUser-account"/>
 			<results>
-				<result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+				<result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;!-- Mode is 'new', new flag is true (originally mode was '', new flag was false) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;input id="ezUser-account-email" tabindex="3211" value="" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;
@@ -446,20 +457,22 @@
 				&lt;label class="ezUser-label" for="ezUser-account-firstName"&gt;First name:&lt;/label&gt;
 				&lt;input id="ezUser-account-lastName" tabindex="3213" value="Last" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;
-				&lt;input id="ezUser-account-username" tabindex="3214" value="FirstLast" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
+				&lt;input id="ezUser-account-username" tabindex="3214" value="firstlast" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
-				&lt;input id="ezUser-account-password" tabindex="3215" value="password" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-password" tabindex="3215" value="password" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;
-				&lt;input id="ezUser-account-confirm" tabindex="3216" value="password" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-confirm" tabindex="3216" value="password" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;
 			&lt;/fieldset&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				<xi:include parse="text" href="ezUser-message-mandatory.html.inc" />
 				&lt;input id="ezUser-account-validate" value="Register" tabindex="3217" class="ezUser-button ezUser-action ezUser-buttonstate-0" onclick="ezUser_click(this)" onmouseover="ezUser_setButtonState(this, 1, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onfocus="ezUser_setButtonState(this, 2, true)" onblur="ezUser_setButtonState(this, 2, false)" type="button"&gt;
+				&lt;input id="ezUser-account-cancel" value="Cancel" tabindex="3218" class="ezUser-button ezUser-action ezUser-buttonstate-0" onclick="ezUser_click(this)" onmouseover="ezUser_setButtonState(this, 1, true)" onmouseout="ezUser_setButtonState(this, 1, false)" onfocus="ezUser_setButtonState(this, 2, true)" onblur="ezUser_setButtonState(this, 2, false)" type="button"&gt;
 			&lt;/fieldset&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;You must provide an email address&lt;/p&gt;&lt;/div&gt;
 				&lt;input id="ezUser-account-new" value="true" type="hidden"&gt;
+				&lt;input id="ezUser-account-useSavedPassword" value="false" type="hidden"&gt;
 			&lt;/fieldset&gt;
 		&lt;/form&gt;&lt;/div&gt;</result>
 			</results>
@@ -488,7 +501,8 @@
 			</formfill>
 			<click id="ezUser-account-validate"/>
 			<post id="ezUser-account"/>
-			<results><result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+			<results><result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;!-- Mode is 'edit', new flag is true (originally mode was 'result', new flag was true) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;input id="ezUser-account-email" tabindex="3211" value="first.last@example.com" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;
@@ -498,9 +512,9 @@
 				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;
 				&lt;input id="ezUser-account-username" tabindex="3214" value="firstlast" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
-				&lt;input id="ezUser-account-password" tabindex="3215" value="" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-password" tabindex="3215" value="" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;
-				&lt;input id="ezUser-account-confirm" tabindex="3216" value="" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-confirm" tabindex="3216" value="" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;
 			&lt;/fieldset&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
@@ -511,6 +525,7 @@
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;Password cannot be blank&lt;/p&gt;&lt;/div&gt;
 				&lt;input id="ezUser-account-new" value="true" type="hidden"&gt;
+				&lt;input id="ezUser-account-useSavedPassword" value="true" type="hidden"&gt;
 			&lt;/fieldset&gt;
 		&lt;/form&gt;&lt;/div&gt;</result></results>
 		</test>
@@ -525,7 +540,8 @@
 			</formfill>
 			<click id="ezUser-account-validate"/>
 			<post id="ezUser-account"/>
-			<results><result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+			<results><result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;!-- Mode is 'edit', new flag is true (originally mode was 'result', new flag was true) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;input id="ezUser-account-email" tabindex="3211" value="first.last@example.com" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;
@@ -535,9 +551,9 @@
 				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;
 				&lt;input id="ezUser-account-username" tabindex="3214" value="firstlast" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
-				&lt;input id="ezUser-account-password" tabindex="3215" value="password" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-password" tabindex="3215" value="password" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;
-				&lt;input id="ezUser-account-confirm" tabindex="3216" value="not password" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-confirm" tabindex="3216" value="not password" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;
 			&lt;/fieldset&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
@@ -548,6 +564,7 @@
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;Passwords are not the same&lt;/p&gt;&lt;/div&gt;
 				&lt;input id="ezUser-account-new" value="true" type="hidden"&gt;
+				&lt;input id="ezUser-account-useSavedPassword" value="true" type="hidden"&gt;
 			&lt;/fieldset&gt;
 		&lt;/form&gt;&lt;/div&gt;</result></results>
 		</test>
@@ -561,75 +578,81 @@
 				<text id="ezUser-account-confirm">password</text>
 			</formfill>
 			<click id="ezUser-account-validate"/>
-			<results><result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-account-email"&#13;
-					tabindex	=	"3211"&#13;
-					value		=	"dominic_sayers3@hotmail.com"&#13;
+			<results><result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;!-- Mode is 'display', new flag is false (originally mode was 'result', new flag was true) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-account-email"
+					tabindex	=	"3211"
+					value		=	"dominic_sayers3@hotmail.com"
 <xi:include parse="text" href="decoration-text-disabled.inc" />
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-account-firstName"&#13;
-					tabindex	=	"3212"&#13;
-					value		=	"Dominic"&#13;
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;
+				&lt;input id= "ezUser-account-firstName"
+					tabindex	=	"3212"
+					value		=	"Dominic"
 <xi:include parse="text" href="decoration-text-disabled.inc" />
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-firstName"&gt;First name:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-account-lastName"&#13;
-					tabindex	=	"3213"&#13;
-					value		=	"Sayers"&#13;
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-firstName"&gt;First name:&lt;/label&gt;
+				&lt;input id= "ezUser-account-lastName"
+					tabindex	=	"3213"
+					value		=	"Sayers"
 <xi:include parse="text" href="decoration-text-disabled.inc" />
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-account-username"&#13;
-					tabindex	=	"3214"&#13;
-					value		=	"dominicsayers3"&#13;
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;
+				&lt;input id= "ezUser-account-username"
+					tabindex	=	"3214"
+					value		=	"dominicsayers3"
 <xi:include parse="text" href="decoration-text-disabled.inc" />
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-account-password"&#13;
-					tabindex	=	"3215"&#13;
-					value		=	"************"&#13;
-					type		=	"password"&#13;
-					disabled	=	"disabled"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;&#13;
-				&lt;input id= "ezUser-account-confirm"&#13;
-					tabindex	=	"3216"&#13;
-					value		=	"************"&#13;
-					type		=	"password"&#13;
-					disabled	=	"disabled"&#13;
-					class		=	"ezUser-text"&#13;
-					onkeyup		=	"ezUser_keyUp(event)"&#13;
-					size		=	"40"&#13;
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;&#13;
-			&lt;/fieldset&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				<xi:include parse="text" href="ezUser-message-mandatory.html.inc" />&#13;
-				&lt;input id="ezUser-account-edit" value="Edit"&#13;
-					tabindex	=	"3217"&#13;
-					type		=	"button"&#13;
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
+				&lt;input id= "ezUser-account-password"
+					tabindex	=	"3215"
+					value		=	"************"
+					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
+					disabled	=	"disabled"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;
+				&lt;input id= "ezUser-account-confirm"
+					tabindex	=	"3216"
+					value		=	"************"
+					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
+					disabled	=	"disabled"
+					class		=	"ezUser-text"
+					onkeyup		=	"ezUser_keyUp(event)"
+					size		=	"40"
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;
+			&lt;/fieldset&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				<xi:include parse="text" href="ezUser-message-mandatory.html.inc" />
+				&lt;input id="ezUser-account-edit" value="Edit"
+					tabindex	=	"3217"
+					type		=	"button"
 <xi:include parse="text" href="decoration-button.inc" />
-				/&gt;&#13;
-				&lt;input id="ezUser-account-new" value="New"&#13;
-					tabindex	=	"3218"&#13;
-					type		=	"button"&#13;
+				/&gt;
+				&lt;input id="ezUser-account-new" value="New"
+					tabindex	=	"3218"
+					type		=	"button"
 <xi:include parse="text" href="decoration-button.inc" />
-				/&gt;&#13;
-			&lt;/fieldset&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-text"&gt;Your account has been created and a confirmation email has been sent. Please click on the link in the confirmation email to verify your account.&lt;/p&gt;&lt;/div&gt;&#13;
-				&lt;input id="ezUser-account-resend" value="Resend"&#13;
-					tabindex	=	"3219"&#13;
-					type		=	"button"&#13;
+				/&gt;
+			&lt;/fieldset&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-text"&gt;Your account has been created and a confirmation email has been sent. Please click on the link in the confirmation email to verify your account.&lt;/p&gt;&lt;/div&gt;
+				&lt;input id="ezUser-account-resend" value="Resend"
+					tabindex	=	"3219"
+					type		=	"button"
 <xi:include parse="text" href="decoration-button.inc" />
-				/&gt;&#13;
-				&lt;input id="ezUser-account-new" type="hidden" value="false" /&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+				/&gt;
+				&lt;input id="ezUser-account-new"			type="hidden" value="false" /&gt;
+				&lt;input id="ezUser-account-useSavedPassword"	type="hidden" value="false" /&gt;
+			&lt;/fieldset&gt;
 		&lt;/form&gt;]]&gt;&lt;/ezUser&gt;</result></results>
 		</test>
 		<test name="Resend confirmation email2">
@@ -639,13 +662,25 @@
 		<test name="Go to registration page #4">
 			<click id="ezUser-goaccount"/>
 			<results>
-				<result>&lt;ezUser&gt;<xi:include parse="text" href="ezUser-dashboard.html.inc" /><xi:include parse="text" href="ezUser-account-success.html.inc" />&lt;/ezUser&gt;</result>
+				<result>&lt;ezUser&gt;<xi:include parse="text" href="ezUser-dashboard.html.inc" /><xi:include parse="text" href="ezUser-account.html.inc" />&lt;/ezUser&gt;</result>
 			</results>
 		</test>
 		<test name="Click new button">
 			<click id="ezUser-account-new"/>
 			<results>
-				<result><xi:include parse="text" href="ezUser-account-blank.html.inc" /></result>
+				<result><xi:include parse="text" href="ezUser-account-new.html.inc" /></result>
+			</results>
+		</test>
+		<test name="Click cancel button">
+			<click id="ezUser-account-cancel"/>
+			<results>
+				<result><xi:include parse="text" href="ezUser-account-cancel.html.inc" /></result>
+			</results>
+		</test>
+		<test name="Click new button #2">
+			<click id="ezUser-account-new"/>
+			<results>
+				<result><xi:include parse="text" href="ezUser-account-new.html.inc" /></result>
 			</results>
 		</test>
 		<test name="Register new account - duplicate username2">
@@ -659,27 +694,29 @@
 			</formfill>
 			<click id="ezUser-account-validate"/>
 			<results>
-				<result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-account-email"&#13;
-					tabindex	=	"3211"&#13;
-					value		=	"dominic_sayers2@hotmail.com"&#13;
+				<result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;!-- Mode is 'edit', new flag is true (originally mode was 'result', new flag was true) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-account-email"
+					tabindex	=	"3211"
+					value		=	"dominic_sayers2@hotmail.com"
 <xi:include parse="text" href="decoration-text.inc" />
-				/&gt;&#13;
+				/&gt;
 <xi:include parse="text" href="ezUser-account-firstnamelastname.html.inc" />
-				&lt;input id= "ezUser-account-username"&#13;
-					tabindex	=	"3214"&#13;
-					value		=	"dominicsayers"&#13;
+				&lt;input id= "ezUser-account-username"
+					tabindex	=	"3214"
+					value		=	"dominicsayers"
 <xi:include parse="text" href="decoration-text.inc" />
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;&#13;
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
 <xi:include parse="text" href="ezUser-account-password.html.inc" />
-			&lt;/fieldset&gt;&#13;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-account-OKCancel.html.inc" />
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;This username already exists&lt;/p&gt;&lt;/div&gt;&#13;
-				&lt;input id="ezUser-account-new" type="hidden" value="true" /&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;This username already exists&lt;/p&gt;&lt;/div&gt;
+				&lt;input id="ezUser-account-new"			type="hidden" value="true" /&gt;
+				&lt;input id="ezUser-account-useSavedPassword"	type="hidden" value="true" /&gt;
+			&lt;/fieldset&gt;
 		&lt;/form&gt;]]&gt;&lt;/ezUser&gt;</result>
 			</results>
 		</test>
@@ -693,27 +730,29 @@
 				<text id="ezUser-account-confirm">password</text>
 			</formfill>
 			<click id="ezUser-account-validate"/>
-			<results><result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;&#13;
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;input id= "ezUser-account-email"&#13;
-					tabindex	=	"3211"&#13;
-					value		=	"dominic_sayers@hotmail.com"&#13;
+			<results><result>&lt;ezUser container="ezUser-account"&gt;&lt;![CDATA[		&lt;!-- Mode is 'edit', new flag is true (originally mode was 'result', new flag was true) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;input id= "ezUser-account-email"
+					tabindex	=	"3211"
+					value		=	"dominic_sayers@hotmail.com"
 <xi:include parse="text" href="decoration-text.inc" />
-				/&gt;&#13;
+				/&gt;
 <xi:include parse="text" href="ezUser-account-firstnamelastname.html.inc" />
-				&lt;input id= "ezUser-account-username"&#13;
-					tabindex	=	"3214"&#13;
-					value		=	"dominicsayers2"&#13;
+				&lt;input id= "ezUser-account-username"
+					tabindex	=	"3214"
+					value		=	"dominicsayers2"
 <xi:include parse="text" href="decoration-text.inc" />
-				/&gt;&#13;
-				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;&#13;
+				/&gt;
+				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
 <xi:include parse="text" href="ezUser-account-password.html.inc" />
-			&lt;/fieldset&gt;&#13;
+			&lt;/fieldset&gt;
 <xi:include parse="text" href="ezUser-account-OKCancel.html.inc" />
-			&lt;fieldset class="ezUser-fieldset"&gt;&#13;
-				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;Email address is already registered&lt;/p&gt;&lt;/div&gt;&#13;
-				&lt;input id="ezUser-account-new" type="hidden" value="true" /&gt;&#13;
-			&lt;/fieldset&gt;&#13;
+			&lt;fieldset class="ezUser-fieldset"&gt;
+				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;Email address is already registered&lt;/p&gt;&lt;/div&gt;
+				&lt;input id="ezUser-account-new"			type="hidden" value="true" /&gt;
+				&lt;input id="ezUser-account-useSavedPassword"	type="hidden" value="true" /&gt;
+			&lt;/fieldset&gt;
 		&lt;/form&gt;]]&gt;&lt;/ezUser&gt;</result></results>
 		</test>
 		<test name="Register new account - no username2">
@@ -727,7 +766,8 @@
 			</formfill>
 			<click id="ezUser-account-validate"/>
 			<post id="ezUser-account"/>
-			<results><result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
+			<results><result>&lt;div class="ezUser-account" id="ezUser-account"&gt;		&lt;!-- Mode is 'edit', new flag is true (originally mode was 'result', new flag was true) --&gt;
+		&lt;form id="ezUser-account-form" class="ezUser-form" onsubmit="return false"&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;input id="ezUser-account-email" tabindex="3211" value="first.last2@example.com" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-email"&gt;* Email address:&lt;/label&gt;
@@ -737,9 +777,9 @@
 				&lt;label class="ezUser-label" for="ezUser-account-lastName"&gt;Last name:&lt;/label&gt;
 				&lt;input id="ezUser-account-username" tabindex="3214" value="" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="text"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-username"&gt;* Username:&lt;/label&gt;
-				&lt;input id="ezUser-account-password" tabindex="3215" value="password" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-password" tabindex="3215" value="password" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-password"&gt;* Password:&lt;/label&gt;
-				&lt;input id="ezUser-account-confirm" tabindex="3216" value="password" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
+				&lt;input id="ezUser-account-confirm" tabindex="3216" value="password" onfocus="ezUser_passwordFocus(this)" onblur="ezUser_passwordBlur(this)" class="ezUser-text" onkeyup="ezUser_keyUp(event)" size="40" type="password"&gt;
 				&lt;label class="ezUser-label" for="ezUser-account-confirm"&gt;* Confirm password:&lt;/label&gt;
 			&lt;/fieldset&gt;
 			&lt;fieldset class="ezUser-fieldset"&gt;
@@ -750,13 +790,14 @@
 			&lt;fieldset class="ezUser-fieldset"&gt;
 				&lt;div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"&gt;&lt;p class="ezUser-message-fail"&gt;The username cannot be blank&lt;/p&gt;&lt;/div&gt;
 				&lt;input id="ezUser-account-new" value="true" type="hidden"&gt;
+				&lt;input id="ezUser-account-useSavedPassword" value="true" type="hidden"&gt;
 			&lt;/fieldset&gt;
 		&lt;/form&gt;&lt;/div&gt;</result></results>
 		</test>
 		<test name="Go to registration page #5">
 			<click id="ezUser-goaccount"/>
 			<results>
-				<result>&lt;ezUser&gt;<xi:include parse="text" href="ezUser-dashboard.html.inc" /><xi:include parse="text" href="ezUser-account-success.html.inc" />&lt;/ezUser&gt;</result>
+				<result>&lt;ezUser&gt;<xi:include parse="text" href="ezUser-dashboard.html.inc" /><xi:include parse="text" href="ezUser-account.html.inc" />&lt;/ezUser&gt;</result>
 			</results>
 		</test>
 		<test name="Sign out #1">
@@ -862,6 +903,105 @@
 			<location url="$suite-example.html"/>
 			<results>
 				<result><xi:include parse="text" href="ezUser-dashboard.html.inc" /></result>
+			</results>
+		</test>
+		<test name="Go to registration page #6">
+			<click id="ezUser-goaccount"/>
+			<results>
+				<result>&lt;ezUser&gt;<xi:include parse="text" href="ezUser-dashboard.html.inc" /><xi:include parse="text" href="ezUser-account.html.inc" />&lt;/ezUser&gt;</result>
+			</results>
+		</test>
+		<test name="Edit account #1">
+			<click id="ezUser-account-edit"/>
+			<results><result><xi:include parse="text" href="ezUser-account-edit.html.inc" /></result></results>
+		</test>
+		<test name="Update account #1">
+			<click id="ezUser-account-validate"/>
+			<results><result><xi:include parse="text" href="ezUser-account-updated.html.inc" /></result></results>
+		</test>
+		<test name="Edit account #2">
+			<click id="ezUser-account-edit"/>
+			<results><result><xi:include parse="text" href="ezUser-account-edit.html.inc" /></result></results>
+		</test>
+		<test name="Click password field #1">
+			<click id="ezUser-account-password"/>
+			<post id="ezUser-account"/>
+			<results><result><xi:include parse="text" href="ezUser-account-edit-password.html.inc" /></result></results>
+		</test>
+		<test name="Click email field #1">
+			<click id="ezUser-account-email"/>
+			<post id="ezUser-account"/>
+			<results><result><xi:include parse="text" href="ezUser-account-edit-password.html.inc" /></result></results>
+		</test>
+		<test name="Update account #2">
+			<click id="ezUser-account-validate"/>
+			<results><result><xi:include parse="text" href="ezUser-account-updated.html.inc" /></result></results>
+		</test>
+		<test name="Edit account #3">
+			<click id="ezUser-account-edit"/>
+			<results><result><xi:include parse="text" href="ezUser-account-edit.html.inc" /></result></results>
+		</test>
+		<test name="Click confirm field #1">
+			<click id="ezUser-account-confirm"/>
+			<post id="ezUser-account"/>
+			<results><result><xi:include parse="text" href="ezUser-account-edit-password.html.inc" /></result></results>
+		</test>
+		<test name="Click username field #1">
+			<click id="ezUser-account-username"/>
+			<post id="ezUser-account"/>
+			<results><result><xi:include parse="text" href="ezUser-account-edit-password.html.inc" /></result></results>
+		</test>
+		<test name="Update account #3">
+			<click id="ezUser-account-validate"/>
+			<results><result><xi:include parse="text" href="ezUser-account-updated.html.inc" /></result></results>
+		</test>
+		<test name="Edit account #4">
+			<click id="ezUser-account-edit"/>
+			<results><result><xi:include parse="text" href="ezUser-account-edit.html.inc" /></result></results>
+		</test>
+		<test name="Change password">
+			<formfill>
+				<text id="ezUser-account-password">drowssap</text>
+				<text id="ezUser-account-confirm">drowssap</text>
+			</formfill>
+			<click id="ezUser-account-validate"/>
+			<results><result><xi:include parse="text" href="ezUser-account-updated.html.inc" /></result></results>
+		</test>
+		<test name="Sign out #6">
+			<click id="ezUser-signout"/>
+			<results>
+				<result>&lt;ezUser&gt;<xi:include parse="text" href="ezUser-blank.html.inc" /><xi:include parse="text" href="ezUser-account-blank.html.inc" />&lt;/ezUser&gt;</result>
+			</results>
+		</test>
+		<test name="Sign in with new password">
+			<formfill>
+				<text id="ezUser-password">drowssap</text>
+			</formfill>
+			<click id="ezUser-signin"/>
+			<results><result><xi:include parse="text" href="ezUser-dashboard.html.inc" /></result></results>
+		</test>
+		<test name="Go to registration page #7">
+			<click id="ezUser-goaccount"/>
+			<results>
+				<result>&lt;ezUser&gt;<xi:include parse="text" href="ezUser-dashboard.html.inc" /><xi:include parse="text" href="ezUser-account.html.inc" />&lt;/ezUser&gt;</result>
+			</results>
+		</test>
+		<test name="Edit account #5">
+			<click id="ezUser-account-edit"/>
+			<results><result><xi:include parse="text" href="ezUser-account-edit.html.inc" /></result></results>
+		</test>
+		<test name="Change first name">
+			<formfill>
+				<text id="ezUser-account-username"></text>
+				<text id="ezUser-account-firstName">Dominic _Z*!+-	 </text>
+			</formfill>
+			<click id="ezUser-account-validate"/>
+			<results><result><xi:include parse="text" href="ezUser-account-firstname.html.inc" /></result></results>
+		</test>
+		<test name="Go to registration page #8">
+			<click id="ezUser-goaccount"/>
+			<results>
+				<result>&lt;ezUser&gt;<xi:include parse="text" href="ezUser-dashboard-updated.html.inc" /><xi:include parse="text" href="ezUser-account-firstdisp.html.inc" />&lt;/ezUser&gt;</result>
 			</results>
 		</test>
 	</tests>

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<suite version="0.7" name="Development code" xmlns:xi="http://www.w3.org/2001/XInclude">
+<suite xmlns:xi="http://www.w3.org/2001/XInclude" version="0.8" name="Development code">
 	<parameters>
 		<testPath>release/test</testPath>
 		<packagePath>_includes/ezUser</packagePath>
-		<versionText>(development code)</versionText>
+		<versionText></versionText>
 	</parameters>
 	<xi:include href="tests.xml#xpointer(/suite/*)" />
 </suite>

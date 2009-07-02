@@ -1,9 +1,9 @@
-<ezUser container="ezUser-account"><![CDATA[		<!-- Mode is 'edit', new flag is true (originally mode was 'result', new flag was true) -->
+<ezUser container="ezUser-account"><![CDATA[		<!-- Mode is 'new', new flag is true (originally mode was 'new', new flag was false) -->
 		<form id="ezUser-account-form" class="ezUser-form" onsubmit="return false">
 			<fieldset class="ezUser-fieldset">
 				<input id= "ezUser-account-email"
 					tabindex	=	"3211"
-					value		=	"Really bad email address"
+					value		=	""
 					type		=	"text"
 					class		=	"ezUser-text"
 					onkeyup		=	"ezUser_keyUp(event)"
@@ -12,7 +12,7 @@
 				<label class="ezUser-label" for="ezUser-account-email">* Email address:</label>
 				<input id= "ezUser-account-firstName"
 					tabindex	=	"3212"
-					value		=	"First"
+					value		=	""
 					type		=	"text"
 					class		=	"ezUser-text"
 					onkeyup		=	"ezUser_keyUp(event)"
@@ -21,7 +21,7 @@
 				<label class="ezUser-label" for="ezUser-account-firstName">First name:</label>
 				<input id= "ezUser-account-lastName"
 					tabindex	=	"3213"
-					value		=	"Last"
+					value		=	""
 					type		=	"text"
 					class		=	"ezUser-text"
 					onkeyup		=	"ezUser_keyUp(event)"
@@ -30,7 +30,7 @@
 				<label class="ezUser-label" for="ezUser-account-lastName">Last name:</label>
 				<input id= "ezUser-account-username"
 					tabindex	=	"3214"
-					value		=	"firstlast"
+					value		=	""
 					type		=	"text"
 					class		=	"ezUser-text"
 					onkeyup		=	"ezUser_keyUp(event)"
@@ -39,7 +39,7 @@
 				<label class="ezUser-label" for="ezUser-account-username">* Username:</label>
 				<input id= "ezUser-account-password"
 					tabindex	=	"3215"
-					value		=	"************"
+					value		=	""
 					type		=	"password"
 					onfocus		=	"ezUser_passwordFocus(this)"
 					onblur		=	"ezUser_passwordBlur(this)"
@@ -50,7 +50,7 @@
 				<label class="ezUser-label" for="ezUser-account-password">* Password:</label>
 				<input id= "ezUser-account-confirm"
 					tabindex	=	"3216"
-					value		=	"************"
+					value		=	""
 					type		=	"password"
 					onfocus		=	"ezUser_passwordFocus(this)"
 					onblur		=	"ezUser_passwordBlur(this)"
@@ -62,7 +62,7 @@
 			</fieldset>
 			<fieldset class="ezUser-fieldset">
 				<div id="ezUser-account-message" class="ezUser-message" onclick="ezUser_click(this)"><p class="ezUser-message-plain">* = mandatory field</p></div>
-				<input id="ezUser-account-validate" value="OK"
+				<input id="ezUser-account-validate" value="Register"
 					tabindex	=	"3217"
 					type		=	"button"
 					class		=	"ezUser-button ezUser-action ezUser-buttonstate-0"
@@ -84,8 +84,8 @@
 				/>
 			</fieldset>
 			<fieldset class="ezUser-fieldset">
-				<div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"><p class="ezUser-message-fail">The format of the email address you entered was incorrect. Email addresses should be in the form <em>joe.smith@example.com</em></p></div>
+				<div id="ezUser-account-text" class="ezUser-text" onclick="ezUser_click(this)"><p class="ezUser-message-hidden"></p></div>
 				<input id="ezUser-account-new"			type="hidden" value="true" />
-				<input id="ezUser-account-useSavedPassword"	type="hidden" value="true" />
+				<input id="ezUser-account-useSavedPassword"	type="hidden" value="false" />
 			</fieldset>
 		</form>]]></ezUser>

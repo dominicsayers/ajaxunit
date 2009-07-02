@@ -1,4 +1,5 @@
-﻿<ezUser container="ezUser-account"><![CDATA[		<form id="ezUser-account-form" class="ezUser-form" onsubmit="return false">
+﻿<ezUser container="ezUser-account"><![CDATA[		<!-- Mode is 'display', new flag is false (originally mode was 'result', new flag was true) -->
+		<form id="ezUser-account-form" class="ezUser-form" onsubmit="return false">
 			<fieldset class="ezUser-fieldset">
 				<input id= "ezUser-account-email"
 					tabindex	=	"3211"
@@ -44,6 +45,8 @@
 					tabindex	=	"3215"
 					value		=	"************"
 					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
 					disabled	=	"disabled"
 					class		=	"ezUser-text"
 					onkeyup		=	"ezUser_keyUp(event)"
@@ -54,6 +57,8 @@
 					tabindex	=	"3216"
 					value		=	"************"
 					type		=	"password"
+					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
 					disabled	=	"disabled"
 					class		=	"ezUser-text"
 					onkeyup		=	"ezUser_keyUp(event)"
@@ -96,6 +101,7 @@
 					onfocus		=	"ezUser_setButtonState(this, 2, true)"
 					onblur		=	"ezUser_setButtonState(this, 2, false)"
 				/>
-				<input id="ezUser-account-new" type="hidden" value="false" />
+				<input id="ezUser-account-new"			type="hidden" value="false" />
+				<input id="ezUser-account-useSavedPassword"	type="hidden" value="false" />
 			</fieldset>
 		</form>]]></ezUser>

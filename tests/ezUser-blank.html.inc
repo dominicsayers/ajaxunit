@@ -14,6 +14,7 @@
 					value		=	""
 					type		=	"password"
 					onfocus		=	"ezUser_passwordFocus(this)"
+					onblur		=	"ezUser_passwordBlur(this)"
 					class		=	"ezUser-text"
 					onkeyup		=	"ezUser_keyUp(event)"
 					size		=	"40"
