@@ -4,7 +4,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.17 - Now with XInclude so you can componentize your test scripts (see examples)
+ * @version	0.18 - Now processes inline Javascript events correctly when updating a form
  */
 /*jslint eqeqeq: true, immed: true, nomen: true, strict: true, undef: true*/
 /*global window, document, event, ActiveXObject */ // For JSLint
@@ -12,7 +12,7 @@
 var ajaxUnitInstances = [];
 
 // ---------------------------------------------------------------------------
-// 		ajaxUnit
+//		ajaxUnit
 // ---------------------------------------------------------------------------
 // The main ajaxUnit client-side class
 // ---------------------------------------------------------------------------
@@ -92,7 +92,7 @@ function C_ajaxUnit() {
 		if (fail)			{
 			markupStart	= '<strong>'; 
 			markupEnd	= '</strong>'; 
-			serverTalk('end=' + encodeURI(text), 'GET');
+			serverTalk('GET', 'end=' + encodeURI(text));
 		}
 
 		// Add to the log
@@ -101,7 +101,7 @@ function C_ajaxUnit() {
 		element.innerHTML	= markupStart + text + markupEnd;
 
 		container.appendChild(element);
-// 		window.alert(text); // Uncomment this to step through the tests
+//		window.alert(text); // Uncomment this to step through the tests
 	}
 
 // ---------------------------------------------------------------------------
@@ -109,25 +109,58 @@ function C_ajaxUnit() {
 		var	controlId	= controlNode.getAttribute('$attrID'),
 			controlType	= controlNode.nodeName,
 			controlValue	= (typeof controlNode.textContent === 'undefined') ? controlNode.text : controlNode.textContent,
-			control		= document.getElementById(controlId);
+			control		= document.getElementById(controlId),
+			e, doEvent;
 
 		if (control === null) {
 			logAppend(' - - No control with id ' + controlId, true);
 		} else {
 			logAppend(' - - setting ' + controlId + ' (' + controlType + ') to ' + controlValue);
 
-			control.focus();
+			if (typeof document.activeElement.onBlur === 'function') {document.activeElement.onBlur()}
+			if (typeof document.activeElement.onblur === 'function') {document.activeElement.onblur()}
+			if (typeof control.onFocus === 'function') {doEvent = control.onFocus(control);}
+			if (typeof control.onfocus === 'function') {doEvent = control.onfocus(control);}
+			if (doEvent !== false) {control.focus();}
 
 			switch (controlType) {
 				case '$tagCheckbox':
-					control.checked		= (controlValue === 'checked') ? true : false;
+					control.checked = (controlValue === 'checked') ? true : false;
+					if (typeof control.onClick === 'function') {control.onClick(control);}
+					if (typeof control.onclick === 'function') {control.onclick(control);}
 					break;
 				case '$tagRadio':
-					control.checked		= (controlValue === 'checked') ? true : false;
+					control.checked = (controlValue === 'checked') ? true : false;
+					if (typeof control.onClick === 'function') {control.onClick(control);}
+					if (typeof control.onclick === 'function') {control.onclick(control);}
 					break;
 				default:
 					control.defaultValue	= controlValue;
 					control.value		= controlValue;
+
+					if (typeof control.onChange	=== 'function') {control.onChange(control);}
+					if (typeof control.onchange	=== 'function') {control.onchange(control);}
+					
+					if (typeof event === 'undefined') {
+						// Non-IE
+						function event(which, target) {
+							this.which = which;
+							this.target = target;
+						}
+
+						e = new event(controlValue.charCodeAt(controlValue.length - 1), control);
+					} else {
+						// IE
+						e = event;
+						e.keyCode = controlValue.charCodeAt(controlValue.length - 1);
+						e.target = control;
+					}
+
+					if (typeof control.onKeyDown	=== 'function') {control.onKeyDown(e);}
+					if (typeof control.onkeydown	=== 'function') {control.onkeydown(e);}
+					if (typeof control.onKeyUp	=== 'function') {control.onKeyUp(e);}
+					if (typeof control.onkeyup	=== 'function') {control.onkeyup(e);}
+					break;
 			}
 		}
 	}
@@ -155,7 +188,14 @@ function C_ajaxUnit() {
 				logAppend(' - No control with id ' + controlId, true);
 			} else {
 				logAppend(' - clicking button ' + controlId);
-				control.click();
+				if (typeof document.activeElement.onBlur === 'function') {document.activeElement.onBlur()}
+				if (typeof document.activeElement.onblur === 'function') {document.activeElement.onblur()}
+				if (typeof control.onFocus === 'function') {doEvent = control.onFocus(control);}
+				if (typeof control.onfocus === 'function') {doEvent = control.onfocus(control);}
+				if (doEvent !== false) {
+					control.focus();
+					control.click();
+				}
 			}
 
 			break;
@@ -276,7 +316,7 @@ function C_ajaxUnit() {
 }
 
 // ---------------------------------------------------------------------------
-// 		ajaxUnit
+//		ajaxUnit
 // ---------------------------------------------------------------------------
 // Process results returned from XMLHttpRequest object
 // ---------------------------------------------------------------------------

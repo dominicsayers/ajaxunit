@@ -1,6 +1,6 @@
 <?php
 // ---------------------------------------------------------------------------
-// 		ajaxUnit
+//		ajaxUnit
 // ---------------------------------------------------------------------------
 /**
  * @package	ajaxUnit
@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.17 - Now with XInclude so you can componentize your test scripts (see examples)
+ * @version	0.18 - Now processes inline Javascript events correctly when updating a form
  */
 
 /*.
@@ -197,7 +197,7 @@ class ajaxUnit implements ajaxUnitAPI {
 
 	private static /*.string.*/ function substituteParameters($text) {
 		extract(self::getTestContext());
-		return eval('return "' . addslashes($text) . '";');
+		return eval('return "' . str_replace('"', '\\"', $text) . '";');
 	}
 
 	private static /*.void.*/ function investigateDifference(/*.string.*/ $results, /*.string.*/ $expected, /*.string.*/ $unique, $dummyRun = false) {
@@ -437,19 +437,19 @@ class ajaxUnit implements ajaxUnitAPI {
 					$results	= htmlspecialchars_decode($results);
 					$expected	= htmlspecialchars_decode(self::substituteParameters($node->nodeValue));
 					$expected	= str_replace(chr(0xEF).chr(0xBB).chr(0xBF), '', $expected); // Get rid of stray UTF-8 BOMs from XIncluded files
-					if (get_magic_quotes_gpc()) $expected = addslashes($expected);	// magic_quotes_gpc will go away soon, but for now
+//					if (get_magic_quotes_gpc()) $expected = addslashes($expected);	// magic_quotes_gpc will go away soon, but for now
 
 					if ($dummyRun) {
 						$success = true;
 					} else {
-						$success = ($results === $expected) ? true : false; // This is the whole point of all this!
+						$success = ($results === $expected); // This is the whole point of all this!
 
 						if (!$success) {
 							self::appendLog("Byte-for-byte match not successful, trying looser EOL definition...", $dummyRun, 6);
 							// Try substituting \r\n for \n in strings (because bits of either may come from a Windows file)
 							$results	= str_replace("\r\n", "\n", $results); 
 							$expected	= str_replace("\r\n", "\n", $expected); 
-							$success	= ($results === $expected) ? true : false;
+							$success	= ($results === $expected);
 						}
 					}
 
@@ -555,7 +555,7 @@ class ajaxUnit implements ajaxUnitAPI {
 // ---------------------------------------------------------------------------
 // Public methods
 // ---------------------------------------------------------------------------
-// 	runTestSuite - called to initiate a named series of tests
+//	runTestSuite - called to initiate a named series of tests
 // ---------------------------------------------------------------------------
 	public static /*.void.*/ function runTestSuite(/*.string.*/ $suite, $dummyRun = false) {
 		$context	= /*.(array[string]string).*/ array();
@@ -572,7 +572,7 @@ class ajaxUnit implements ajaxUnitAPI {
 
 		$document	= self::getDOMDocument($suite);
 		$text		= ($dummyRun) ? "Dummy" : "Starting";
-		$suiteNode 	= $document->getElementsByTagName(self::TAGNAME_SUITE)->item(0);
+		$suiteNode	= $document->getElementsByTagName(self::TAGNAME_SUITE)->item(0);
 		$suiteName	= htmlspecialchars($suiteNode->getAttribute(self::ATTRNAME_NAME));
 		$suiteVersion	= $suiteNode->getAttribute("version");
 
@@ -634,7 +634,7 @@ class ajaxUnit implements ajaxUnitAPI {
 	}
 
 // ---------------------------------------------------------------------------
-// 	parseTest - called by the browser when it receives AJAX responseText
+//	parseTest - called by the browser when it receives AJAX responseText
 // ---------------------------------------------------------------------------
 	public static /*.void.*/ function parseTest($dummyRun = false) {
 		// Get some context for this test

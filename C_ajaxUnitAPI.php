@@ -1,6 +1,6 @@
 <?php
 // ---------------------------------------------------------------------------
-// 		ajaxUnitAPI
+//		ajaxUnitAPI
 // ---------------------------------------------------------------------------
 /**
  * @package	ajaxUnit
@@ -8,7 +8,7 @@
  * @copyright	2009 Dominic Sayers
  * @license	http://www.opensource.org/licenses/cpal_1.0 Common Public Attribution License Version 1.0 (CPAL) license
  * @link	http://code.google.com/p/ajaxunit/
- * @version	0.17 - Now with XInclude so you can componentize your test scripts (see examples)
+ * @version	0.18 - Now processes inline Javascript events correctly when updating a form
  */
 interface ajaxUnitAPI {
 	/*.public.*/	const	PACKAGE			= 'ajaxUnit',
