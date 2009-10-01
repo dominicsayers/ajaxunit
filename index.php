@@ -1,16 +1,19 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.1//EN" "http://www.w3.org/TR/xhtml11/DTD/xhtml11.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!DOCTYPE html>
+<html>
 
 <head>
 	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-	<link rel="shortcut icon" href="ajaxUnit.ico" />
+	<link rel="shortcut icon" href="ajaxunit.ico" />
 	<title>ajaxUnit - run tests</title>
 </head>
 
 <body>
 <?php
-	require_once 'ajaxUnit.php';
-	ajaxUnitUI::getContainer(ajaxUnitUI::ACTION_LOGTIDY);
+	require_once 'ajaxunit.php';
+	ajaxUnit::setProject($_GET['project']);
+//	ajaxUnit::setRoot('..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.'projects'.DIRECTORY_SEPARATOR.''.$_GET['project']);
+	ajaxUnit::setRoot('..'.DIRECTORY_SEPARATOR.'..'.DIRECTORY_SEPARATOR.''.$_GET['project']);
+	ajaxUnit::getContainer(ajaxUnit::ACTION_LOGTIDY);
 ?>
 </body>
 
