@@ -33,7 +33,7 @@
  * @copyright	2008-2010 Dominic Sayers
  * @license	http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link	http://code.google.com/p/ajaxUnit/
- * @version	0.17.30 - Added 'ignore' tag - just put 'ignore' before any test element to ignore it
+ * @version	0.18.4 - New common functions class
  */
 
 // The quality of this code has been improved greatly by using PHPLint
@@ -55,14 +55,10 @@ ini_set('display_errors', '1');
  * Common utility functions
  *
  * @package ajaxUnit
- * @version 1.14 (revision number of this common functions class only)
+ * @version 1.19 (revision number of this common functions class only)
  */
 
 interface I_ajaxUnit_common {
-//	const	PACKAGE				= 'ajaxUnit',
-//		VERSION				= '0.17', // Version 1.13: added
-// Version 1.14: PACKAGE & VERSION now hard-coded by build process.
-
 	const	HASH_FUNCTION			= 'SHA256',
 		URL_SEPARATOR			= '/',
 
@@ -76,13 +72,6 @@ interface I_ajaxUnit_common {
 		URL_MODE_PORT			= 4,
 		URL_MODE_PATH			= 8,
 		URL_MODE_ALL			= 15,
-
-		// Behaviour settings for getPackage()
-//		PACKAGE_CASE_DEFAULT		= 0,
-////		PACKAGE_CASE_LOWER		= 0,
-//		PACKAGE_CASE_CAMEL		= 1,
-//		PACKAGE_CASE_UPPER		= 2,
-// Version 1.14: PACKAGE & VERSION now hard-coded by build process.
 
 		// Extra GLOB constant for safe_glob()
 		GLOB_NODIR			= 256,
@@ -126,8 +115,10 @@ interface I_ajaxUnit_common {
 	public static /*.string.*/			function var_dump_to_HTML(/*.string.*/ $var_dump, $offset = 0);
 	public static /*.string.*/			function array_to_HTML(/*.array[]mixed.*/ $source = NULL);
 
+	// Session functions
+	public static /*.void.*/			function checkSession();	// Version 1.18: Added
+
 	// Environment functions
-//	public static /*.string.*/			function getPackage($mode = self::PACKAGE_CASE_DEFAULT); // Version 1.14: PACKAGE & VERSION now hard-coded by build process.
 	public static /*.string.*/			function getURL($mode = self::URL_MODE_PATH, $filename = '');
 	public static /*.string.*/			function docBlock_to_HTML(/*.string.*/ $php);
 
@@ -145,7 +136,6 @@ interface I_ajaxUnit_common {
 	public static /*.string.*/			function prkg(/*.int.*/ $index, /*.int.*/ $length = 6, /*.int.*/ $base = 34, /*.int.*/ $seed = 0);
 
 	// Validation functions
-//	public static /*.boolean.*/			function is_email(/*.string.*/ $email, $checkDNS = false);
 	public static /*.mixed.*/			function is_email(/*.string.*/ $email, $checkDNS = false, $diagnose = false); // New parameters from version 1.8
 }
 
@@ -421,26 +411,11 @@ echo "$indent Corrected \$offset = $offset\n"; // debug
 		return self::var_dump_to_HTML($var_dump);
 	}
 
-///**
-// * Return the name of this package. By default this will be in lower case for use in Javascript tags etc.
-// *
-// * @param int $mode One of the <var>PACKAGE_CASE_XXX</var> predefined constants defined in this class
-// */
-//	public static /*.string.*/ function getPackage($mode = self::PACKAGE_CASE_DEFAULT) {
-//		switch ($mode) {
-//		case self::PACKAGE_CASE_CAMEL:
-//			$package = self::PACKAGE;
-//			break;
-//		case self::PACKAGE_CASE_UPPER:
-//			$package = strtoupper(self::PACKAGE);
-//			break;
-//		default:
-//			$package = strtolower(self::PACKAGE);
-//			break;
-//		}
-//
-//		return $package;
-//	}
+// Version 1.18: Added checkSession()
+/**
+ * Check session is running. If not start one.
+ */
+	public static /*.void.*/ function checkSession() {if (!isset($_SESSION) || !is_array($_SESSION) || (session_id() === '')) session_start();}
 
 /**
  * Return all or part of the URL of the current script.
@@ -448,8 +423,9 @@ echo "$indent Corrected \$offset = $offset\n"; // debug
  * @param int $mode One of the <var>URL_MODE_XXX</var> predefined constants defined in this class
  * @param string $filename If this is not empty then the returned script name is forced to be this filename.
  */
-	public static /*.string.*/ function getURL($mode = self::URL_MODE_PATH, $filename = 'ajaxUnit') {
+	public static /*.string.*/ function getURL($mode = self::URL_MODE_PATH, $filename = '') {
 // Version 1.14: PACKAGE & VERSION now hard-coded by build process.
+// Version 1.16: Filename default is now '', was 'ajaxUnit'
 		$portInteger = array_key_exists('SERVER_PORT', $_SERVER) ? (int) $_SERVER['SERVER_PORT'] : 0;
 
 		if (array_key_exists('HTTPS', $_SERVER) && $_SERVER['HTTPS'] === 'on') {
@@ -526,7 +502,6 @@ echo "</pre>\n"; // debug
  */
 	public static /*.string.*/ function docBlock_to_HTML(/*.string.*/ $php) {
 // Updated in version 1.12 (bug fixes and formatting)
-//		$package	= self::getPackage(self::PACKAGE_CASE_CAMEL); // Version 1.14: PACKAGE & VERSION now hard-coded by build process.
 		$eol		= "\r\n";
 		$tagStart	= strpos($php, "/**$eol * ");
 
@@ -551,13 +526,8 @@ echo "</pre>\n"; // debug
 			$value		= htmlspecialchars(substr($php, $tagEnd + 1, $tagPos - $tagEnd - 1));
 			$tagPos		= strpos($php, " * @", $offset);
 
-//			$$tag		= htmlspecialchars($value); // The easy way. But PHPlint doesn't like it, so...
-
-//			$package	= '';
-//			$summary	= '';
-//			$description	= '';
-
 			switch ($tag) {
+			case 'package':		$package	= $value; break; // Version 1.19: Remembered this one. Oops.
 			case 'license':		$license	= $value; break;
 			case 'author':		$author		= $value; break;
 			case 'link':		$link		= $value; break;
@@ -588,7 +558,7 @@ echo "</pre>\n"; // debug
 
 		// Build the HTML
 		$html = <<<HTML
-	<h1>ajaxUnit</h1>
+	<h1>$package</h1> // Version 1.16 changed to $package from ajaxUnit
 	<h2>$summary</h2>
 	<pre>$description</pre>
 	<hr />
@@ -769,7 +739,7 @@ HTML;
  * Shuffle an array using the Mersenne Twist PRNG (can be deterministically seeded)
  *
  */
-	public static /*.void.*/ function mt_shuffle_array(/*.array.*/ &$arr, /*.int.*/ $seed = 0) {
+	private static /*.void.*/ function mt_shuffle_array(/*.array.*/ &$arr, /*.int.*/ $seed = 0) {
 		$count	= count($arr);
 		$keys	= array_keys($arr);
 
@@ -855,17 +825,17 @@ HTML;
 		//					    ^ base 34 recommended
 
 		// Is $base in range?
-		if ($base < 2)			{die('Base must be greater than or equal to 2');}
-		if ($base > 66)			{die('Base must be less than or equal to 66');}
+		if ($base < 2)			{exit('Base must be greater than or equal to 2');}
+		if ($base > 66)			{exit('Base must be less than or equal to 66');}
 
 		// Is $length in range?
-		if ($length < 1)		{die('Length must be greater than or equal to 1');}
+		if ($length < 1)		{exit('Length must be greater than or equal to 1');}
 		// Max length depends on arithmetic functions of PHP
 
 		// Is $index in range?
 		$max_index = (int) pow($base, $length);
-		if ($index < 0)			{die('Index must be greater than or equal to 0');}
-		if ($index > $max_index)	{die('Index must be less than or equal to ' . $max_index);}
+		if ($index < 0)			{exit('Index must be greater than or equal to 0');}
+		if ($index > $max_index)	{exit('Index must be less than or equal to ' . $max_index);}
 
 		// Seed the RNG with a deterministic seed
 		mt_srand($seed);
@@ -1499,7 +1469,7 @@ HTML;
 	private static /*.string.*/ function htmlPageBottom() {
 		return <<<HTML
 			<p><a id="bottom" href="#top">&laquo; top</a></p>
-			<p>ajaxUnit version 0.17.30</p>
+			<p>ajaxUnit version 0.18.4</p>
 		</div>
 		<script type="text/javascript">
 			function ajaxUnit_toggle_log(control, id) {
@@ -1632,6 +1602,7 @@ HTML;
 
 	private static /*.string.*/ function getSuiteFilename(/*.string.*/ $suite) {
 		$folder = (string) self::getTestContext(self::TAGNAME_FOLDER_TESTS);
+		if (empty($folder)) exit('Tests folder has not been set. Please use index.html');
 		self::makeFolder($folder);
 		return $folder.DIRECTORY_SEPARATOR.$suite.'.'.self::TESTS_EXTENSION;
 	}
@@ -1640,7 +1611,8 @@ HTML;
 		$filename = self::getSuiteFilename($suite);
 		$document = new DOMDocument();
 		$document->documentURI = $filename;
-		@$document->load($filename);
+		$success = @$document->load($filename);
+		if (!$success) exit("Unable to load XML document '$filename'");
 		$document->xinclude();
 		return $document;
 	}
@@ -1689,14 +1661,14 @@ HTML;
 		self::appendLog('<hr />', $dummyRun, 0, '', 3);
 	}
 
-//	private static /*.void.*/ function logTestScript(DOMDocument $document, $dummyRun = false) {
-//		self::appendLog("<span class=\"ajaxunit-testlog\" onclick=\"ajaxUnit_toggle_log(this, 'ajaxunit-script')\">+</span> Test script", $dummyRun, 0, 'p', 3);
-//		self::appendLog("<div class=\"ajaxunit-testlog\" id=\"ajaxunit-script\">", $dummyRun, 0, '', 3);
-//		self::appendLog('<pre>' . htmlspecialchars($document->saveXML()) . '</pre>', $dummyRun);
-//		self::appendLog('</div>', $dummyRun, 0, '', 3);
-//		self::appendLog('<hr />', $dummyRun, 0, '', 3);
-//	}
-
+//-	private static /*.void.*/ function logTestScript(DOMDocument $document, $dummyRun = false) {
+//-		self::appendLog("<span class=\"ajaxunit-testlog\" onclick=\"ajaxUnit_toggle_log(this, 'ajaxunit-script')\">+</span> Test script", $dummyRun, 0, 'p', 3);
+//-		self::appendLog("<div class=\"ajaxunit-testlog\" id=\"ajaxunit-script\">", $dummyRun, 0, '', 3);
+//-		self::appendLog('<pre>' . htmlspecialchars($document->saveXML()) . '</pre>', $dummyRun);
+//-		self::appendLog('</div>', $dummyRun, 0, '', 3);
+//-		self::appendLog('<hr />', $dummyRun, 0, '', 3);
+//-	}
+//-
 	protected static /*.void.*/ function logResult(/*.boolean.*/ $success, $dummyRun = false) {
 		self::appendLog('</div>', $dummyRun, 0, '', 3);
 
@@ -3421,6 +3393,11 @@ class ajaxUnit_results extends ajaxUnit_environment implements I_ajaxUnit_result
 		// Get some context for this test
 		$context = /*.(array[string]string).*/ self::getTestContext();
 
+		if (in_array($context[self::TAGNAME_STATUS], array('', self::STATUS_FINISHED, self::STATUS_FAIL, self::STATUS_FATALERROR))) {
+			echo 'No testing in progress';
+			return false;
+		}
+
 		// Wait for previous reponse to be parsed
 		$totalSleeps	= 0;
 		$maxCounter	= (int) (self::TEST_MAXWAIT / self::TEST_WAITUSECS);
@@ -3530,7 +3507,6 @@ abstract class ajaxUnit_control extends ajaxUnit_environment implements I_ajaxUn
 		$browser				= new ajaxUnit_browser();
 		$context[self::TAGNAME_BROWSER]		= $browser->Name;
 		$context[self::TAGNAME_BROWSERVERSION]	= $browser->Version;
-
 		self::setTestContext($context);
 
 		$document	= self::getDOMDocument($suite);
@@ -3660,7 +3636,7 @@ class ajaxUnit extends ajaxUnit_control implements I_ajaxUnit {
  * @copyright	2008-2010 Dominic Sayers
  * @license	http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link	http://code.google.com/p/ajaxUnit/
- * @version	0.17.30 - Added 'ignore' tag - just put 'ignore' before any test element to ignore it
+ * @version	0.18.4 - New common functions class
  */
 
 .dummy {} /* Webkit is ignoring the first item so we'll put a dummy one in */
@@ -3773,7 +3749,7 @@ GENERATED;
  * @copyright	2008-2010 Dominic Sayers
  * @license	http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link	http://code.google.com/p/ajaxUnit/
- * @version	0.17.30 - Added 'ignore' tag - just put 'ignore' before any test element to ignore it
+ * @version	0.18.4 - New common functions class
  */
 
 /*jslint onevar: true, undef: true, nomen: true, eqeqeq: true, regexp: true, newcap: true, immed: true, strict: true */
@@ -4265,7 +4241,7 @@ $suiteList
 				</div>
 			</fieldset>
 		</form>
-		<p class="ajaxunit-footnote">ajaxUnit version 0.17.30 - $message</p>
+		<p class="ajaxunit-footnote">ajaxUnit version 0.18.4 - $message</p>
 HTML;
 		}
 
