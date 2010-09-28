@@ -2,7 +2,7 @@
 <html>
 
 <head>
-	<meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+	<meta charset="UTF-8" />
 	<link rel="shortcut icon" href="ajaxunit.php?icon" />
 	<link rel="stylesheet"    href="ajaxunit.php?css"  type="text/css" title="ajaxUnit" />
 	<title>ajaxUnit - run tests</title>

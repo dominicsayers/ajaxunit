@@ -33,7 +33,7 @@
  * @copyright	2008-2010 Dominic Sayers
  * @license	http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link	http://code.google.com/p/ajaxUnit/
- * @version	0.18.4 - New common functions class
+ * @version	0.19.17 - Bugfixes arising from ezUser testing
  */
 
 // The quality of this code has been improved greatly by using PHPLint
@@ -43,6 +43,7 @@
 /*.
 	require_module 'standard';
 	require_module 'dom';
+	require_module 'libxml';
 	require_module 'session';
 	require_module 'pcre';
 	require_module 'hash';
@@ -51,11 +52,15 @@
 error_reporting(E_ALL | E_STRICT);
 ini_set('display_errors', '1');
 
+// PHPLint
+/*.unchecked.*/ class ajaxUnitException extends Exception {}
+/*.forward mixed function cast(string $type, mixed $variable);.*/
+
 /**
  * Common utility functions
  *
  * @package ajaxUnit
- * @version 1.19 (revision number of this common functions class only)
+ * @version 1.22 (revision number of this common functions class only)
  */
 
 interface I_ajaxUnit_common {
@@ -80,36 +85,54 @@ interface I_ajaxUnit_common {
 		GLOB_RECURSE			= 2048,
 
 		// Email validation constants
+		// No errors
 		ISEMAIL_VALID			= 0,
-		ISEMAIL_TOOLONG			= 1,
-		ISEMAIL_NOAT			= 2,
-		ISEMAIL_NOLOCALPART		= 3,
-		ISEMAIL_NODOMAIN		= 4,
-		ISEMAIL_ZEROLENGTHELEMENT	= 5,
-		ISEMAIL_BADCOMMENT_START	= 6,
-		ISEMAIL_BADCOMMENT_END		= 7,
-		ISEMAIL_UNESCAPEDDELIM		= 8,
-		ISEMAIL_EMPTYELEMENT		= 9,
-		ISEMAIL_UNESCAPEDSPECIAL	= 10,
-		ISEMAIL_LOCALTOOLONG		= 11,
-		ISEMAIL_IPV4BADPREFIX		= 12,
-		ISEMAIL_IPV6BADPREFIXMIXED	= 13,
-		ISEMAIL_IPV6BADPREFIX		= 14,
-		ISEMAIL_IPV6GROUPCOUNT		= 15,
-		ISEMAIL_IPV6DOUBLEDOUBLECOLON	= 16,
-		ISEMAIL_IPV6BADCHAR		= 17,
-		ISEMAIL_IPV6TOOMANYGROUPS	= 18,
-		ISEMAIL_TLD			= 19,
-		ISEMAIL_DOMAINEMPTYELEMENT	= 20,
-		ISEMAIL_DOMAINELEMENTTOOLONG	= 21,
-		ISEMAIL_DOMAINBADCHAR		= 22,
-		ISEMAIL_DOMAINTOOLONG		= 23,
-		ISEMAIL_TLDNUMERIC		= 24,
-		ISEMAIL_DOMAINNOTFOUND		= 25;
-//		ISEMAIL_NOTDEFINED		= 99;
+		// Warnings (valid address but unlikely in the real world)
+		ISEMAIL_WARNING			= 64,
+		ISEMAIL_TLD			= 65,
+		ISEMAIL_TLDNUMERIC		= 66,
+		ISEMAIL_QUOTEDSTRING		= 67,
+		ISEMAIL_COMMENTS		= 68,
+		ISEMAIL_FWS			= 69,
+		ISEMAIL_ADDRESSLITERAL		= 70,
+		ISEMAIL_UNLIKELYINITIAL		= 71,
+		ISEMAIL_SINGLEGROUPELISION	= 72,
+		ISEMAIL_DOMAINNOTFOUND		= 73,
+		ISEMAIL_MXNOTFOUND		= 74,
+		// Errors (invalid address)
+		ISEMAIL_ERROR			= 128,
+		ISEMAIL_TOOLONG			= 129,
+		ISEMAIL_NOAT			= 130,
+		ISEMAIL_NOLOCALPART		= 131,
+		ISEMAIL_NODOMAIN		= 132,
+		ISEMAIL_ZEROLENGTHELEMENT	= 133,
+		ISEMAIL_BADCOMMENT_START	= 134,
+		ISEMAIL_BADCOMMENT_END		= 135,
+		ISEMAIL_UNESCAPEDDELIM		= 136,
+		ISEMAIL_EMPTYELEMENT		= 137,
+		ISEMAIL_UNESCAPEDSPECIAL	= 138,
+		ISEMAIL_LOCALTOOLONG		= 139,
+		ISEMAIL_IPV4BADPREFIX		= 140,
+		ISEMAIL_IPV6BADPREFIXMIXED	= 141,
+		ISEMAIL_IPV6BADPREFIX		= 142,
+		ISEMAIL_IPV6GROUPCOUNT		= 143,
+		ISEMAIL_IPV6DOUBLEDOUBLECOLON	= 144,
+		ISEMAIL_IPV6BADCHAR		= 145,
+		ISEMAIL_IPV6TOOMANYGROUPS	= 146,
+		ISEMAIL_DOMAINEMPTYELEMENT	= 147,
+		ISEMAIL_DOMAINELEMENTTOOLONG	= 148,
+		ISEMAIL_DOMAINBADCHAR		= 149,
+		ISEMAIL_DOMAINTOOLONG		= 150,
+		ISEMAIL_IPV6SINGLECOLONSTART	= 151,
+		ISEMAIL_IPV6SINGLECOLONEND	= 152,
+		// Unexpected errors
+		ISEMAIL_BADPARAMETER		= 190,
+		ISEMAIL_NOTDEFINED		= 191;
 
 	// Basic utility functions
 	public static /*.string.*/			function strleft(/*.string.*/ $haystack, /*.string.*/ $needle);
+	public static /*.mixed.*/			function reescape(/*.mixed.*/ $literal);
+	public static /*.string.*/			function gettype(/*.mixed.*/ $variable);
 	public static /*.mixed.*/			function getInnerHTML(/*.string.*/ $html, /*.string.*/ $tag);
 	public static /*.array[string][string]string.*/	function meta_to_array(/*.string.*/ $html);
 	public static /*.string.*/			function var_dump_to_HTML(/*.string.*/ $var_dump, $offset = 0);
@@ -132,11 +155,11 @@ interface I_ajaxUnit_common {
 	public static /*.string.*/			function makeId();
 	public static /*.string.*/			function makeUniqueKey(/*.string.*/ $id);
 	public static /*.string.*/			function mt_shuffle(/*.string.*/ $str, /*.int.*/ $seed = 0);
-//	public static /*.void.*/			function mt_shuffle_array(/*.array.*/ &$arr, /*.int.*/ $seed = 0);
+//	public static /*.void.*/			function mt_shuffle_array(/*.array.*/ &$shuffle, /*.int.*/ $seed = 0);
 	public static /*.string.*/			function prkg(/*.int.*/ $index, /*.int.*/ $length = 6, /*.int.*/ $base = 34, /*.int.*/ $seed = 0);
 
 	// Validation functions
-	public static /*.mixed.*/			function is_email(/*.string.*/ $email, $checkDNS = false, $diagnose = false); // New parameters from version 1.8
+	public static /*.mixed.*/			function is_email(/*.string.*/ $email, $checkDNS = false, /*.mixed.*/ $errorlevel = false);	// Revision 1.20: Parameter name changed
 }
 
 /**
@@ -148,7 +171,8 @@ abstract class ajaxUnit_common implements I_ajaxUnit_common {
  *
  * @param string $haystack The string containing the search term
  * @param string $needle The end point of the returned string. In other words, if <var>needle</var> is found then the begging of <var>haystack</var> is returned up to the character before <needle>.
- * @param int $mode If <var>needle</var> is not found then <pre>FALSE</pre> will be returned. */
+ * @param int $mode If <var>needle</var> is not found then <pre>FALSE</pre> will be returned.
+ */
 	public static /*.string.*/ function strleft(/*.string.*/ $haystack, /*.string.*/ $needle, /*.int.*/ $mode = self::STRLEFT_MODE_NONE) {
 		$posNeedle = strpos($haystack, $needle);
 
@@ -159,6 +183,34 @@ abstract class ajaxUnit_common implements I_ajaxUnit_common {
 				return (string) $posNeedle;
 		} else
 			return substr($haystack, 0, $posNeedle);
+	}
+
+/**
+ * Re-escape a string, replacing tabs and carriage returns etc. with their \t, \n equivalent
+ *
+ * @param mixed $literal The string or array of strings to be re-escaped
+ */
+	public static /*.mixed.*/ function reescape(/*.mixed.*/ $literal) {
+		$search		= array("\t",	"\r",	"\n");
+		$replace	= array('\\t',	'\\r',	'\\n');
+
+		return str_replace($search, $replace, $literal);
+	}
+
+/**
+ * Return the type or class of a variable
+ *
+ * @param mixed $variable The variable to be typed
+ */
+	public static /*.string.*/ function gettype(/*.mixed.*/ $variable) {
+		if (is_object($variable)) {
+			/*.object.*/ $typed = cast('object', $variable);
+			$type = get_class($typed);
+		} else {
+			$type = gettype($variable);
+		}
+
+		return $type;
 	}
 
 /**
@@ -212,7 +264,7 @@ abstract class ajaxUnit_common implements I_ajaxUnit_common {
  *
  * <pre>
  * array (
- *   'key' => 
+ *   'key' =>
  *   array (
  *     'Content-Type' => 'text/html; charset=iso-8859-1',
  *     'description' => 'Free Web tutorials',
@@ -229,11 +281,11 @@ abstract class ajaxUnit_common implements I_ajaxUnit_common {
  *     'geo.placename' => 'Boca Raton, FL',
  *     'ICBM' => '26.367559, -80.12172',
  *   ),
- *   'http-equiv' => 
+ *   'http-equiv' =>
  *   array (
  *     'Content-Type' => 'text/html; charset=iso-8859-1',
  *   ),
- *   'name' => 
+ *   'name' =>
  *   array (
  *     'description' => 'Free Web tutorials',
  *     'keywords' => 'corporate,guidelines,cataloging',
@@ -249,11 +301,11 @@ abstract class ajaxUnit_common implements I_ajaxUnit_common {
  *     'geo.placename' => 'Boca Raton, FL',
  *     'ICBM' => '26.367559, -80.12172',
  *   ),
- *   'lang' => 
+ *   'lang' =>
  *   array (
  *     'DC.title' => 'en',
  *   ),
- *   'scheme' => 
+ *   'scheme' =>
  *   array (
  *     'DCTERMS.modified' => 'XSD.date',
  *   ),
@@ -397,9 +449,9 @@ echo "$indent Corrected \$offset = $offset\n"; // debug
 /**
  * Return the contents of an array as HTML (like <var>var_dump()</var> on steroids), including object members
  *
- * @param mixed $source The array to export. If it's empty then $GLOBALS is exported.
+ * @param array[]mixed $source The array to export. If it's empty then $GLOBALS is exported.
  */
-	public static /*.string.*/ function array_to_HTML(/*.array[]mixed.*/ $source = NULL) {
+	public static /*.string.*/ function array_to_HTML($source = NULL) {
 // If no specific array is passed we will export $GLOBALS to HTML
 // Unfortunately, this means we have to use var_dump() because var_export() barfs on $GLOBALS
 // In fact var_dump is easier to walk than var_export anyway so this is no bad thing.
@@ -498,9 +550,9 @@ echo "</pre>\n"; // debug
 /**
  * Convert a DocBlock to HTML (see http://java.sun.com/j2se/javadoc/writingdoccomments/index.html)
  *
- * @param string $docBlock Some PHP code containing a valid DocBlock.
+ * @param string $php Some PHP code containing a valid DocBlock.
  */
-	public static /*.string.*/ function docBlock_to_HTML(/*.string.*/ $php) {
+	public static /*.string.*/ function docBlock_to_HTML($php) {
 // Updated in version 1.12 (bug fixes and formatting)
 		$eol		= "\r\n";
 		$tagStart	= strpos($php, "/**$eol * ");
@@ -515,6 +567,7 @@ echo "</pre>\n"; // debug
 		$tagPos		= strpos($php, "$eol * @") + 2;
 		$description	= substr($php, $tagStart, $tagPos - $tagStart - 7);
 		$description	= (string) str_replace(' * ', '' , $description);
+		$package	= '(no package specified)';	// Revision 1.22: $package might not get set
 
 		// Get tags and values from DocBlock
 		do {
@@ -589,9 +642,12 @@ HTML;
  * Supported flags: GLOB_MARK, GLOB_NOSORT, GLOB_ONLYDIR
  * Additional flags: GLOB_NODIR, GLOB_PATH, GLOB_NODOTS, GLOB_RECURSE
  * (these were not original glob() flags)
+
  * @author BigueNique AT yahoo DOT ca
+ * @param string $pattern
+ * @param int $flags
  */
-	public static /*.mixed.*/ function safe_glob(/*.string.*/ $pattern, /*.int.*/ $flags = 0) {
+	public static /*.mixed.*/ function safe_glob($pattern, $flags = 0) {
 		$split	= explode('/', (string) str_replace('\\', '/', $pattern));
 		$mask	= (string) array_pop($split);
 		$path	= (count($split) === 0) ? '.' : implode('/', $split);
@@ -599,7 +655,8 @@ HTML;
 
 		if ($dir === false) return false;
 
-		$glob	= /*.(array[int]).*/ array();
+		$glob		= /*.(array[int]).*/ array();
+		$sub_glob	= /*.(array[int]).*/ array();
 
 		do {
 			$filename = readdir($dir);
@@ -610,9 +667,9 @@ HTML;
 
 			// Recurse subdirectories (if GLOB_RECURSE is supplied)
 			if ($is_dir && !$is_dot && (($flags & self::GLOB_RECURSE) !== 0)) {
-				$sub_glob	= /*.(array[int]).*/ self::safe_glob($path.'/'.$filename.'/'.$mask,  $flags);
-//					array_prepend($sub_glob, ((boolean) ($flags & self::GLOB_PATH) ? '' : $filename.'/'));
-				$glob		= /*.(array[int]).*/ array_merge($glob, $sub_glob);
+				$sub_glob	= cast('array[int]', self::safe_glob($path.'/'.$filename.'/'.$mask,  $flags));
+//				array_prepend($sub_glob, ((boolean) ($flags & self::GLOB_PATH) ? '' : $filename.'/'));
+				$glob		= cast('array[int]', array_merge($glob, $sub_glob));
 			}
 
 			// Match file mask
@@ -635,6 +692,12 @@ HTML;
  * Return file contents as a string. Fail silently if the file can't be opened.
  *
  * The parameters are the same as the built-in PHP function {@link http://www.php.net/file_get_contents file_get_contents}
+ *
+ * @param string $filename
+ * @param int $flags
+ * @param object $context
+ * @param int $offset
+ * @param int $maxlen
  */
 	public static /*.string.*/ function getFileContents(/*.string.*/ $filename, /*.int.*/ $flags = 0, /*.object.*/ $context = NULL, /*.int.*/ $offset = -1, /*.int.*/ $maxlen = -1) {
 		// From the documentation of file_get_contents:
@@ -700,6 +763,8 @@ HTML;
 
 /**
  * Make a unique hash key from a string (usually an ID)
+ *
+ * @param string $id
  */
 	public static /*.string.*/ function makeUniqueKey(/*.string.*/ $id) {
 		return hash(self::HASH_FUNCTION, $_SERVER['REQUEST_TIME'] . $id);
@@ -735,27 +800,30 @@ HTML;
 	}
 
 // Added in version 1.10
+// Revision 1.22: More specific about array type (just for PHPLint)
 /**
  * Shuffle an array using the Mersenne Twist PRNG (can be deterministically seeded)
  *
+ * @param array[string]string &$shuffle
+ * @param int $seed
  */
-	private static /*.void.*/ function mt_shuffle_array(/*.array.*/ &$arr, /*.int.*/ $seed = 0) {
-		$count	= count($arr);
-		$keys	= array_keys($arr);
+	private static /*.void.*/ function mt_shuffle_array(/*.array[string]string.*/ &$shuffle, /*.int.*/ $seed = 0) {
+		$count = count($shuffle);
+		/*.array[int]string.*/ $keys = cast('array[int]string', array_keys($shuffle));
 
 		// Seed the RNG with a deterministic seed
 		mt_srand($seed);
 
 		// Shuffle the digits
 		for ($element = $count - 1; $element >= 0; $element--) {
-			$shuffle		= mt_rand(0, $element);
+			$random		= mt_rand(0, $element);
 
-			$key_shuffle		= $keys[$shuffle];
+			$key_shuffle		= $keys[$random];
 			$key_element		= $keys[$element];
 
-			$value			= $arr[$key_shuffle];
-			$arr[$key_shuffle]	= $arr[$key_element];
-			$arr[$key_element]	= $value;
+			$value			= $shuffle[$key_shuffle];
+			$shuffle[$key_shuffle]	= $shuffle[$key_element];
+			$shuffle[$key_element]	= $value;
 		}
 	}
 
@@ -764,14 +832,14 @@ HTML;
  * The Pseudo-Random Key Generator returns an apparently random key of
  * length $length and comprising digits specified by $base. However, for
  * a given seed this key depends only on $index.
- * 
+ *
  * In other words, if you keep the $seed constant then you'll get a
  * non-repeating series of keys as you increment $index but these keys
  * will be returned in a pseudo-random order.
- * 
+ *
  * The $seed parameter is available in case you want your series of keys
  * to come out in a different order to mine.
- * 
+ *
  * Comparison of bases:
  * <pre>
  * +------+----------------+---------------------------------------------+
@@ -862,40 +930,86 @@ HTML;
 		return $result;
 	}
 
-// Updated in version 1.8
+// Updated in version 1.20
+// Revision numbers in this function refer to the is_email() version itself,
+// which is maintained separately here: http://isemail.googlecode.com
 /**
- * Check that an email address conforms to RFC5322 and other RFCs
+ * Check that an email address conforms to RFCs 5321, 5322 and others
  *
- * @param boolean $checkDNS If true then a DNS check for A and MX records will be made
- * @param boolean $diagnose If true then return an integer error number rather than true or false
+ * @param string	$email		The email address to check
+ * @param boolean	$checkDNS	If true then a DNS check for A and MX records will be made
+ * @param mixed		$errorlevel	If true then return an integer error or warning number rather than true or false
  */
-	public static /*.mixed.*/ function is_email (/*.string.*/ $email, $checkDNS = false, $diagnose = false) {
+	public static /*.mixed.*/ function is_email ($email, $checkDNS = false, $errorlevel = false) {
 		// Check that $email is a valid address. Read the following RFCs to understand the constraints:
-		// 	(http://tools.ietf.org/html/rfc5322)
-		// 	(http://tools.ietf.org/html/rfc3696)
 		// 	(http://tools.ietf.org/html/rfc5321)
+		// 	(http://tools.ietf.org/html/rfc5322)
 		// 	(http://tools.ietf.org/html/rfc4291#section-2.2)
 		// 	(http://tools.ietf.org/html/rfc1123#section-2.1)
+		// 	(http://tools.ietf.org/html/rfc3696) (guidance only)
 
-		// the upper limit on address lengths should normally be considered to be 256
+		//	$errorlevel	Behaviour
+		//	---------------	---------------------------------------------------------------------------
+		//	E_ERROR		Return validation failures only. For technically valid addresses return
+		//			ISEMAIL_VALID
+		//	E_WARNING	Return warnings for unlikely but technically valid addresses. This includes
+		//			addresses at TLDs (e.g. johndoe@com), addresses with FWS and comments,
+		//			addresses that are quoted and addresses that contain no alphabetic or
+		//			numeric characters.
+		//	true		Same as E_ERROR
+		//	false		Return true for valid addresses, false for invalid ones. No warnings.
+		//
+		//	Errors can be distinguished from warnings if ($return_value > self::ISEMAIL_ERROR)
+	// version 2.0: Enhance $diagnose parameter to $errorlevel
+
+		if (is_bool($errorlevel)) {
+			if ((bool) $errorlevel) {
+				$diagnose	= true;
+				$warn		= false;
+			} else {
+				$diagnose	= false;
+				$warn		= false;
+			}
+		} else {
+			switch ((int) $errorlevel) {
+			case E_WARNING:
+				$diagnose	= true;
+				$warn		= true;
+				break;
+			case E_ERROR:
+				$diagnose	= true;
+				$warn		= false;
+				break;
+			default:
+				$diagnose	= false;
+				$warn		= false;
+			}
+		}
+
+		if ($diagnose) /*.mixed.*/ $return_status = self::ISEMAIL_VALID; else $return_status = true;
+
+	// version 2.0: Enhance $diagnose parameter to $errorlevel
+
+		// the upper limit on address lengths should normally be considered to be 254
 		// 	(http://www.rfc-editor.org/errata_search.php?rfc=3696)
-		// 	NB I think John Klensin is misreading RFC 5321 and the the limit should actually be 254
-		// 	However, I will stick to the published number until it is changed.
+		// 	NB My erratum has now been verified by the IETF so the correct answer is 254
 		//
 		// The maximum total length of a reverse-path or forward-path is 256
 		// characters (including the punctuation and element separators)
 		// 	(http://tools.ietf.org/html/rfc5321#section-4.5.3.1.3)
+		//	NB There is a mandatory 2-character wrapper round the actual address
 		$emailLength = strlen($email);
-		if ($emailLength > 256)			if ($diagnose) return self::ISEMAIL_TOOLONG; else return false;	// Too long
+	// revision 1.17: Max length reduced to 254 (see above)
+		if ($emailLength > 254)			if ($diagnose) return self::ISEMAIL_TOOLONG;		else return false;	// Too long
 
 		// Contemporary email addresses consist of a "local part" separated from
 		// a "domain part" (a fully-qualified domain name) by an at-sign ("@").
 		// 	(http://tools.ietf.org/html/rfc3696#section-3)
 		$atIndex = strrpos($email,'@');
 
-		if ($atIndex === false)			if ($diagnose) return self::ISEMAIL_NOAT; else return false;	// No at-sign
-		if ($atIndex === 0)			if ($diagnose) return self::ISEMAIL_NOLOCALPART; else return false;	// No local part
-		if ($atIndex === $emailLength - 1)	if ($diagnose) return self::ISEMAIL_NODOMAIN; else return false;	// No domain part
+		if ($atIndex === false)			if ($diagnose) return self::ISEMAIL_NOAT;		else return false;	// No at-sign
+		if ($atIndex === 0)			if ($diagnose) return self::ISEMAIL_NOLOCALPART;	else return false;	// No local part
+		if ($atIndex === $emailLength - 1)	if ($diagnose) return self::ISEMAIL_NODOMAIN;		else return false;	// No domain part
 	// revision 1.14: Length test bug suggested by Andrew Campbell of Gloucester, MA
 
 		// Sanitize comments
@@ -909,60 +1023,40 @@ HTML;
 			$char = $email[$i];
 			$replaceChar = false;
 
-			if ($char === '\\') {
-				$escapeThisChar = !$escapeThisChar;	// Escape the next character?
-			} else {
+			if ($char === '\\') 	$escapeThisChar = !$escapeThisChar;			// Escape the next character?
+			else {
 				switch ($char) {
 				case '(':
-					if ($escapeThisChar) {
-						$replaceChar = true;
-					} else {
-						if ($inQuote) {
-							$replaceChar = true;
-						} else {
-							if ($braceDepth++ > 0) $replaceChar = true;	// Increment brace depth
-						}
-					}
+					if	($escapeThisChar)	$replaceChar	= true;
+					else if	($inQuote)		$replaceChar	= true;
+					else if	($braceDepth++ > 0)	$replaceChar	= true;		// Increment brace depth
 
 					break;
 				case ')':
-					if ($escapeThisChar) {
-						$replaceChar = true;
-					} else {
-						if ($inQuote) {
-							$replaceChar = true;
-						} else {
-							if (--$braceDepth > 0) $replaceChar = true;	// Decrement brace depth
-							if ($braceDepth < 0) $braceDepth = 0;
-						}
+					if	($escapeThisChar)	$replaceChar	= true;
+					else if	($inQuote)		$replaceChar	= true;
+					else {
+						if (--$braceDepth > 0)	$replaceChar	= true;		// Decrement brace depth
+						if ($braceDepth < 0)	$braceDepth	= 0;
 					}
 
 					break;
 				case '"':
-					if ($escapeThisChar) {
-						$replaceChar = true;
-					} else {
-						if ($braceDepth === 0) {
-							$inQuote = !$inQuote;	// Are we inside a quoted string?
-						} else {
-							$replaceChar = true;
-						}
-					}
+					if	($escapeThisChar)	$replaceChar	= true;
+					else if ($braceDepth === 0)	$inQuote	= !$inQuote;	// Are we inside a quoted string?
+					else				$replaceChar	= true;
 
 					break;
-				case '.':	// Dots don't help us either
-					if ($escapeThisChar) {
-						$replaceChar = true;
-					} else {
-						if ($braceDepth > 0) $replaceChar = true;
-					}
+				case '.':
+					if	($escapeThisChar)	$replaceChar	= true;		// Dots don't help us either
+					else if	($braceDepth > 0)	$replaceChar	= true;
 
 					break;
 				default:
 				}
 
 				$escapeThisChar = false;
-	//			if ($replaceChar) $email[$i] = 'x';	// Replace the offending character with something harmless
+	//			if ($replaceChar) $email[$i] = 'x';					// Replace the offending character with something harmless
 	// revision 1.12: Line above replaced because PHPLint doesn't like that syntax
 				if ($replaceChar) $email = (string) substr_replace($email, 'x', $i, 1);	// Replace the offending character with something harmless
 			}
@@ -971,6 +1065,8 @@ HTML;
 		$localPart	= substr($email, 0, $atIndex);
 		$domain		= substr($email, $atIndex + 1);
 		$FWS		= "(?:(?:(?:[ \\t]*(?:\\r\\n))?[ \\t]+)|(?:[ \\t]+(?:(?:\\r\\n)[ \\t]+)*))";	// Folding white space
+		$dotArray	= /*. (array[]) .*/ array();
+
 		// Let's check the local part for RFC compliance...
 		//
 		// local-part      =       dot-atom / quoted-string / obs-local-part
@@ -979,42 +1075,51 @@ HTML;
 		//
 		// Problem: need to distinguish between "first.last" and "first"."last"
 		// (i.e. one element or two). And I suck at regexes.
-		$dotArray	= /*. (array[int]string) .*/ preg_split('/\\.(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $localPart);
+		$dotArray	= preg_split('/\\.(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $localPart);
 		$partLength	= 0;
 
-		foreach ($dotArray as $element) {
+		foreach ($dotArray as $arrayMember) {
+			$element = (string) $arrayMember;
 			// Remove any leading or trailing FWS
-			$element	= preg_replace("/^$FWS|$FWS\$/", '', $element);
+			$new_element = preg_replace("/^$FWS|$FWS\$/", '', $element);
+			if ($warn && ($element !== $new_element)) $return_status = self::ISEMAIL_FWS;	// FWS is unlikely in the real world
+			$element = $new_element;
+	// version 2.3: Warning condition added
 			$elementLength	= strlen($element);
 
-			if ($elementLength === 0)								if ($diagnose) return self::ISEMAIL_ZEROLENGTHELEMENT; else return false;	// Can't have empty element (consecutive dots or dots at the start or end)
+			if ($elementLength === 0)								if ($diagnose) return self::ISEMAIL_ZEROLENGTHELEMENT;	else return false;	// Can't have empty element (consecutive dots or dots at the start or end)
 	// revision 1.15: Speed up the test and get rid of "unitialized string offset" notices from PHP
 
 			// We need to remove any valid comments (i.e. those at the start or end of the element)
 			if ($element[0] === '(') {
+				if ($warn) $return_status = self::ISEMAIL_COMMENTS;	// Comments are unlikely in the real world
+	// version 2.0: Warning condition added
 				$indexBrace = strpos($element, ')');
 				if ($indexBrace !== false) {
-					if (preg_match('/(?<!\\\\)[\\(\\)]/', substr($element, 1, $indexBrace - 1)) > 0) {
-														if ($diagnose) return self::ISEMAIL_BADCOMMENT_START; else return false;	// Illegal characters in comment
-					}
+					if (preg_match('/(?<!\\\\)[\\(\\)]/', substr($element, 1, $indexBrace - 1)) > 0)
+														if ($diagnose) return self::ISEMAIL_BADCOMMENT_START;	else return false;	// Illegal characters in comment
 					$element	= substr($element, $indexBrace + 1, $elementLength - $indexBrace - 1);
 					$elementLength	= strlen($element);
 				}
 			}
 
 			if ($element[$elementLength - 1] === ')') {
+				if ($warn) $return_status = self::ISEMAIL_COMMENTS;	// Comments are unlikely in the real world
+	// version 2.0: Warning condition added
 				$indexBrace = strrpos($element, '(');
 				if ($indexBrace !== false) {
-					if (preg_match('/(?<!\\\\)(?:[\\(\\)])/', substr($element, $indexBrace + 1, $elementLength - $indexBrace - 2)) > 0) {
-														if ($diagnose) return self::ISEMAIL_BADCOMMENT_END; else return false;	// Illegal characters in comment
-					}
+					if (preg_match('/(?<!\\\\)(?:[\\(\\)])/', substr($element, $indexBrace + 1, $elementLength - $indexBrace - 2)) > 0)
+														if ($diagnose) return self::ISEMAIL_BADCOMMENT_END;	else return false;	// Illegal characters in comment
 					$element	= substr($element, 0, $indexBrace);
 					$elementLength	= strlen($element);
 				}
 			}
 
-			// Remove any leading or trailing FWS around the element (inside any comments)
-			$element = preg_replace("/^$FWS|$FWS\$/", '', $element);
+			// Remove any remaining leading or trailing FWS around the element (having removed any comments)
+			$new_element = preg_replace("/^$FWS|$FWS\$/", '', $element);
+			if ($warn && ($element !== $new_element)) $return_status = self::ISEMAIL_FWS;	// FWS is unlikely in the real world
+			$element = $new_element;
+	// version 2.0: Warning condition added
 
 			// What's left counts towards the maximum length for this part
 			if ($partLength > 0) $partLength++;	// for the dot
@@ -1024,13 +1129,15 @@ HTML;
 			// (because of the obs-local-part provision)
 			if (preg_match('/^"(?:.)*"$/s', $element) > 0) {
 				// Quoted-string tests:
-				//
+				if ($warn) $return_status = self::ISEMAIL_QUOTEDSTRING;	// Quoted string is unlikely in the real world
+	// version 2.0: Warning condition added
 				// Remove any FWS
-				$element = preg_replace("/(?<!\\\\)$FWS/", '', $element);
+				$element = preg_replace("/(?<!\\\\)$FWS/", '', $element);	// A warning condition, but we've already raised self::ISEMAIL_QUOTEDSTRING
 				// My regex skillz aren't up to distinguishing between \" \\" \\\" \\\\" etc.
 				// So remove all \\ from the string first...
 				$element = preg_replace('/\\\\\\\\/', ' ', $element);
-				if (preg_match('/(?<!\\\\|^)["\\r\\n\\x00](?!$)|\\\\"$|""/', $element) > 0)	if ($diagnose) return self::ISEMAIL_UNESCAPEDDELIM; else return false;	// ", CR, LF and NUL must be escaped, "" is too short
+				if (preg_match('/(?<!\\\\|^)["\\r\\n\\x00](?!$)|\\\\"$|""/', $element) > 0)	if ($diagnose) return self::ISEMAIL_UNESCAPEDDELIM;	else return false;	// ", CR, LF and NUL must be escaped
+	// version 2.0: allow ""@example.com because it's technically valid
 			} else {
 				// Unquoted string tests:
 				//
@@ -1040,7 +1147,7 @@ HTML;
 				//
 				// A zero-length element implies a period at the beginning or end of the
 				// local part, or two periods together. Either way it's not allowed.
-				if ($element === '')								if ($diagnose) return self::ISEMAIL_EMPTYELEMENT; else return false;	// Dots in wrong place
+				if ($element === '')								if ($diagnose) return self::ISEMAIL_EMPTYELEMENT;	else return false;	// Dots in wrong place
 
 				// Any ASCII graphic (printing) character other than the
 				// at-sign ("@"), backslash, double quote, comma, or square brackets may
@@ -1049,11 +1156,12 @@ HTML;
 				// 	(http://tools.ietf.org/html/rfc3696#section-3)
 				//
 				// Any excluded characters? i.e. 0x00-0x20, (, ), <, >, [, ], :, ;, @, \, comma, period, "
-				if (preg_match('/[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\."]/', $element) > 0)	if ($diagnose) return self::ISEMAIL_UNESCAPEDSPECIAL; else return false;	// These characters must be in a quoted string
+				if (preg_match('/[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\."]/', $element) > 0)	if ($diagnose) return self::ISEMAIL_UNESCAPEDSPECIAL;	else return false;	// These characters must be in a quoted string
+				if ($warn && (preg_match('/^\\w+/', $element) === 0)) $return_status = self::ISEMAIL_UNLIKELYINITIAL;	// First character is an odd one
 			}
 		}
 
-		if ($partLength > 64) if ($diagnose) return self::ISEMAIL_LOCALTOOLONG; else return false;	// Local part must be 64 characters or less
+		if ($partLength > 64)										if ($diagnose) return self::ISEMAIL_LOCALTOOLONG;	else return false;	// Local part must be 64 characters or less
 
 		// Now let's check the domain part...
 
@@ -1063,7 +1171,11 @@ HTML;
 		// 	(http://tools.ietf.org/html/rfc4291#section-2.2)
 		if (preg_match('/^\\[(.)+]$/', $domain) === 1) {
 			// It's an address-literal
+			if ($warn) $return_status = self::ISEMAIL_ADDRESSLITERAL;	// Quoted string is unlikely in the real world
+	// version 2.0: Warning condition added
 			$addressLiteral = substr($domain, 1, strlen($domain) - 2);
+			$groupMax	= 8;
+	// revision 2.1: new IPv6 testing strategy
 			$matchesIP	= array();
 
 			// Extract IPv4 part from the end of the address-literal (if there is one)
@@ -1072,40 +1184,55 @@ HTML;
 
 				if ($index === 0) {
 					// Nothing there except a valid IPv4 address, so...
-					if ($diagnose) return self::ISEMAIL_VALID; else return true;
+					if ($diagnose) return $return_status; else return true;
+	// version 2.0: return warning if one is set
 				} else {
-					// Assume it's an attempt at a mixed address (IPv6 + IPv4)
-					if ($addressLiteral[$index - 1] !== ':')	if ($diagnose) return self::ISEMAIL_IPV4BADPREFIX; else return false;	// Character preceding IPv4 address must be ':'
-					if (substr($addressLiteral, 0, 5) !== 'IPv6:')	if ($diagnose) return self::ISEMAIL_IPV6BADPREFIXMIXED; else return false;	// RFC5321 section 4.1.3
-
-					$IPv6		= substr($addressLiteral, 5, ($index ===7) ? 2 : $index - 6);
-					$groupMax	= 6;
+	//-				// Assume it's an attempt at a mixed address (IPv6 + IPv4)
+	//-				if ($addressLiteral[$index - 1] !== ':')				if ($diagnose) return self::ISEMAIL_IPV4BADPREFIX;	else return false;	// Character preceding IPv4 address must be ':'
+	// revision 2.1: new IPv6 testing strategy
+					if (substr($addressLiteral, 0, 5) !== 'IPv6:')				if ($diagnose) return self::ISEMAIL_IPV6BADPREFIXMIXED;	else return false;	// RFC5321 section 4.1.3
+	//-
+	//-				$IPv6		= substr($addressLiteral, 5, ($index === 7) ? 2 : $index - 6);
+	//-				$groupMax	= 6;
+	// revision 2.1: new IPv6 testing strategy
+					$IPv6		= substr($addressLiteral, 5, $index - 5) . '0000:0000'; // Convert IPv4 part to IPv6 format
 				}
 			} else {
 				// It must be an attempt at pure IPv6
-				if (substr($addressLiteral, 0, 5) !== 'IPv6:')		if ($diagnose) return self::ISEMAIL_IPV6BADPREFIX; else return false;	// RFC5321 section 4.1.3
+				if (substr($addressLiteral, 0, 5) !== 'IPv6:')					if ($diagnose) return self::ISEMAIL_IPV6BADPREFIX;	else return false;	// RFC5321 section 4.1.3
 				$IPv6 = substr($addressLiteral, 5);
-				$groupMax = 8;
+	//-			$groupMax = 8;
+	// revision 2.1: new IPv6 testing strategy
 			}
-
+	//echo "\n<br /><pre>\$IPv6 = $IPv6</pre>\n"; // debug
 			$groupCount	= preg_match_all('/^[0-9a-fA-F]{0,4}|\\:[0-9a-fA-F]{0,4}|(.)/', $IPv6, $matchesIP);
 			$index		= strpos($IPv6,'::');
 
+	//echo "\n<br /><pre>\$matchesIP[0] = " . var_export($matchesIP[0], true) . "</pre>\n"; // debug
 			if ($index === false) {
 				// We need exactly the right number of groups
-				if ($groupCount !== $groupMax)				if ($diagnose) return self::ISEMAIL_IPV6GROUPCOUNT; else return false;	// RFC5321 section 4.1.3
+				if ($groupCount !== $groupMax)							if ($diagnose) return self::ISEMAIL_IPV6GROUPCOUNT;	else return false;	// RFC5321 section 4.1.3
 			} else {
-				if ($index !== strrpos($IPv6,'::'))			if ($diagnose) return self::ISEMAIL_IPV6DOUBLEDOUBLECOLON; else return false;	// More than one '::'
-				$groupMax = ($index === 0 || $index === (strlen($IPv6) - 2)) ? $groupMax : $groupMax - 1;
-				if ($groupCount > $groupMax)				if ($diagnose) return self::ISEMAIL_IPV6TOOMANYGROUPS; else return false;	// Too many IPv6 groups in address
+				if ($index !== strrpos($IPv6,'::'))						if ($diagnose) return self::ISEMAIL_IPV6DOUBLEDOUBLECOLON; else return false;	// More than one '::'
+				if ($index === 0 || $index === (strlen($IPv6) - 2)) $groupMax++;	// RFC 4291 allows :: at the start or end of an address with 7 other groups in addition
+	//echo "\n<br /><pre>\$groupMax = $groupMax</pre>\n"; // debug
+				if ($groupCount > $groupMax)							if ($diagnose) return self::ISEMAIL_IPV6TOOMANYGROUPS;	else return false;	// Too many IPv6 groups in address
+				if ($groupCount === $groupMax) $return_status = self::ISEMAIL_SINGLEGROUPELISION;	// Eliding a single group with :: is deprecated by RFCs 5321 & 5952
 			}
+
+			// Check for single : at start and end of address
+			if (($matchesIP[0][0] === '') && ($matchesIP[0][1] !== ':'))				if ($diagnose) return self::ISEMAIL_IPV6SINGLECOLONSTART; else return false;	// Address starts with a single colon
+			if (($matchesIP[0][$groupCount - 1] === ':') && ($matchesIP[0][$groupCount - 2] !== ':')) if ($diagnose) return self::ISEMAIL_IPV6SINGLECOLONEND; else return false;	// Address ends with a single colon
 
 			// Check for unmatched characters
 			array_multisort($matchesIP[1], SORT_DESC);
-			if ($matchesIP[1][0] !== '')					if ($diagnose) return self::ISEMAIL_IPV6BADCHAR; else return false;	// Illegal characters in address
-
+			if ($matchesIP[1][0] !== '') {
+	//echo "\n<br /><pre>\$matchesIP[1] = " . var_export($matchesIP[1], true) . "</pre>\n"; // debug
+			if ($diagnose) return self::ISEMAIL_IPV6BADCHAR; else return false;	// Illegal characters in address
+	} // debug
 			// It's a valid IPv6 address, so...
-			if ($diagnose) return self::ISEMAIL_VALID; else return true;
+			if ($diagnose) return $return_status; else return true;
+	// revision 2.1: bug fix: now correctly return warning status
 		} else {
 			// It's a domain name...
 
@@ -1132,49 +1259,61 @@ HTML;
 			//
 			// RFC5321 precludes the use of a trailing dot in a domain name for SMTP purposes
 			// 	(http://tools.ietf.org/html/rfc5321#section-4.1.2)
-			$dotArray	= /*. (array[int]string) .*/ preg_split('/\\.(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $domain);
+			$dotArray	= preg_split('/\\.(?=(?:[^\\"]*\\"[^\\"]*\\")*(?![^\\"]*\\"))/m', $domain);
 			$partLength	= 0;
 			$element	= ''; // Since we use $element after the foreach loop let's make sure it has a value
 	// revision 1.13: Line above added because PHPLint now checks for Definitely Assigned Variables
 
-			if (count($dotArray) === 1)					if ($diagnose) return self::ISEMAIL_TLD; else return false;	// Mail host can't be a TLD (cite? What about localhost?)
+			if ($warn && (count($dotArray) === 1))	$return_status = self::ISEMAIL_TLD;	// The mail host probably isn't a TLD
+	// version 2.0: downgraded to a warning
 
-			foreach ($dotArray as $element) {
+			foreach ($dotArray as $arrayMember) {
+				$element = (string) $arrayMember;
 				// Remove any leading or trailing FWS
-				$element	= preg_replace("/^$FWS|$FWS\$/", '', $element);
+				$new_element	= preg_replace("/^$FWS|$FWS\$/", '', $element);
+				if ($warn && ($element !== $new_element)) $return_status = self::ISEMAIL_FWS;	// FWS is unlikely in the real world
+				$element = $new_element;
+	// version 2.0: Warning condition added
 				$elementLength	= strlen($element);
 
 				// Each dot-delimited component must be of type atext
 				// A zero-length element implies a period at the beginning or end of the
 				// local part, or two periods together. Either way it's not allowed.
-				if ($elementLength === 0)				if ($diagnose) return self::ISEMAIL_DOMAINEMPTYELEMENT; else return false;	// Dots in wrong place
+				if ($elementLength === 0)							if ($diagnose) return self::ISEMAIL_DOMAINEMPTYELEMENT;	else return false;	// Dots in wrong place
 	// revision 1.15: Speed up the test and get rid of "unitialized string offset" notices from PHP
 
 				// Then we need to remove all valid comments (i.e. those at the start or end of the element
 				if ($element[0] === '(') {
+					if ($warn) $return_status = self::ISEMAIL_COMMENTS;	// Comments are unlikely in the real world
+	// version 2.0: Warning condition added
 					$indexBrace = strpos($element, ')');
 					if ($indexBrace !== false) {
-						if (preg_match('/(?<!\\\\)[\\(\\)]/', substr($element, 1, $indexBrace - 1)) > 0) {
-											if ($diagnose) return self::ISEMAIL_BADCOMMENT_START; else return false;	// Illegal characters in comment
-						}
+						if (preg_match('/(?<!\\\\)[\\(\\)]/', substr($element, 1, $indexBrace - 1)) > 0)
+														if ($diagnose) return self::ISEMAIL_BADCOMMENT_START;	else return false;	// Illegal characters in comment
+	// revision 1.17: Fixed name of constant (also spotted by turboflash - thanks!)
 						$element	= substr($element, $indexBrace + 1, $elementLength - $indexBrace - 1);
 						$elementLength	= strlen($element);
 					}
 				}
 
 				if ($element[$elementLength - 1] === ')') {
+					if ($warn) $return_status = self::ISEMAIL_COMMENTS;	// Comments are unlikely in the real world
+	// version 2.0: Warning condition added
 					$indexBrace = strrpos($element, '(');
 					if ($indexBrace !== false) {
 						if (preg_match('/(?<!\\\\)(?:[\\(\\)])/', substr($element, $indexBrace + 1, $elementLength - $indexBrace - 2)) > 0)
-											if ($diagnose) return self::ISEMAIL_BADCOMMENT_END; else return false;	// Illegal characters in comment
-
+														if ($diagnose) return self::ISEMAIL_BADCOMMENT_END;	else return false;	// Illegal characters in comment
+	// revision 1.17: Fixed name of constant (also spotted by turboflash - thanks!)
 						$element	= substr($element, 0, $indexBrace);
 						$elementLength	= strlen($element);
 					}
 				}
 
 				// Remove any leading or trailing FWS around the element (inside any comments)
-				$element = preg_replace("/^$FWS|$FWS\$/", '', $element);
+				$new_element	= preg_replace("/^$FWS|$FWS\$/", '', $element);
+				if ($warn && ($element !== $new_element)) $return_status = self::ISEMAIL_FWS;	// FWS is unlikely in the real world
+				$element = $new_element;
+	// version 2.0: Warning condition added
 
 				// What's left counts towards the maximum length for this part
 				if ($partLength > 0) $partLength++;	// for the dot
@@ -1185,7 +1324,7 @@ HTML;
 				// separated by dots, and with a maximum total of 255
 				// octets.
 				// 	(http://tools.ietf.org/html/rfc1123#section-6.1.3.5)
-				if ($elementLength > 63)				if ($diagnose) return self::ISEMAIL_DOMAINELEMENTTOOLONG; else return false;	// Label must be 63 characters or less
+				if ($elementLength > 63)							if ($diagnose) return self::ISEMAIL_DOMAINELEMENTTOOLONG;	else return false;	// Label must be 63 characters or less
 
 				// Any ASCII graphic (printing) character other than the
 				// at-sign ("@"), backslash, double quote, comma, or square brackets may
@@ -1198,29 +1337,103 @@ HTML;
 				// 	(http://tools.ietf.org/html/rfc3696#section-2)
 				//
 				// Any excluded characters? i.e. 0x00-0x20, (, ), <, >, [, ], :, ;, @, \, comma, period, "
-				if (preg_match('/[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\."]|^-|-$/', $element) > 0) {
-											if ($diagnose) return self::ISEMAIL_DOMAINBADCHAR; else return false;
-				}
+				if (preg_match('/[\\x00-\\x20\\(\\)<>\\[\\]:;@\\\\,\\."]|^-|-$/', $element) > 0) if ($diagnose) return self::ISEMAIL_DOMAINBADCHAR;	else return false;	// Illegal character in domain name
 			}
 
-			if ($partLength > 255) 						if ($diagnose) return self::ISEMAIL_DOMAINTOOLONG; else return false;	// Domain part must be 255 characters or less (http://tools.ietf.org/html/rfc1123#section-6.1.3.5)
+			if ($partLength > 255) 									if ($diagnose) return self::ISEMAIL_DOMAINTOOLONG;	else return false;	// Domain part must be 255 characters or less (http://tools.ietf.org/html/rfc1123#section-6.1.3.5)
 
-			if (preg_match('/^[0-9]+$/', $element) > 0)			if ($diagnose) return self::ISEMAIL_TLDNUMERIC; else return false;	// TLD can't be all-numeric (http://www.apps.ietf.org/rfc/rfc3696.html#sec-2)
+			if ($warn && (preg_match('/^[0-9]+$/', $element) > 0))	$return_status = self::ISEMAIL_TLDNUMERIC;	// TLD probably isn't all-numeric (http://www.apps.ietf.org/rfc/rfc3696.html#sec-2)
+	// version 2.0: Downgraded to a warning
 
 			// Check DNS?
-			if ($checkDNS && function_exists('checkdnsrr')) {
-				if (!(checkdnsrr($domain, 'A') || checkdnsrr($domain, 'MX'))) {
-											if ($diagnose) return self::ISEMAIL_DOMAINNOTFOUND; else return false;	// Domain doesn't actually exist
-				}
+			if ($diagnose && ($return_status === self::ISEMAIL_VALID) && $checkDNS && function_exists('checkdnsrr')) {
+				if (!(checkdnsrr($domain, 'A')))	$return_status = self::ISEMAIL_DOMAINNOTFOUND;	// 'A' record for domain can't be found
+				if (!(checkdnsrr($domain, 'MX')))	$return_status = self::ISEMAIL_MXNOTFOUND;		// 'MX' record for domain can't be found
 			}
 		}
 
 		// Eliminate all other factors, and the one which remains must be the truth.
 		// 	(Sherlock Holmes, The Sign of Four)
-		if ($diagnose) return self::ISEMAIL_VALID; else return true;
+		if ($diagnose) return $return_status; else return true;
+	// version 2.0: return warning if one is set
 	}
 }
 // End of class ajaxUnit_common
+
+// PHPLint needs this function to exist outside the class
+/**
+ *	throws ajaxUnitException
+ *
+ *	Checks at runtime for the type of the value.
+ *	If the value matches the specified type, then this value is returned.
+ *	Otherwise a ajaxUnitException is thrown. This function is "magic" in the
+ *	sense that it is handled in special way by PHPLint: in fact the
+ *	returned type always corresponds to what is specified in the $type
+ *	argument; moreover, cast checks that the expression giving $type be
+ *	a static expression of string type.
+ *
+ * @param string $type The target type
+ * @param mixed $variable The variable to be cast
+ */
+/*.mixed.*/ function cast(/*.string.*/ $type, /*.mixed.*/ $variable) {
+	// Check non-array types:
+	if (
+		$variable instanceof $type
+		or $type === 'boolean'	and is_bool($variable)
+		or $type === 'int'	and is_int($variable)
+		or $type === 'float'	and is_float($variable)
+		or $type === 'string'	and (is_string($variable)	or is_null($variable))
+		or $type === 'resource'	and (is_resource($variable)	or is_null($variable))
+		or $type === 'object'	and (is_object($variable)	or is_null($variable))
+	)
+		return $variable;
+
+	if ($type === 'array' or $type === 'array[]') {
+		if (!(is_null($variable) or is_array($variable))) {
+			throw new ajaxUnitException('value is not an array: ' . ajaxUnit_common::gettype($variable));
+		}
+		return $variable;
+	}
+
+	if (strlen($type) > 6 and substr($type, 0, 6) === 'array[') {
+
+		if (!is_array($variable))
+			throw new ajaxUnitException('value is not an array: ' . ajaxUnit_common::gettype($variable));
+
+		// NULL or empty array matches any type of array:
+		if (count($variable) === 0) return $variable;
+
+		// Parse index type:
+		$close = strpos($type, ']');
+		// cast now guarantees ']' does exist.
+		$index_type = substr($type, 6, $close - 6);
+		// cast now guarantees $index_type is either 'int', 'string' or ''.
+
+		// Parse element type:
+		$elem_type = substr($type, $close + 1, strlen($type) - $close - 1);
+		if (strlen($elem_type) > 0 and $elem_type[0] === '[') $elem_type = "array$elem_type";
+		// cast now garantees $elem_type does exist or it is ''
+
+		// Now check all indexes and elements:
+		foreach(/*.(array).*/ $variable as $k => &$v) {
+
+			// Check index type:
+			if ($index_type === 'int') {
+				if (!is_int($k))	throw new ajaxUnitException("found index of type string: $k");
+			} else if ($index_type === 'string') {
+				if (!is_string($k))	throw new ajaxUnitException("found index of type int: $k");
+			} else {
+				// Any index.
+			}
+
+			// Check elem type:
+			if ($elem_type !== '') /* $ignore = */ cast($elem_type, $v);
+		}
+		return $variable;
+	}
+
+	throw new ajaxUnitException("value is not of type $type: " . ajaxUnit_common::gettype($variable));
+}
 
 
 /**
@@ -1287,7 +1500,7 @@ class ajaxUnit_cookies {
 			$html		.= "<tr><td>Cookie ($cookieCount)</td><td>Value</td></tr>\n";
 
 			for ($i = 0; $i < $cookieCount; $i++) {
-				$name = $keys[$i];
+				$name = (string) $keys[$i];
 				$html .= self::toTable($name, false, false);
 			}
 		} else {
@@ -1469,7 +1682,7 @@ HTML;
 	private static /*.string.*/ function htmlPageBottom() {
 		return <<<HTML
 			<p><a id="bottom" href="#top">&laquo; top</a></p>
-			<p>ajaxUnit version 0.18.4</p>
+			<p>ajaxUnit version 0.19.17</p>
 		</div>
 		<script type="text/javascript">
 			function ajaxUnit_toggle_log(control, id) {
@@ -1505,7 +1718,7 @@ HTML;
 		if (is_file($filename)) {
 			$handle		= @fopen($filename, 'r+b'); // Lock the file
 			$serial		= @file_get_contents($filename);
-			$context	= /*.(array[string]string).*/ unserialize($serial);
+			$context	= cast('array[string]string', unserialize($serial));
 
 			rewind($handle);
 			ftruncate($handle, 0);
@@ -1514,7 +1727,7 @@ HTML;
 		}
 
 		if (is_array($newContext)) {
-			$context = /*.(array[string]string).*/ array_merge($context, /*.(array[string]string).*/ $newContext);
+			$context = cast('array[string]string', array_merge($context, cast('array', $newContext)));
 		} else {
 			$context[(string) $newContext] = $value;
 		}
@@ -1531,7 +1744,7 @@ HTML;
 			$context	= /*.(array[]string).*/ array();
 		} else {
 			$serial		= @file_get_contents($filename);
-			$context	= /*.(array[]string).*/ unserialize($serial);
+			$context	= cast('array[]string', unserialize($serial));
 		}
 
 		if ($key === '') {
@@ -1579,8 +1792,7 @@ HTML;
 		if ($resultsNodeName === '') {
 			$expected	= 0;
 		} else {
-			/*.object.*/ $resultsObject = $resultsNode;		// PHPLint-compliant typecasting
-			$resultsElement	= /*.(DOMElement).*/ $resultsObject;	// PHPLint-compliant typecasting
+			$resultsElement	= cast('DOMElement', $resultsNode);	// PHPLint-compliant typecasting
 
 			$resultsList	= $resultsElement->getElementsByTagName(self::TAGNAME_RESULT);	// Get the expected results
 			$expected	= $resultsList->length;
@@ -1611,8 +1823,8 @@ HTML;
 		$filename = self::getSuiteFilename($suite);
 		$document = new DOMDocument();
 		$document->documentURI = $filename;
-		$success = @$document->load($filename);
-		if (!$success) exit("Unable to load XML document '$filename'");
+		/*.mixed.*/ $success = @$document->load($filename);
+		if (is_bool($success) && !(bool) $success) exit("Unable to load XML document '$filename'");
 		$document->xinclude();
 		return $document;
 	}
@@ -1652,7 +1864,7 @@ HTML;
 	}
 
 	protected static /*.void.*/ function logTestContext($dummyRun = false) {
-		$context	= /*.(array[string]string).*/ self::getTestContext();
+		$context	= cast('array[string]string', self::getTestContext());
 
 		self::appendLog("<span class=\"ajaxunit-testlog\" onclick=\"ajaxUnit_toggle_log(this, 'ajaxunit-parameters')\">+</span> Global test parameters", $dummyRun, 0, 'p', 3);
 		self::appendLog("<div class=\"ajaxunit-testlog\" id=\"ajaxunit-parameters\">", $dummyRun, 0, '', 3);
@@ -1709,7 +1921,7 @@ HTML;
 	}
 
 	protected static /*.string.*/ function substituteParameters(/*.string.*/ $text) {
-		$variables		= /*.(array[string]string).*/ self::getTestContext();
+		$variables		= cast('array[string]string', self::getTestContext());
 		$variables['URL']	= self::thisURL();
 
 		extract($variables);
@@ -1923,30 +2135,36 @@ class ajaxUnit_Text_Diff_Engine_native {
 		return $end;
 	}
 
-	/**
-	 * Divides the Largest Common Subsequence (LCS) of the sequences (XOFF,
-	 * XLIM) and (YOFF, YLIM) into NCHUNKS approximately equally sized
-	 * segments.
-	 *
-	 * Returns (LCS, PTS).  LCS is the length of the LCS. PTS is an array of
-	 * NCHUNKS+1 (X, Y) indexes giving the diving points between sub
-	 * sequences.  The first sub-sequence is contained in (X0, X1), (Y0, Y1),
-	 * the second in (X1, X2), (Y1, Y2) and so on.  Note that (X0, Y0) ==
-	 * (XOFF, YOFF) and (X[NCHUNKS], Y[NCHUNKS]) == (XLIM, YLIM).
-	 *
-	 * This function assumes that the first lines of the specified portions of
-	 * the two files do not match, and likewise that the last lines do not
-	 * match.  The caller must trim matching lines from the beginning and end
-	 * of the portions it is going to specify.
-	 */
+/**
+ * Divides the Largest Common Subsequence (LCS) of the sequences (XOFF,
+ * XLIM) and (YOFF, YLIM) into NCHUNKS approximately equally sized
+ * segments.
+ *
+ * Returns (LCS, PTS).  LCS is the length of the LCS. PTS is an array of
+ * NCHUNKS+1 (X, Y) indexes giving the diving points between sub
+ * sequences.  The first sub-sequence is contained in (X0, X1), (Y0, Y1),
+ * the second in (X1, X2), (Y1, Y2) and so on.  Note that (X0, Y0) ==
+ * (XOFF, YOFF) and (X[NCHUNKS], Y[NCHUNKS]) == (XLIM, YLIM).
+ *
+ * This function assumes that the first lines of the specified portions of
+ * the two files do not match, and likewise that the last lines do not
+ * match.  The caller must trim matching lines from the beginning and end
+ * of the portions it is going to specify.
+ *
+ * @param int $xoff
+ * @param int $xlim
+ * @param int $yoff
+ * @param int $ylim
+ * @param int $nchunks
+ */
 	private /*.array.*/ function _diag (/*.int.*/ $xoff, /*.int.*/ $xlim, /*.int.*/ $yoff, /*.int.*/ $ylim, /*.int.*/ $nchunks)
 	{
 		$flip		= false;
 		$ymatches	= /*.(array[string][int]int).*/ array();
 
 		if ($xlim - $xoff > $ylim - $yoff) {
-			/* Things seems faster (I'm not sure I understand why) when the
-			 * shortest sequence is in X. */
+/* Things seems faster (I'm not sure I understand why) when the
+ * shortest sequence is in X. */
 			$flip = true;
 			list ($xoff, $xlim, $yoff, $ylim)
 				= array($yoff, $ylim, $xoff, $xlim);
@@ -2008,8 +2226,8 @@ class ajaxUnit_Text_Diff_Engine_native {
 
 					if ($y > $this->seq[$k - 1]) {
 						assert($y <= $this->seq[$k]);
-						/* Optimization: this is a common case: next match is
-						 * just replacing previous match. */
+					/* Optimization: this is a common case: next match is
+				 * just replacing previous match. */
 						$this->in_seq[$this->seq[$k]] = 0;
 						$this->seq[$k] = $y;
 						$this->in_seq[$y] = 1;
@@ -2034,30 +2252,35 @@ class ajaxUnit_Text_Diff_Engine_native {
 		return array($this->lcs, $seps);
 	}
 
-	/**
-	 * Finds LCS of two sequences.
-	 *
-	 * The results are recorded in the vectors $this->{x,y}changed[], by
-	 * storing a 1 in the element for each line that is an insertion or
-	 * deletion (ie. is not in the LCS).
-	 *
-	 * The subsequence of file 0 is (XOFF, XLIM) and likewise for file 1.
-	 *
-	 * Note that XLIM, YLIM are exclusive bounds.  All line numbers are
-	 * origin-0 and discarded lines are not counted.
-	 */
+/**
+ * Finds LCS of two sequences.
+ *
+ * The results are recorded in the vectors $this->{x,y}changed[], by
+ * storing a 1 in the element for each line that is an insertion or
+ * deletion (ie. is not in the LCS).
+ *
+ * The subsequence of file 0 is (XOFF, XLIM) and likewise for file 1.
+ *
+ * Note that XLIM, YLIM are exclusive bounds.  All line numbers are
+ * origin-0 and discarded lines are not counted.
+ *
+ * @param int $xoff
+ * @param int $xlim
+ * @param int $yoff
+ * @param int $ylim
+ */
 	private /*.void.*/ function _compareseq (/*.int.*/ $xoff, /*.int.*/ $xlim, /*.int.*/ $yoff, /*.int.*/ $ylim)
 	{
-		/* Slide down the bottom initial diagonal. */
+	/* Slide down the bottom initial diagonal. */
 		while ($xoff < $xlim && $yoff < $ylim
-			   && $this->xv[$xoff] === $this->yv[$yoff]) {
+	   && $this->xv[$xoff] === $this->yv[$yoff]) {
 			++$xoff;
 			++$yoff;
 		}
 
-		/* Slide up the top initial diagonal. */
+	/* Slide up the top initial diagonal. */
 		while ($xlim > $xoff && $ylim > $yoff
-			   && $this->xv[$xlim - 1] === $this->yv[$ylim - 1]) {
+	   && $this->xv[$xlim - 1] === $this->yv[$ylim - 1]) {
 			--$xlim;
 			--$ylim;
 		}
@@ -2066,16 +2289,16 @@ class ajaxUnit_Text_Diff_Engine_native {
 			$lcs			= 0;
 			$seps			= /*.(array[int][int]int).*/ array();
 		} else {
-			/* This is ad hoc but seems to work well.  $nchunks =
-			 * sqrt(min($xlim - $xoff, $ylim - $yoff) / 2.5); $nchunks =
-			 * max(2,min(8,(int)$nchunks)); */
+		/* This is ad hoc but seems to work well.  $nchunks =
+		 * sqrt(min($xlim - $xoff, $ylim - $yoff) / 2.5); $nchunks =
+		 * max(2,min(8,(int)$nchunks)); */
 			$nchunks		= (int) min(7, $xlim - $xoff, $ylim - $yoff) + 1;
 			list($lcs, $seps)	= $this->_diag($xoff, $xlim, $yoff, $ylim, $nchunks);
 		}
 
 		if ($lcs == 0) {
-			/* X and Y sequences have no common subsequence: mark all
-			 * changed. */
+		/* X and Y sequences have no common subsequence: mark all
+		 * changed. */
 			while ($yoff < $ylim) {
 				$this->ychanged[$this->yind[$yoff++]] = true;
 			}
@@ -2083,32 +2306,36 @@ class ajaxUnit_Text_Diff_Engine_native {
 				$this->xchanged[$this->xind[$xoff++]] = true;
 			}
 		} else {
-			/* Use the partitions to split this problem into subproblems. */
+		/* Use the partitions to split this problem into subproblems. */
 			reset($seps);
 			$pt1 = $seps[0];
 
 			do {
 				$next = next($seps);
 				if (is_bool($next)) break;
-				$pt2 = /*.(array[int]int).*/ $next;
+				$pt2 = cast('array[int]int', $next);
 				$this->_compareseq ($pt1[0], $pt2[0], $pt1[1], $pt2[1]);
 				$pt1 = $pt2;
 			} while (true);
 		}
 	}
 
-	/**
-	 * Adjusts inserts/deletes of identical lines to join changes as much as
-	 * possible.
-	 *
-	 * We do something when a run of changed lines include a line at one end
-	 * and has an excluded, identical line at the other.  We are free to
-	 * choose which identical line is included.  `compareseq' usually chooses
-	 * the one at the beginning, but usually it is cleaner to consider the
-	 * following identical line to be the "change".
-	 *
-	 * This is extracted verbatim from analyze.c (GNU diffutils-2.7).
-	 */
+/**
+ * Adjusts inserts/deletes of identical lines to join changes as much as
+ * possible.
+ *
+ * We do something when a run of changed lines include a line at one end
+ * and has an excluded, identical line at the other.  We are free to
+ * choose which identical line is included.  `compareseq' usually chooses
+ * the one at the beginning, but usually it is cleaner to consider the
+ * following identical line to be the "change".
+ *
+ * This is extracted verbatim from analyze.c (GNU diffutils-2.7).
+ *
+ * @param array[int]string $lines
+ * @param array[int]boolean &$changed
+ * @param array[int]boolean $other_changed
+ */
 	private /*.void.*/ function _shiftBoundaries(/*.array[int]string.*/ $lines, /*.array[int]boolean.*/ &$changed, /*.array[int]boolean.*/ $other_changed)
 	{
 		$i = 0;
@@ -2119,17 +2346,17 @@ class ajaxUnit_Text_Diff_Engine_native {
 		$other_len = count($other_changed);
 
 		while (true) {
-			/* Scan forward to find the beginning of another run of
-			 * changes. Also keep track of the corresponding point in the
-			 * other file.
-			 *
-			 * Throughout this code, $i and $j are adjusted together so that
-			 * the first $i elements of $changed and the first $j elements of
-			 * $other_changed both contain the same number of zeros (unchanged
-			 * lines).
-			 *
-			 * Furthermore, $j is always kept so that $j == $other_len or
-			 * $other_changed[$j] == false. */
+		/* Scan forward to find the beginning of another run of
+		 * changes. Also keep track of the corresponding point in the
+		 * other file.
+		 *
+		 * Throughout this code, $i and $j are adjusted together so that
+		 * the first $i elements of $changed and the first $j elements of
+		 * $other_changed both contain the same number of zeros (unchanged
+		 * lines).
+		 *
+		 * Furthermore, $j is always kept so that $j == $other_len or
+		 * $other_changed[$j] == false. */
 			while ($j < $other_len && $other_changed[$j]) {
 				$j++;
 			}
@@ -2148,19 +2375,19 @@ class ajaxUnit_Text_Diff_Engine_native {
 
 			$start = $i;
 
-			/* Find the end of this run of changes. */
+		/* Find the end of this run of changes. */
 			while (++$i < $len && $changed[$i]) {
 				continue;
 			}
 
 			do {
-				/* Record the length of this run of changes, so that we can
-				 * later determine whether the run has grown. */
+			/* Record the length of this run of changes, so that we can
+			 * later determine whether the run has grown. */
 				$runlength = $i - $start;
 
-				/* Move the changed region back, so long as the previous
-				 * unchanged line matches the last changed one.  This merges
-				 * with previous changed regions. */
+			/* Move the changed region back, so long as the previous
+			 * unchanged line matches the last changed one.  This merges
+			 * with previous changed regions. */
 				while ($start > 0 && $lines[$start - 1] === $lines[$i - 1]) {
 					$changed[--$start] = true;
 					$changed[--$i] = false;
@@ -2174,17 +2401,17 @@ class ajaxUnit_Text_Diff_Engine_native {
 					assert('$j >= 0 && !$other_changed[$j]');
 				}
 
-				/* Set CORRESPONDING to the end of the changed run, at the
-				 * last point where it corresponds to a changed run in the
-				 * other file. CORRESPONDING == LEN means no such point has
-				 * been found. */
+			/* Set CORRESPONDING to the end of the changed run, at the
+			 * last point where it corresponds to a changed run in the
+			 * other file. CORRESPONDING == LEN means no such point has
+			 * been found. */
 				$corresponding = $j < $other_len ? $i : $len;
 
-				/* Move the changed region forward, so long as the first
-				 * changed line matches the following unchanged one.  This
-				 * merges with following changed regions.  Do this second, so
-				 * that if there are no merges, the changed region is moved
-				 * forward as far as possible. */
+			/* Move the changed region forward, so long as the first
+			 * changed line matches the following unchanged one.  This
+			 * merges with following changed regions.  Do this second, so
+			 * that if there are no merges, the changed region is moved
+			 * forward as far as possible. */
 				while ($i < $len && $lines[$start] === $lines[$i]) {
 					$changed[$start++] = false;
 					$changed[$i++] = true;
@@ -2203,8 +2430,8 @@ class ajaxUnit_Text_Diff_Engine_native {
 				}
 			} while ($runlength != $i - $start);
 
-			/* If possible, move the fully-merged run of changes back to a
-			 * corresponding run in the other file. */
+		/* If possible, move the fully-merged run of changes back to a
+		 * corresponding run in the other file. */
 			while ($corresponding < $i) {
 				$changed[--$start] = true;
 				$changed[--$i] = false;
@@ -2281,7 +2508,7 @@ class ajaxUnit_Text_Diff_Engine_native {
 		$this->_shiftBoundaries($to_lines, $this->ychanged, $this->xchanged);
 
 		// Compute the edit operations.
-		$edits = /*.(array[int]object).*/ array();
+		$edits = /*.(array[int]mixed).*/ array();
 		$xi = $yi = 0;
 		while ($xi < $n_from || $yi < $n_to) {
 			assert($yi < $n_to || $this->xchanged[$xi]);
@@ -2290,7 +2517,7 @@ class ajaxUnit_Text_Diff_Engine_native {
 			// Skip matching "snake".
 			$copy = /*.(array[int]string).*/ array();
 			while ($xi < $n_from && $yi < $n_to
-				   && !$this->xchanged[$xi] && !$this->ychanged[$yi]) {
+			   && !$this->xchanged[$xi] && !$this->ychanged[$yi]) {
 				$copy[] = $from_lines[$xi++];
 				++$yi;
 			}
@@ -2342,71 +2569,74 @@ class ajaxUnit_Text_Diff_Engine_native {
  */
 class ajaxUnit_Text_Diff {
 
-	/**
-	 * Array of changes.
-	 *
-	 * @var array[int]object
-	 */
+/**
+ * Array of changes.
+ *
+ * @var array[int]mixed
+ */
 	private $_edits;
 
-	/**
-	 * Computes diffs between sequences of strings.
-	 */
+/**
+ * Computes diffs between sequences of strings.
+ *
+ * @param array[int]string $array1
+ * @param array[int]string $array2
+ */
 	public /*.void.*/ function __construct(/*.array[int]string.*/ $array1, /*.array[int]string.*/ $array2)
 	{
 		$params = array($array1, $array2);
 		$diff_engine = new ajaxUnit_Text_Diff_Engine_native();
 
-		$this->_edits = /*.(array[int]object).*/ call_user_func_array(array($diff_engine, 'diff'), $params);
+		$this->_edits = cast('array[int]ajaxUnit_Text_Diff_Op', call_user_func_array(array($diff_engine, 'diff'), $params));
 	}
 
-	/**
-	 * Returns the array of differences.
-	 */
-	public /*.array[int]object.*/ function getDiff()
+/**
+ * Returns the array of differences.
+ */
+	public /*.array[int]mixed.*/ function getDiff()
 	{
 		return $this->_edits;
 	}
 
-	/**
-	 * Computes a reversed diff.
-	 *
-	 * Example:
-	 * <code>
-	 * $diff = new Text_Diff($lines1, $lines2);
-	 * $rev = $diff->reverse();
-	 * </code>
-	 *
-	 * @return ajaxUnit_Text_Diff  A Diff object representing the inverse of the
-	 *					original diff.  Note that we purposely don't return a
-	 *					reference here, since this essentially is a clone()
-	 *					method.
-	 */
+/**
+ * Computes a reversed diff.
+ *
+ * Example:
+ * <code>
+ * $diff = new Text_Diff($lines1, $lines2);
+ * $rev = $diff->reverse();
+ * </code>
+ *
+ * @return ajaxUnit_Text_Diff  A Diff object representing the inverse of the
+ *					original diff.  Note that we purposely don't return a
+ *					reference here, since this essentially is a clone()
+ *					method.
+ */
 	private function reverse()
 	{
 		$rev		= ((boolean) version_compare(zend_version(), '2', '>')) ? clone($this) : $this;
-		$rev->_edits	= /*.(array[int]object).*/ array();
+		$rev->_edits	= /*.(array[int]mixed).*/ array();
 
 		foreach ($this->_edits as $item) {
-			$edit = /*.(ajaxUnit_Text_Diff_Op).*/ $item;
+			$edit = cast('ajaxUnit_Text_Diff_Op', $item);
 			$rev->_edits[] = $edit->reverse();
 		}
 		return $rev;
 	}
 
-	/**
-	 * Computes the length of the Longest Common Subsequence (LCS).
-	 *
-	 * This is mostly for diagnostic purposes.
-	 *
-	 * @return integer  The length of the LCS.
-	 */
+/**
+ * Computes the length of the Longest Common Subsequence (LCS).
+ *
+ * This is mostly for diagnostic purposes.
+ *
+ * @return integer  The length of the LCS.
+ */
 	function lcs()
 	{
 		$lcs = 0;
 
 		foreach ($this->_edits as $item) {
-			$edit = /*.(ajaxUnit_Text_Diff_Op).*/ $item;
+			$edit = cast('ajaxUnit_Text_Diff_Op', $item);
 			if (is_a($edit, 'ajaxUnit_Text_Diff_Op_copy')) {
 				$lcs += count($edit->originalArray);
 			}
@@ -2414,19 +2644,19 @@ class ajaxUnit_Text_Diff {
 		return $lcs;
 	}
 
-	/**
-	 * Gets the original set of lines.
-	 *
-	 * This reconstructs the $from_lines parameter passed to the constructor.
-	 *
-	 * @return array  The original sequence of strings.
-	 */
+/**
+ * Gets the original set of lines.
+ *
+ * This reconstructs the $from_lines parameter passed to the constructor.
+ *
+ * @return array  The original sequence of strings.
+ */
 	private function getOriginal()
 	{
 		$lines = array();
 
 		foreach ($this->_edits as $item) {
-			$edit = /*.(ajaxUnit_Text_Diff_Op).*/ $item;
+			$edit = cast('ajaxUnit_Text_Diff_Op', $item);
 			if (isset($edit->originalArray)) {
 				array_splice($lines, count($lines), 0, $edit->originalArray);
 			}
@@ -2434,18 +2664,18 @@ class ajaxUnit_Text_Diff {
 		return $lines;
 	}
 
-	/**
-	 * Gets the final set of lines.
-	 *
-	 * This reconstructs the $to_lines parameter passed to the constructor.
-	 *
-	 * @return array  The sequence of strings.
-	 */
+/**
+ * Gets the final set of lines.
+ *
+ * This reconstructs the $to_lines parameter passed to the constructor.
+ *
+ * @return array  The sequence of strings.
+ */
 	private function getFinal()
 	{
 		$lines = array();
 		foreach ($this->_edits as $item) {
-			$edit = /*.(ajaxUnit_Text_Diff_Op).*/ $item;
+			$edit = cast('ajaxUnit_Text_Diff_Op', $item);
 			if (isset($edit->finalArray)) {
 				array_splice($lines, count($lines), 0, $edit->finalArray);
 			}
@@ -2453,13 +2683,13 @@ class ajaxUnit_Text_Diff {
 		return $lines;
 	}
 
-	/**
-	 * Removes trailing newlines from a line of text. This is meant to be used
-	 * with array_walk().
-	 *
-	 * @param string &$line  The line to trim.
-	 * @param integer $key  The index of the line in the array. Not used.
-	 */
+/**
+ * Removes trailing newlines from a line of text. This is meant to be used
+ * with array_walk().
+ *
+ * @param string &$line  The line to trim.
+ * @param integer $key  The index of the line in the array. Not used.
+ */
 	public static /*.void.*/ function trimNewlines(&$line, $key)
 	{
 		// $key is needed because that's the format of the array we're walking
@@ -2484,20 +2714,20 @@ class ajaxUnit_Text_Diff {
  */
 class ajaxUnit_Text_Diff_Renderer {
 
-	/**
-	 * Number of leading context "lines" to preserve.
-	 *
-	 * This should be left at zero for this class, but subclasses may want to
-	 * set this to other values.
-	 */
+/**
+ * Number of leading context "lines" to preserve.
+ *
+ * This should be left at zero for this class, but subclasses may want to
+ * set this to other values.
+ */
 	private $_leading_context_lines = 0;
 
-	/**
-	 * Number of trailing context "lines" to preserve.
-	 *
-	 * This should be left at zero for this class, but subclasses may want to
-	 * set this to other values.
-	 */
+/**
+ * Number of trailing context "lines" to preserve.
+ *
+ * This should be left at zero for this class, but subclasses may want to
+ * set this to other values.
+ */
 	private $_trailing_context_lines = 0;
 
 	private /*.string.*/ function _startDiff()
@@ -2562,12 +2792,12 @@ class ajaxUnit_Text_Diff_Renderer {
 		return '';
 	}
 
-	private /*.string.*/ function _block(/*.int.*/ $xbeg, /*.int.*/ $xlen, /*.int.*/ $ybeg, /*.int.*/ $ylen, /*.array[int]object.*/ &$edits)
+	private /*.string.*/ function _block(/*.int.*/ $xbeg, /*.int.*/ $xlen, /*.int.*/ $ybeg, /*.int.*/ $ylen, /*.array[int]mixed.*/ &$edits)
 	{
 		$output = $this->_startBlock($this->_blockHeader($xbeg, $xlen, $ybeg, $ylen));
 
 		foreach ($edits as $item) {
-			$edit = /*.(ajaxUnit_Text_Diff_Op).*/ $item;
+			$edit = cast('ajaxUnit_Text_Diff_Op', $item);
 			switch (strtolower(get_class($edit))) {
 			case 'ajaxunit_text_diff_op_copy':
 				$output .= $this->_context($edit->originalArray);
@@ -2596,19 +2826,19 @@ class ajaxUnit_Text_Diff_Renderer {
 		return '';
 	}
 
-	/**
-	 * Renders a diff.
-	 *
-	 * @param ajaxUnit_Text_Diff $diff  A ajaxUnit_Text_Diff object.
-	 *
-	 * @return string  The formatted output.
-	 */
+/**
+ * Renders a diff.
+ *
+ * @param ajaxUnit_Text_Diff $diff  A ajaxUnit_Text_Diff object.
+ *
+ * @return string  The formatted output.
+ */
 	function render($diff)
 	{
 		$x0 = $y0 = 0;
 		$xi = $yi = 1;
 		$context	= /*.(array[int]string).*/ array();
-		$block		= /*.(array[int]object).*/ array();
+		$block		= /*.(array[int]mixed).*/ array();
 
 		$nlead = $this->_leading_context_lines;
 		$ntrail = $this->_trailing_context_lines;
@@ -2617,45 +2847,45 @@ class ajaxUnit_Text_Diff_Renderer {
 
 		$diffs = $diff->getDiff();
 		foreach ($diffs as $i => $item) {
-			$edit = /*.(ajaxUnit_Text_Diff_Op).*/ $item;
+			$edit = cast('ajaxUnit_Text_Diff_Op', $item);
 
-			/* If these are unchanged (copied) lines, and we want to keep
-			 * leading or trailing context lines, extract them from the copy
-			 * block. */
+		/* If these are unchanged (copied) lines, and we want to keep
+		 * leading or trailing context lines, extract them from the copy
+		 * block. */
 			if (is_a($edit, 'ajaxUnit_Text_Diff_Op_copy')) {
-				/* Do we have any diff blocks yet? */
+			/* Do we have any diff blocks yet? */
 				if (isset($block)) {
-					/* How many lines to keep as context from the copy
-					 * block. */
+				/* How many lines to keep as context from the copy
+				 * block. */
 					$keep = $i == count($diffs) - 1 ? $ntrail : $nlead + $ntrail;
 					if (count($edit->originalArray) <= $keep) {
-						/* We have less lines in the block than we want for
-						 * context => keep the whole block. */
+					/* We have less lines in the block than we want for
+					 * context => keep the whole block. */
 						$block[] = $edit;
 					} else {
 						if ($ntrail !== 0) {
-							/* Create a new block with as many lines as we need
-							 * for the trailing context. */
-							$context = /*.(array[int]string).*/ array_slice($edit->originalArray, 0, $ntrail);
+						/* Create a new block with as many lines as we need
+						 * for the trailing context. */
+							$context = cast('array[int]string', array_slice($edit->originalArray, 0, $ntrail));
 							$block[] = new ajaxUnit_Text_Diff_Op_copy($context);
 						}
-						/* @todo */
+					/* @todo */
 						$output .= $this->_block($x0, $ntrail + $xi - $x0,
-												 $y0, $ntrail + $yi - $y0,
-												 $block);
+											 $y0, $ntrail + $yi - $y0,
+											 $block);
 						unset($block);
 					}
 				}
-				/* Keep the copy block as the context for the next block. */
+			/* Keep the copy block as the context for the next block. */
 				$context = $edit->originalArray;
 			} else {
-				/* Don't we have any diff blocks yet? */
+			/* Don't we have any diff blocks yet? */
 				if (!isset($block)) {
-					/* Extract context lines from the preceding copy block. */
-					$context = /*.(array[int]string).*/ array_slice($context, count($context) - $nlead);
+				/* Extract context lines from the preceding copy block. */
+					$context = cast('array[int]string', array_slice($context, count($context) - $nlead));
 					$x0 = $xi - count($context);
 					$y0 = $yi - count($context);
-					$block = /*.(array[int]object).*/ array();
+					$block = /*.(array[int]mixed).*/ array();
 					if (count($context) !== 0) {
 						$block[] = new ajaxUnit_Text_Diff_Op_copy($context);
 					}
@@ -2673,15 +2903,15 @@ class ajaxUnit_Text_Diff_Renderer {
 
 		if (isset($block)) {
 			$output .= $this->_block($x0, $xi - $x0,
-									 $y0, $yi - $y0,
-									 $block);
+								 $y0, $yi - $y0,
+								 $block);
 		}
 
 		return $output . $this->_endDiff();
 	}
 }
 
-class ajaxUnit_compare {
+class ajaxUnit_compare extends ajaxUnit_common {
 	private static /*.string.*/ function analyze(/*.array[int]string.*/ $array1, /*.array[int]string.*/ $array2) {
 		$diff		= new ajaxUnit_Text_Diff($array1, $array2);
 		$renderer	= new ajaxUnit_Text_Diff_Renderer();
@@ -2723,78 +2953,189 @@ class ajaxUnit_compare {
 		return $logEntry;
 	}
 
-	private static /*.boolean.*/ function compareHTML($results = '', $expected = '', &$logEntry = '') {
-		preg_match_all('/(?<=>|^)[^><\\r\\n]+(?=<|$|\\r|\\n)|<.*>/Um', $results, $matches);
-		$resultsArray	= $matches[0];
-		preg_match_all('/(?<=>|^)[^><\\r\\n]+(?=<|$|\\r|\\n)|<.*>/Um', $expected, $matches);
-		$expectedArray	= $matches[0];
-		$resultsLineCount	= count($resultsArray);
-		$expectedLineCount	= count($expectedArray);
-		$logEntry	.= ajaxUnit_log::format("Trying element-by-element comparison of $resultsLineCount elements...", 6);
+/*. forward private static boolean function compareXML(string $results, string $expected, string &$logEntry, boolean $load_as_HTML =); .*/
 
-		if ($resultsLineCount === $expectedLineCount) {
-			$success = true;
-		} else {
-			$logEntry	.= ajaxUnit_log::format("Different number of lines: expecting $expectedLineCount", 8);
-			$success	= false;
-		}
+	private static /*.boolean.*/ function compareXMLNodes(/*.DOMNode.*/ $results, /*.DOMNode.*/ $expected, /*.string.*/ &$logEntry, $indentOffset = 0) {
+		$success		= true;
+		$resultsNodeCount	= ($results->hasChildNodes())	? $results->childNodes->length	: 0;
+		$expectedNodeCount	= ($expected->hasChildNodes())	? $expected->childNodes->length	: 0;
 
-		for ($line = 0; $line < $resultsLineCount; $line++) {
-			$thisResultsLine	= $resultsArray[$line];
-			$thisExpectedLine	= $expectedArray[$line];
-			$lineOrdinal		= $line + 1;
+		if ($resultsNodeCount === $expectedNodeCount) {
+			$logEntry .= ajaxUnit_log::format("Comparing $resultsNodeCount elements...", 8 + $indentOffset);
 
-			if ($thisResultsLine !== $thisExpectedLine) {
-				$logEntry	.= ajaxUnit_log::format("Line $lineOrdinal is different to the expected line", 8);
+			for ($i = 0; $i < $resultsNodeCount; $i++) {
+				$nodeResults		= $results->childNodes->item($i);
+				$nodeExpected		= $expected->childNodes->item($i);
+				$nodeTypeResults	= $nodeResults->nodeType;
 
-				if ($thisResultsLine[0] === '<' && $thisExpectedLine[0] === '<') {
-					$logEntry	.= ajaxUnit_log::format("Comparing line $lineOrdinal according to its HTML attributes", 8);
+				if ($nodeTypeResults === $nodeExpected->nodeType) {
+					switch ($nodeTypeResults) {
+					case XML_ELEMENT_NODE:
+						$tagResults = $nodeResults->nodeName;
 
-					// Compare attributes
-					$thisResultsAttributes	= preg_split('/[\\s]+/', substr($thisResultsLine, 1, strlen($thisResultsLine) - 2));
-					$thisExpectedAttributes	= preg_split('/[\\s]+/', substr($thisExpectedLine, 1, strlen($thisExpectedLine) - 2));
-					$attributeCount		= count($thisResultsAttributes);
-					$logEntry		.= ajaxUnit_log::format("Comparing $attributeCount attributes on line $lineOrdinal...", 8);
-
-					if ($attributeCount === count($thisExpectedAttributes)) {
-						$allAttributesSame = true;
-						sort($thisResultsAttributes);
-						sort($thisExpectedAttributes);
-						$log = "<pre>|Actual|Expected|<br />\n";
-
-						for ($attribute = 0; $attribute < $attributeCount; $attribute++) {
-							$thisResultsAttribute	= $thisResultsAttributes[$attribute];
-							$thisExpectedAttribute	= $thisExpectedAttributes[$attribute];
-							$log .= '|'. htmlspecialchars($thisResultsAttribute) . "|" . htmlspecialchars($thisExpectedAttribute) . "|<br />\n";
-
-							if ($thisResultsAttribute !== $thisExpectedAttribute) {
-								if ($success) $logEntry	.= ajaxUnit_log::format("In line $lineOrdinal, '". htmlspecialchars($thisResultsAttribute) . "' (actual) was not the same as '" . htmlspecialchars($thisExpectedAttribute) . "' (expected)", 8);
-								$success = false;
-								$allAttributesSame = false;
-							}
-						}
-
-						if ($allAttributesSame) {
-							$logEntry	.= ajaxUnit_log::format('All attributes are identical. Lines must differ in another way (e.g. white space)', 8);
-							$log		= "<pre>Actual:<br />\n".htmlspecialchars($thisResultsLine)."<br />\nExpected:<br />\n".htmlspecialchars($thisExpectedLine)."</pre>\n";
-							$logEntry	.= ajaxUnit_log::format($log, 8);
-						} else if (!$success) {
-							$logEntry	.= ajaxUnit_log::format("$log</pre>", 8);
+						if ($tagResults === $nodeExpected->nodeName) {
+							$logEntry	.= ajaxUnit_log::format("Tag <em>$tagResults</em> matches. Looking for attributes...", 8 + $indentOffset);
+						} else {
+							$logEntry	.= ajaxUnit_log::format("HTML tag is different. Expecting " . $nodeExpected->nodeName . ", received " . $tagResults, 8 + $indentOffset);
+							$success	= false;
 							break;
 						}
+
+						$attributesResults	= array();
+						$attributesExpected	= array();
+
+						foreach ($nodeResults->attributes as $item) {
+							$attributeNode = cast('DOMAttr', $item);
+							$attributesResults[$attributeNode->nodeName]	= $attributeNode->nodeValue;
+						}
+
+						foreach ($nodeExpected->attributes as $item) {
+							$attributeNode = cast('DOMattr', $item);
+							$attributesExpected[$attributeNode->nodeName]	= $attributeNode->nodeValue;
+						}
+
+						$resultsAttributeCount = count($attributesResults);
+
+						if ($resultsAttributeCount === count($attributesExpected)) {
+							$resultsKeys = cast('array[int]string', array_keys($attributesResults));
+
+							for ($j = 0; $j < $resultsAttributeCount; $j++) {
+								$resultsKey = $resultsKeys[$j];
+
+								if (array_key_exists($resultsKey, $attributesExpected)) {
+									$attributeResult	= $attributesResults[$resultsKey];
+									$originalAttribute	= $attributeResult;
+
+									// If we've included '*' in the template then those exact measurements aren't critically important
+									$pattern		= '/[0-9]+(?:\\.[0-9]+)*(?=cm|em|ex|in|mm|pc|pt|px)/';
+									$attributeResult	= preg_replace($pattern, '*', $attributeResult);
+
+									if ($attributeResult !== $attributesExpected[$resultsKey]) {
+//										$logEntry	.= ajaxUnit_log::format("Attribute <em>$resultsKey</em> OK: <em>" . $originalAttribute . '</em>', 10 + $indentOffset);
+//									} else {
+										$logEntry	.= ajaxUnit_log::format("Attribute <em>$resultsKey</em>, expecting <em>" . $attributesExpected[$resultsKey] . '</em>, received <em>' . $attributeResult . '</em>', 10 + $indentOffset);
+										$success	= false;
+										break;
+									}
+								} else {
+									$logEntry	.= ajaxUnit_log::format($tagResults . " element has unexpected attribute $resultsKey", 10 + $indentOffset);
+									$success	= false;
+									break;
+								}
+							}
+						} else {
+							$logEntry	.= ajaxUnit_log::format($tagResults . " element has unexpected number of attributes. Expecting " . count($attributesExpected) . ", received $resultsAttributeCount", 10 + $indentOffset);
+							$success	= false;
+						}
+
+						break;
+					case XML_TEXT_NODE:
+						$textResults = cast('DOMText', $nodeResults);
+						$textExpected = cast('DOMText', $nodeExpected);
+						$dataResults	= $textResults->wholeText;
+						$success	= ($dataResults === $textExpected->wholeText);
+//						$logEntry	.= ajaxUnit_log::format((($success) ? "Text node OK: '" : "Text node is different. Expecting '" . $nodeExpected->data . "', received '") . $dataResults . "'", 8 + $indentOffset);
+						if (!$success) $logEntry .= ajaxUnit_log::format("Text node is different. Expecting '" . (string) self::reescape($textExpected->wholeText) . "', received '" . (string) self::reescape($dataResults) . "'", 8 + $indentOffset);
+						break;
+					case XML_COMMENT_NODE:
+						$commentResults = cast('DOMComment', $nodeResults);
+						$commentExpected = cast('DOMComment', $nodeExpected);
+						$dataResults	= $commentResults->data;
+						$success	= ($dataResults === $commentExpected->data);
+//						$logEntry	.= ajaxUnit_log::format((($success) ? "Comment node OK: '" : "Comment node is different. Expecting '" . $nodeExpected->data . "', received '") . $dataResults . "'", 8 + $indentOffset);
+						if (!$success) $logEntry .= ajaxUnit_log::format("Comment node is different. Expecting '" . (string) self::reescape($commentExpected->data) . "', received '" . (string) self::reescape($dataResults) . "'", 8 + $indentOffset);
+						break;
+					case XML_CDATA_SECTION_NODE:
+						$CDATAResults = cast('DOMCdataSection', $nodeResults);
+						$CDATAExpected = cast('DOMCdataSection', $nodeExpected);
+						$dataResults	= $CDATAResults->data;
+						$success	= ($dataResults === $CDATAExpected->data);
+						if (!$success) {
+							// Compare CData contents as XML or HTML
+							$logEntry	.= ajaxUnit_log::format('Comparing CData contents as XML or HTML', 8 + $indentOffset);
+							$logEntry	.= ajaxUnit_log::format('------------------------------------------------------------', 8 + $indentOffset);
+							$success	= self::compareXML($dataResults, $CDATAExpected->data, $logEntry);
+
+							if (!$success)
+								$success = self::compareXML($dataResults, $CDATAExpected->data, $logEntry, true);
+						}
+
+						$logEntry	.= ajaxUnit_log::format('------------------------------------------------------------', 8 + $indentOffset);
+						$logEntry	.= ajaxUnit_log::format((($success) ? "CData node OK" : "CData nodes are different"), 8 + $indentOffset);
+						break;
+					case XML_DOCUMENT_TYPE_NODE:
+//						$logEntry	.= ajaxUnit_log::format('Ignoring DOCTYPE', 8 + $indentOffset);
+						break;
+					default:
+						$logEntry	.= ajaxUnit_log::format("Unexpected node type found (type $nodeTypeResults) and I don't know how to compare it", 8 + $indentOffset);
+						$success	= false;
+					}
+
+					if ($success) {
+						if ($nodeResults->hasChildNodes()) {
+							if ($nodeExpected->hasChildNodes()) {
+								$logEntry	.= ajaxUnit_log::format("Comparing child nodes...", 8 + $indentOffset);
+								$success	= self::compareXMLNodes($nodeResults, $nodeExpected, $logEntry, $indentOffset + 4);
+							} else {
+								$logEntry	.= ajaxUnit_log::format("Node has child nodes and none were expected", 8 + $indentOffset);
+								$success	= false;
+							}
+
+							if (!$success) break;
+						} else {
+							if ($nodeExpected->hasChildNodes()) {
+								$logEntry	.= ajaxUnit_log::format("Node has no child nodes and at least one was expected", 8 + $indentOffset);
+								$success	= false;
+								break;
+							}
+						}
 					} else {
-						$logEntry		.= ajaxUnit_log::format("Different number of attributes in line $lineOrdinal", 8);
-						$success = false;
 						break;
 					}
 				} else {
-					$log				= "<pre>Actual:<br />\n".htmlspecialchars($thisResultsLine)."<br />\nExpected:<br />\n".htmlspecialchars($thisExpectedLine)."</pre>\n";
-					$logEntry			.= ajaxUnit_log::format($log, 8);
-					$success = false;
+					$logEntry	.= ajaxUnit_log::format("Found node of type $nodeTypeResults, expecting " . $nodeExpected->nodeType, 8 + $indentOffset);
+					$success	= false;
+					break;
 				}
 			}
+		} else {
+				$logEntry	.= ajaxUnit_log::format("Different number of nodes (expected $expectedNodeCount, received $resultsNodeCount)", 8 + $indentOffset);
+				$success	= false;
 		}
 
+		return $success;
+	}
+
+	private static /*.boolean.*/ function compareXML(/*.string.*/ $results, /*.string.*/ $expected, /*.string.*/ &$logEntry, $load_as_HTML = false) {
+		$logEntry .= ajaxUnit_log::format('Comparing results as ' . (($load_as_HTML ? 'HTML' : 'XML')), 6);
+
+		libxml_clear_errors();
+
+		$previous		= libxml_use_internal_errors(true);
+		$documentResults	= new DOMDocument();
+		$documentExpected	= new DOMDocument();
+		$successResults		= ($load_as_HTML) ? $documentResults->loadHTML($results) : $documentResults->loadXML($results);
+		$errorsXML		= libxml_get_errors();
+
+		if (count($errorsXML) === 0) {
+			$successExpected	= ($load_as_HTML) ? $documentExpected->loadHTML($expected) : $documentExpected->loadXML($expected);
+			$errorsXML		= libxml_get_errors();
+			$errorDocument		= 'expected results';
+		} else {
+			$errorDocument		= 'results';
+		}
+
+		if (count($errorsXML) === 0) {
+			$success	= self::compareXMLNodes($documentResults, $documentExpected, $logEntry);
+		} else {
+			foreach($errorsXML as $errorXML)
+				$logEntry .= ajaxUnit_log::format($errorXML->message . ' (position ' . $errorXML->column . ' on line ' . $errorXML->line . " in $errorDocument)", 8);
+
+//			$logEntry	.= ajaxUnit_log::format('Offending document (XHTML may have been mangled by the browser):<pre>' . htmlspecialchars(($errorDocument === 'results') ? $results : $expected) . '</pre>', 0); // debug
+			$success	= false;
+		}
+
+		libxml_use_internal_errors($previous);	// Restore prior setting
 		return $success;
 	}
 
@@ -2811,7 +3152,8 @@ class ajaxUnit_compare {
 
 		if (!$success) {
 			$logEntry	= ajaxUnit_log::format('Still different even with looser EOL definition', 6);
-			$success	= self::compareHTML($results, $expected, $logEntry);
+			$success	= self::compareXML($results, $expected, $logEntry);
+			if (!$success) $success = self::compareXML($results, $expected, $logEntry, true);	// Try loadHTML instead of loadXML
 		}
 
 		return $success;
@@ -2842,7 +3184,7 @@ interface I_ajaxUnit_test extends I_ajaxUnit_environment {
  */
 class ajaxUnit_test extends ajaxUnit_environment implements I_ajaxUnit_test {
 	private /*.string.*/		$suite;
-	private /*.int.*/		$testIndex		= -1;
+	private /*.int.*/		$testIndex;
 	private /*.DOMDocument.*/	$document;
 	private /*.DOMNodeList.*/	$testList;
 	private /*.DOMElement.*/	$test;
@@ -2859,6 +3201,8 @@ class ajaxUnit_test extends ajaxUnit_environment implements I_ajaxUnit_test {
 	}
 
 	public /*.string.*/ function description() {
+if (!$this->test instanceof DOMElement) throw new ajaxUnitException('test is not a DOMElement');
+
 		$numberType	= ($this->test->hasAttribute(self::ATTRNAME_NAME)) ? 'name' : 'index';
 		$testName	= $this->name();
 
@@ -2881,8 +3225,7 @@ class ajaxUnit_test extends ajaxUnit_environment implements I_ajaxUnit_test {
 			return $this->document->createElement($this->resultsNodeName);
 		} else {
 			$resultsNode = $resultsList->item(0);
-	/*.object.*/	$resultsObject		= $resultsNode;		// PHP-compliant typecasting
-			return /*.(DOMElement).*/ $resultsObject;	// PHP-compliant typecasting
+			return cast('DOMElement', $resultsNode);	// PHP-compliant typecasting
 		}
 	}
 
@@ -2892,22 +3235,20 @@ class ajaxUnit_test extends ajaxUnit_environment implements I_ajaxUnit_test {
 
 	private /*.void.*/ function getTestFromList() {
 		$node		= $this->testList->item($this->testIndex);	// Get this particular test
-/*.object.*/	$nodeObject	= $node;					// PHP-compliant typecasting
-		$this->test	= /*.(DOMElement).*/ $nodeObject;		// PHP-compliant typecasting
+		$this->test	= cast('DOMElement', $node);			// PHP-compliant typecasting
 	}
 
 	public /*.void.*/ function __construct() {
 		// Get some context for this test
-		$context		= /*.(array[string]string).*/ self::getTestContext();
+		$context		= cast('array[string]string', self::getTestContext());
 		$this->resultsNodeName	= $context[self::TAGNAME_RESULTSNODENAME];
 		$this->suite		= $context[self::TAGNAME_SUITE];
 		$this->testIndex	= (int) $context[self::TAGNAME_INDEX];
 		$this->document		= self::getDOMDocument($this->suite);		// Get the test suite information
 		$this->testList		= self::getTestList($this->document);		// Get list of tests
 
-		if ($this->count() === 0) self::terminate(self::STATUS_FATALERROR, 'There are no tests defined in this test suite');
-
-		$this->getTestFromList();
+		if ($this->count() === 0)	self::terminate(self::STATUS_FATALERROR, 'There are no tests defined in this test suite');
+		if ($this->testIndex > -1)	$this->getTestFromList();
 	}
 
 	private /*.boolean.*/ function next() {
@@ -2935,8 +3276,7 @@ class ajaxUnit_test extends ajaxUnit_environment implements I_ajaxUnit_test {
 			$node = $nodeList->item($i);
 
 			if ($node->nodeType === XML_ELEMENT_NODE) {
-				/*.object.*/ $nodeObject = $node;			// PHPLint-compliant typecasting
-				$element	= /*.(DOMElement).*/ $nodeObject;	// PHPLint-compliant typecasting
+				$element	= cast('DOMElement', $node);	// PHPLint-compliant typecasting
 
 				$action		= $element->nodeName;
 				$name		= self::substituteParameters($element->getAttribute(self::ATTRNAME_NAME));
@@ -2984,8 +3324,7 @@ class ajaxUnit_test extends ajaxUnit_environment implements I_ajaxUnit_test {
 			$node = $nodeList->item($i);
 
 			if ($node->nodeType === XML_ELEMENT_NODE) {
-				/*.object.*/ $nodeObject = $node;			// PHPLint-compliant typecasting
-				$element	= /*.(DOMElement).*/ $nodeObject;	// PHPLint-compliant typecasting
+				$element	= cast('DOMElement', $node);	// PHPLint-compliant typecasting
 
 				$action	= $element->nodeName;
 
@@ -3049,12 +3388,10 @@ class ajaxUnit_test extends ajaxUnit_environment implements I_ajaxUnit_test {
 			$node = $nodeList->item($i);
 
 			if ($node->nodeType === XML_ELEMENT_NODE) {
-				/*.object.*/ $nodeObject = $node;			// PHPLint-compliant typecasting
-				$element	= /*.(DOMElement).*/ $nodeObject;	// PHPLint-compliant typecasting
-
-				$type	= self::substituteParameters($element->nodeName);
-				$value	= self::substituteParameters($element->nodeValue);
-				$id	= self::substituteParameters($element->getAttribute(self::ATTRNAME_ID));
+				$element	= cast('DOMElement', $node);	// PHPLint-compliant typecasting
+				$type		= self::substituteParameters($element->nodeName);
+				$value		= self::substituteParameters($element->nodeValue);
+				$id		= self::substituteParameters($element->getAttribute(self::ATTRNAME_ID));
 
 				self::appendLog("Setting $type control <strong>$id</strong> to <em>$value</em>", $dummyRun);
 			}
@@ -3197,8 +3534,7 @@ class ajaxUnit_test extends ajaxUnit_environment implements I_ajaxUnit_test {
 			$node = $childNodes->item($i);
 
 			if ($node->nodeType === XML_ELEMENT_NODE) {
-				/*.object.*/ $nodeObject = $node;		// PHPLint-compliant typecasting
-				$step	= /*.(DOMElement).*/ $nodeObject;	// PHPLint-compliant typecasting
+				$step	= cast('DOMElement', $node);	// PHPLint-compliant typecasting
 
 				$stepType	= $step->nodeName;
 				$stepList	= $step->childNodes;
@@ -3287,7 +3623,7 @@ class ajaxUnit_results extends ajaxUnit_environment implements I_ajaxUnit_result
 	private static /*.boolean.*/ function doResults(DOMNodeList $nodeList, /*.string.*/ $results, $dummyRun = false) {
 		self::appendLog("Compare actual results with expected", $dummyRun);
 
-		$context	= /*.(array[string]string).*/ self::getTestContext();
+		$context	= cast('array[string]string', self::getTestContext());
 
 		if (!array_key_exists(self::TAGNAME_STATUS, $context)) {
 			echo 'Unknown testing status';
@@ -3295,7 +3631,7 @@ class ajaxUnit_results extends ajaxUnit_environment implements I_ajaxUnit_result
 		}
 
 		if (in_array($context[self::TAGNAME_STATUS], array('', self::STATUS_FINISHED, self::STATUS_FAIL, self::STATUS_FATALERROR))) {
-			echo 'No testing in progress';
+			echo 'No testing in progress [doResults]';
 			return false;
 		}
 
@@ -3324,7 +3660,7 @@ class ajaxUnit_results extends ajaxUnit_environment implements I_ajaxUnit_result
 					$expected	= htmlspecialchars_decode(self::substituteParameters($node->nodeValue));
 					$expected	= (string) str_replace(chr(0xEF).chr(0xBB).chr(0xBF), '', $expected);	// Get rid of stray UTF-8 BOMs from XIncluded files
 
-					if ($dummyRun) 
+					if ($dummyRun)
 						$success	= true;
 					else {
 						$logEntry	= '';
@@ -3333,6 +3669,11 @@ class ajaxUnit_results extends ajaxUnit_environment implements I_ajaxUnit_result
 						self::appendLog($logEntry, $dummyRun, 0, '');
 					}
 
+					$diffID		= 'ajaxunit-diff-' . $context[self::TAGNAME_INDEX] . '-' . $context[self::TAGNAME_RESPONSECOUNT] . '-' . (string) $i;
+					$logEntry	= ajaxUnit_compare::investigateDifference($results, $expected, $diffID, $dummyRun);
+
+					self::appendLog($logEntry, $dummyRun, 0, '');
+
 					if ($success) {
 						self::appendLog("Match with test data set #$indexText", $dummyRun, 6);
 						// Remove this results set from the list of responses we are expecting
@@ -3340,11 +3681,6 @@ class ajaxUnit_results extends ajaxUnit_environment implements I_ajaxUnit_result
 						$responseList	= substr($responseList, 0, $indexPos) . substr($responseList, $indexPos + 1);
 						self::setTestContext(self::TAGNAME_RESPONSELIST, $responseList);
 						break;
-					} else {
-						$diffID		= 'ajaxunit-diff-' . $context[self::TAGNAME_INDEX] . '-' . $context[self::TAGNAME_RESPONSECOUNT] . '-' . (string) $i;
-						$logEntry	= ajaxUnit_compare::investigateDifference($results, $expected, $diffID, $dummyRun);
-
-						self::appendLog($logEntry, $dummyRun, 0, '');
 					}
 				}
 			}
@@ -3357,8 +3693,11 @@ class ajaxUnit_results extends ajaxUnit_environment implements I_ajaxUnit_result
 
 /**
  * If the test suite needs some model results then use these
+ *
+ * @param DOMElement $element
+ * @param boolean $finalResult
  */
-	private static /*.boolean.*/ function modelRequired(DOMElement $element, /*.boolean.*/ $finalResult = false) {
+	private static /*.boolean.*/ function modelRequired(DOMElement $element, $finalResult = false) {
 		if (!$element->hasAttribute(self::ATTRNAME_UPDATE)) return false;
 
 		// Use these as model results
@@ -3386,15 +3725,16 @@ class ajaxUnit_results extends ajaxUnit_environment implements I_ajaxUnit_result
  * Called by the browser when it receives an AJAX responseText
  *
  * @return boolean OK to move on to next test
+ * @param boolean $dummyRun
  */
-	public static function parse(/*.boolean.*/ $dummyRun = false) {
+	public static function parse($dummyRun = false) {
 		self::appendLog('Results received', $dummyRun, 2);
 
 		// Get some context for this test
-		$context = /*.(array[string]string).*/ self::getTestContext();
+		$context = cast('array[string]string', self::getTestContext());
 
 		if (in_array($context[self::TAGNAME_STATUS], array('', self::STATUS_FINISHED, self::STATUS_FAIL, self::STATUS_FATALERROR))) {
-			echo 'No testing in progress';
+			echo 'No testing in progress [parse]';
 			return false;
 		}
 
@@ -3406,7 +3746,7 @@ class ajaxUnit_results extends ajaxUnit_environment implements I_ajaxUnit_result
 			if ($totalSleeps++ > $maxCounter) return self::terminate(self::STATUS_FATALERROR, 'Waited too long for another result to be parsed', false, $dummyRun);
 			self::appendLog('(Another response is being parsed. Waiting ' . self::TEST_WAITUSECS . ' microseconds)', $dummyRun, 2);
 			usleep(self::TEST_WAITUSECS);
-			$context = /*.(array[string]string).*/ self::getTestContext();
+			$context = cast('array[string]string', self::getTestContext());
 		}
 
 		self::setTestContext(self::TAGNAME_PARSING, '1');
@@ -3495,9 +3835,12 @@ abstract class ajaxUnit_control extends ajaxUnit_environment implements I_ajaxUn
 
 /**
  * Initiate a named series of tests
+ *
+ * @param string $suite
+ * @param boolean $dummyRun
  */
-	public static /*.void.*/ function runTestSuite(/*.string.*/ $suite, /*.boolean.*/ $dummyRun = false) {
-		$context				= /*.(array[string]string).*/ self::getTestContext();
+	public static /*.void.*/ function runTestSuite($suite, $dummyRun = false) {
+		$context				= cast('array[string]string', self::getTestContext());
 		$context[self::TAGNAME_UID]		= gmdate('YmdHis');
 		$context[self::TAGNAME_SUITE]		= $suite;
 		$context[self::TAGNAME_STATUS]		= self::STATUS_INPROGRESS;
@@ -3511,9 +3854,7 @@ abstract class ajaxUnit_control extends ajaxUnit_environment implements I_ajaxUn
 
 		$document	= self::getDOMDocument($suite);
 		$text		= ($dummyRun) ? "Dummy" : "Starting";
-		$suiteNode	= $document->getElementsByTagName(self::TAGNAME_SUITE)->item(0);
-/*.object.*/	$suiteObject	= $suiteNode;				// PHPLint-compliant typecasting
-		$suiteElement	= /*.(DOMElement).*/ $suiteObject;	// PHPLint-compliant typecasting
+		$suiteElement	= cast('DOMElement', $document->getElementsByTagName(self::TAGNAME_SUITE)->item(0));	// PHPLint-compliant typecasting
 		$suiteName	= htmlspecialchars($suiteElement->getAttribute(self::ATTRNAME_NAME));
 		$suiteVersion	= $suiteElement->getAttribute("version");
 
@@ -3522,7 +3863,7 @@ abstract class ajaxUnit_control extends ajaxUnit_environment implements I_ajaxUn
 		self::appendLog("<hr />", $dummyRun, 0, '', 3);
 
 		// Add test script to log
-// Not often useful and makes the log a lot bigger		
+// Not often useful and makes the log a lot bigger
 //		self::logTestScript($document, $dummyRun);
 
 		// Get global parameters
@@ -3549,8 +3890,16 @@ abstract class ajaxUnit_control extends ajaxUnit_environment implements I_ajaxUn
 
 /**
  * Abandon running tests
+ *
+ * @param string $message
+ * @param boolean $dummyRun
  */
-	public static /*.void.*/ function endTestSuite(/*.string.*/ $message = '', /*.boolean.*/ $dummyRun = false) {
+	public static /*.void.*/ function endTestSuite($message = '', $dummyRun = false) {
+		if (self::getTestContext(self::TAGNAME_STATUS) === self::STATUS_FINISHED) {
+			echo 'No testing in progress [end]';
+			return;
+		}
+
 		self::appendLog("Testing ended at request of browser", $dummyRun);
 		self::terminate(self::STATUS_FINISHED, $message, false, $dummyRun);
 	}
@@ -3636,7 +3985,7 @@ class ajaxUnit extends ajaxUnit_control implements I_ajaxUnit {
  * @copyright	2008-2010 Dominic Sayers
  * @license	http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link	http://code.google.com/p/ajaxUnit/
- * @version	0.18.4 - New common functions class
+ * @version	0.19.17 - Bugfixes arising from ezUser testing
  */
 
 .dummy {} /* Webkit is ignoring the first item so we'll put a dummy one in */
@@ -3749,7 +4098,7 @@ GENERATED;
  * @copyright	2008-2010 Dominic Sayers
  * @license	http://www.opensource.org/licenses/bsd-license.php BSD License
  * @link	http://code.google.com/p/ajaxUnit/
- * @version	0.18.4 - New common functions class
+ * @version	0.19.17 - Bugfixes arising from ezUser testing
  */
 
 /*jslint onevar: true, undef: true, nomen: true, eqeqeq: true, regexp: true, newcap: true, immed: true, strict: true */
@@ -3900,10 +4249,11 @@ function C_ajaxUnit() {
 			controlType	= controlNode.nodeName,
 			controlValue	= (typeof controlNode.textContent === 'undefined') ? controlNode.text : controlNode.textContent,
 			control		= that.getControl(controlId),
-			keyCode, doEvent;
+			keyCode, doEvent, success;
 
 		if (control === null) {
 			logAppend(' - - No control with id ' + controlId, true);
+			success = false;
 		} else {
 			logAppend(' - - setting ' + controlId + ' (' + controlType + ') to ' + controlValue);
 
@@ -3939,12 +4289,16 @@ function C_ajaxUnit() {
 					if (typeof control.onkeyup	=== 'function') {fireEvent(control, 'keyup', keyCode);}
 					break;
 			}
+
+			success = true;
 		}
+
+		return success;
 	}
 
 // ---------------------------------------------------------------------------
 	function doStep(step) {
-		var url, control, controlId, controlNode, doEvent, element, html, postData, j, controlList;
+		var url, control, controlId, controlNode, doEvent, element, html, postData, j, controlList, success = true;
 
 		switch (step.nodeName) {
 		case '$tagLocation':
@@ -3963,16 +4317,23 @@ function C_ajaxUnit() {
 
 			if (control === null) {
 				logAppend(' - No control with id ' + controlId, true);
+				success = false
 			} else {
 				logAppend(' - clicking button ' + controlId);
-				if (typeof document.activeElement.onBlur === 'function') {fireEvent(document.activeElement, 'blur');}
-				if (typeof document.activeElement.onblur === 'function') {fireEvent(document.activeElement, 'blur');}
-				doEvent = true;
-				if (typeof control.onFocus === 'function') {doEvent = fireEvent(control, 'focus');}
-				if (typeof control.onfocus === 'function') {doEvent = fireEvent(control, 'focus');}
-				if (doEvent !== false) {
-					control.focus();
+//				if (typeof document.activeElement.onBlur === 'function') {fireEvent(document.activeElement, 'blur');}
+//				if (typeof document.activeElement.onblur === 'function') {fireEvent(document.activeElement, 'blur');}
+//				doEvent = true;
+//				if (typeof control.onFocus === 'function') {doEvent = fireEvent(control, 'focus');}
+//				if (typeof control.onfocus === 'function') {doEvent = fireEvent(control, 'focus');}
+//				if (doEvent !== false) {
+//					control.focus();
+//				}
+
+				if (typeof control.click === 'function') {
 					control.click();
+				} else {
+					if (typeof control.onClick === 'function') {control.onClick();}
+					if (typeof control.onclick === 'function') {control.onclick();}
 				}
 			}
 
@@ -4000,7 +4361,10 @@ function C_ajaxUnit() {
 
 			for (j = 0; j < controlList.length; j++) {
 				controlNode = controlList[j];
-				if (controlNode.nodeType === 1) {doFormFill(controlNode);}
+				if (controlNode.nodeType === 1) {
+					success = doFormFill(controlNode);
+					if (!success) {break;}
+				}
 			}
 
 			break;
@@ -4015,6 +4379,8 @@ function C_ajaxUnit() {
 			logAppend(' - content is ' + step.nodeValue);
 			break;
 		}
+
+		return success;
 	}
 
 // ---------------------------------------------------------------------------
@@ -4031,7 +4397,9 @@ function C_ajaxUnit() {
 
 		for (i = 0; i < stepList.length; i++) {
 			step = stepList[i];
-			if (step.nodeType === 1) {doStep(step);}
+			if (step.nodeType === 1) {
+				if (doStep(step) === false) {break;}
+			}
 		}
 	}
 
@@ -4139,23 +4507,23 @@ function C_ajaxUnit() {
 // Process results returned from XMLHttpRequest object
 // ---------------------------------------------------------------------------
 function ajaxUnit(payload, debugArgument) {
-	var	thisAjaxUnit	= new C_ajaxUnit(),
+	var	unitTesting	= new C_ajaxUnit(),
 		debug		= debugArgument || false;
 
-	ajaxUnitInstances.push(thisAjaxUnit);
+	ajaxUnitInstances.push(unitTesting);
 
 	if (debug) {
-		thisAjaxUnit.debug(payload);
+		unitTesting.debug(payload);
 	} else {
 		switch (typeof payload) {
 		case 'undefined':
-			thisAjaxUnit.postSelf();
+			unitTesting.postSelf();
 			break;
 		case 'string':
-			thisAjaxUnit.postString(payload);
+			unitTesting.postString(payload);
 			break;
 		default:
-			thisAjaxUnit.postResponse(payload);
+			unitTesting.postResponse(payload);
 		}
 	}
 }
@@ -4198,9 +4566,7 @@ GENERATED;
 			$document	= new DOMDocument();
 			$document->load($filename);
 
-			$suiteNode	= $document->getElementsByTagName(self::ACTION_SUITE)->item(0);
-	/*.object.*/	$suiteObject	= $suiteNode;				// PHPLint-compliant typecasting
-			$suiteElement	= /*.(DOMElement).*/ $suiteObject;	// PHPLint-compliant typecasting
+			$suiteElement	= cast('DOMElement', $document->getElementsByTagName(self::ACTION_SUITE)->item(0));	// PHPLint-compliant typecasting
 
 			if ($suiteElement->hasAttribute(self::ATTRNAME_NAME)) {
 				$suiteName	= $suiteElement->getAttribute(self::ATTRNAME_NAME);
@@ -4222,7 +4588,7 @@ HTML;
 			$result		= @file_put_contents($filename, $js);
 			$success	= (boolean) $result;
 
-			$message = ($success === false) ? "<strong>Couldn't write ajaxUnit javascript to tests folder - might be out of date or missing!</strong>" : 'ajaxUnit javascript written to tests folder';
+			$message = ($success) ? "$filename updated" : "<strong>Couldn't write ajaxUnit javascript to tests folder - might be out of date or missing!</strong>";
 
 			$html = <<<HTML
 		<h2>ajaxUnit testing for project $project</h2>
@@ -4241,7 +4607,7 @@ $suiteList
 				</div>
 			</fieldset>
 		</form>
-		<p class="ajaxunit-footnote">ajaxUnit version 0.18.4 - $message</p>
+		<p class="ajaxunit-footnote">ajaxUnit version 0.19.17 - $message</p>
 HTML;
 		}
 
@@ -4259,11 +4625,11 @@ HTML;
 		$content	= '';
 
 		// Get some context for this test
-		$context = /*.(array[string]string).*/ self::getTestContext();
+		$context = cast('array[string]string', self::getTestContext());
 
 		// Are we actually running tests at the moment?
 		if (!array_key_exists(self::TAGNAME_STATUS, $context) || in_array($context[self::TAGNAME_STATUS], array('', self::STATUS_FINISHED, self::STATUS_FAIL, self::STATUS_FATALERROR))) {
-			$content	.= 'No testing in progress';
+			$content	.= 'No testing in progress [customURL]';
 			$testName	= '';
 			$rubric		= '';
 		} else {
